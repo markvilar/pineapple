@@ -1,0 +1,1 @@
+/usr/bin/clang++-10  -O3 -DNDEBUG   CMakeFiles/Sandbox.dir/Sandbox.cpp.o  -o Sandbox  -Wl,-rpath,/usr/local/zed/lib:/usr/local/cuda/lib64 ../src/libSennetZED.a -lSennet /usr/local/zed/lib/libsl_zed.so /usr/lib/libopenblas.so /usr/lib/x86_64-linux-gnu/libusb-1.0.so /usr/lib/x86_64-linux-gnu/libcuda.so /usr/local/cuda/lib64/libcudart.so 

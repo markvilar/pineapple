@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSennetZED.a  CMakeFiles/SennetZED.dir/ZED/Conversion.cpp.o CMakeFiles/SennetZED.dir/ZED/IO.cpp.o CMakeFiles/SennetZED.dir/ZED/Recorder.cpp.o
+/usr/bin/ranlib libSennetZED.a
