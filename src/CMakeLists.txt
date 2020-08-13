@@ -1,16 +1,31 @@
 # Headers
 set(HEADER_LIST 
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/ZED/Conversion.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/ZED/IO.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/ZED/Recorder.hpp")
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/ControlLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/NetworkLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/SensorLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Messages/ZEDMessage.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/Conversion.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/IO.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/Settings.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Controller.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Recorder.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/RecorderNode.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/SennetZED.hpp"
+	)
 
 # Library
-add_library(SennetZED 
-	ZED/Conversion.cpp
-	ZED/IO.cpp
-	ZED/Recorder.cpp
+add_library(SennetZED STATIC
+	Layers/ControlLayer.cpp
+	Layers/NetworkLayer.cpp
+	Layers/SensorLayer.cpp
+	Messages/ZEDMessage.cpp
+	Primitives/Conversion.cpp
+	Primitives/IO.cpp
+	Primitives/Settings.cpp
+	Controller.cpp
+	Recorder.cpp
+	RecorderNode.cpp
 	"${HEADER_LIST}")
-	
 
 # Library include directory
 target_include_directories(SennetZED PUBLIC 
@@ -20,16 +35,14 @@ target_include_directories(SennetZED PUBLIC
 	${ZED_INCLUDE_DIRS}
 	)
 
-
 # Library linking
 target_link_libraries(SennetZED PRIVATE
+	Sennet
 	${ZED_LIBS}
 	)
 
-
 # Library compilation
 target_compile_features(SennetZED PUBLIC cxx_std_17)
-
 
 # IDEs source
 source_group(TREE "${PROJECT_SOURCE_DIR}/include"

@@ -1,4 +1,4 @@
-#include <SennetZED/ZED/IO.hpp>
+#include <SennetZED/Primitives/IO.hpp>
 
 std::ostream& operator<<(std::ostream& os, const sl::String& s)
 {

@@ -1,6 +1,6 @@
-#include <SennetZED/ZED/Recorder.hpp>
+#include <SennetZED/Recorder.hpp>
 
-#include <SennetZED/ZED/Conversion.hpp>
+#include <SennetZED/Primitives/Conversion.hpp>
 
 namespace Sennet
 {
@@ -9,13 +9,13 @@ namespace ZED
 {
 
 Recorder::Recorder()
-	: m_InitParameters(::Sennet::CreateRef<sl::InitParameters>()),
-	m_RecordingParameters(::Sennet::CreateRef<sl::RecordingParameters>()),
-	m_RuntimeParameters(::Sennet::CreateRef<sl::RuntimeParameters>()),
-	m_Camera(::Sennet::CreateScope<sl::Camera>()),
+	: m_InitParameters(),
+	m_RecordingParameters(),
+	m_RuntimeParameters(),
+	m_Camera(CreateScope<sl::Camera>()),
 	m_Running(false),
 	m_Recording(false),
-	m_Mutex(::Sennet::CreateScope<std::mutex>()),
+	m_Mutex(CreateScope<std::mutex>()),
 	m_ExecutionThread(),
 	m_InitTimeout(100),
 	m_WorkerTimeout(100),
@@ -117,14 +117,14 @@ bool Recorder::IsCameraOpened() const
 	return m_Camera->isOpened();
 }
 
-::Sennet::Ref<image> Recorder::GetImage(const ZED::view& view) const
+Ref<Image> Recorder::GetImage(const View& view) const
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	if (m_Camera->isOpened())
 	{
-		auto m = CreateRef<sl::Mat>();
-		m_Camera->retrieveImage(*m, ::SennetToStereolabs(view));
-		return ::StereolabsToSennet(m);
+		auto mat = CreateRef<sl::Mat>();
+		m_Camera->retrieveImage(*mat, SennetToStereolabs(view));
+		return StereolabsToSennet(mat);
 	}
 	else
 	{
@@ -132,88 +132,38 @@ bool Recorder::IsCameraOpened() const
 	}
 }
 
-::Sennet::Ref<init_params> Recorder::GetInitParameters() const
+InitParameters Recorder::GetInitParameters() const
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	return ::StereolabsToSennet(m_InitParameters);
 }
 
-::Sennet::Ref<recording_params> Recorder::GetRecordingParameters() const
+RecordingParameters Recorder::GetRecordingParameters() const
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	return ::StereolabsToSennet(m_RecordingParameters);
 }
 
-::Sennet::Ref<runtime_params> Recorder::GetRuntimeParameters() const
+RuntimeParameters Recorder::GetRuntimeParameters() const
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	return ::StereolabsToSennet(m_RuntimeParameters);
+		
 }
 
-::Sennet::Ref<init_params> Recorder::GetZEDInitParameters() const
-{
-	if (not IsCameraOpened())
-	{
-		SN_CORE_WARN("[Recorder] ZED is closed.");
-		return nullptr;
-	}
-	else
-	{
-		m_Mutex->lock();
-		auto params = CreateRef<sl::InitParameters>(
-			m_Camera->getInitParameters());
-		m_Mutex->unlock();
-		return ::StereolabsToSennet(params);
-	}
-}
-
-Ref<ZED::recording_params> Recorder::GetZEDRecordingParameters() const
-{
-	if (not IsCameraOpened())
-	{
-		SN_CORE_WARN("[Recorder] ZED is closed.");
-		return nullptr;
-	}
-	else
-	{
-		m_Mutex->lock();
-		auto recordingParameters = CreateRef<sl::RecordingParameters>(
-			m_Camera->getRecordingParameters());
-		m_Mutex->unlock();
-		return ::StereolabsToSennet(recordingParameters);
-	}
-}
-
-Ref<ZED::runtime_params> Recorder::GetZEDRuntimeParameters() const
-{
-	if (not IsCameraOpened())
-	{
-		SN_CORE_WARN("[Recorder] ZED is closed.");
-		return nullptr;
-	}
-	else
-	{
-		m_Mutex->lock();
-		auto runtimeParameters = CreateRef<sl::RuntimeParameters>(
-			m_Camera->getRuntimeParameters());
-		m_Mutex->unlock();
-		return ::StereolabsToSennet(runtimeParameters);
-	}
-}
-
-void Recorder::SetInitParameters(const Ref<ZED::init_params> init_params)
+void Recorder::SetInitParameters(const InitParameters& init_params)
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	m_InitParameters = ::SennetToStereolabs(init_params);
 }
 
-void Recorder::SetRecordingParameters(const Ref<ZED::recording_params> rec_params)
+void Recorder::SetRecordingParameters(const RecordingParameters& rec_params)
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	m_RecordingParameters = ::SennetToStereolabs(rec_params);
 }
 
-void Recorder::SetRuntimeParameters(const Ref<ZED::runtime_params> run_params)
+void Recorder::SetRuntimeParameters(const RuntimeParameters& run_params)
 {
 	std::lock_guard<std::mutex> lock(*m_Mutex);
 	m_RuntimeParameters = ::SennetToStereolabs(run_params);
@@ -241,7 +191,7 @@ void Recorder::RecordLoop()
 	SN_CORE_TRACE("[Recorder] Record loop started.");
 
 	m_Mutex->lock();
-	auto openError = m_Camera->open(*m_InitParameters);
+	auto openError = m_Camera->open(m_InitParameters);
 	m_Mutex->unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
@@ -253,7 +203,7 @@ void Recorder::RecordLoop()
 	}
 
 	m_Mutex->lock();
-	auto recordError = m_Camera->enableRecording(*m_RecordingParameters);
+	auto recordError = m_Camera->enableRecording(m_RecordingParameters);
 	m_Mutex->unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
@@ -269,7 +219,7 @@ void Recorder::RecordLoop()
 	while (m_ShouldRecord)
 	{
 		m_Mutex->lock();
-		grabError = m_Camera->grab(*m_RuntimeParameters);
+		grabError = m_Camera->grab(m_RuntimeParameters);
 		m_Mutex->unlock();
 		if (grabError != sl::ERROR_CODE::SUCCESS)
 		{

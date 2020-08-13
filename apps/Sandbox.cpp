@@ -1,8 +1,8 @@
 #include <Sennet/Sennet.hpp>
 
-#include <SennetZED/ZED/Conversion.cpp>
-
 int main()
 {
+	Sennet::Log::Init();
+	SN_INFO("Hello world!");
 	return 0;
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Sennet/pch.hpp>
-
 #include <sl/Camera.hpp>
 
 #include <Sennet/Sennet.hpp>
+
+#include <SennetZED/Primitives/Settings.hpp>
 
 namespace Sennet
 {
@@ -32,7 +32,7 @@ public:
 
 	std::string ToString() const override;
 
-	// ZED Recorder specific member functions.
+	// ZED ZEDRecorder specific member functions.
 	void StartRecord();
 	void StopRecord();
 
@@ -40,18 +40,14 @@ public:
 	bool IsRecording() const { return m_Recording; }
 	bool IsCameraOpened() const;
 
-	::Sennet::Ref<image> GetImage(const view& view=view::left) const;
-	::Sennet::Ref<init_params> GetInitParameters() const;
-	::Sennet::Ref<recording_params> GetRecordingParameters() const;
-	::Sennet::Ref<runtime_params> GetRuntimeParameters() const;
+	Ref<Image> GetImage(const View& view = View::Left) const;
+	InitParameters GetInitParameters() const;
+	RecordingParameters GetRecordingParameters() const;
+	RuntimeParameters GetRuntimeParameters() const;
 
-	::Sennet::Ref<init_params> GetZEDInitParameters() const;
-	::Sennet::Ref<recording_params> GetZEDRecordingParameters() const;
-	::Sennet::Ref<runtime_params> GetZEDRuntimeParameters() const;
-
-	void SetInitParameters(const ::Sennet::Ref<init_params> init_params);
-	void SetRecordingParameters(const ::Sennet::Ref<recording_params> rec_params);
-	void SetRuntimeParameters(const ::Sennet::Ref<runtime_params> run_params);
+	void SetInitParameters(const InitParameters& initParameters);
+	void SetRecordingParameters(const RecordingParameters& recordingParameters);
+	void SetRuntimeParameters(const RuntimeParameters& runtimeParameters);
 
 private:
 	void ExecutionWorker();
@@ -63,14 +59,14 @@ private:
 
 private:
 	// Sensor members.
-	::Sennet::Ref<sl::InitParameters> m_InitParameters;
-	::Sennet::Ref<sl::RecordingParameters> m_RecordingParameters;
-	::Sennet::Ref<sl::RuntimeParameters> m_RuntimeParameters;
-	::Sennet::Scope<sl::Camera> m_Camera;
+	sl::InitParameters m_InitParameters;
+	sl::RecordingParameters m_RecordingParameters;
+	sl::RuntimeParameters m_RuntimeParameters;
+	Scope<sl::Camera> m_Camera;
 
 	// Thread members.
-	::Sennet::Scope<std::mutex> m_Mutex;
-	::Sennet::Scope<std::thread> m_ExecutionThread;
+	Scope<std::mutex> m_Mutex;
+	Scope<std::thread> m_ExecutionThread;
 	std::chrono::milliseconds m_InitTimeout;
 	std::chrono::milliseconds m_WorkerTimeout;
 	std::chrono::milliseconds m_RecordTimeout;
@@ -85,5 +81,4 @@ private:
 };
 
 }
-
 }
