@@ -2,6 +2,8 @@
 #include <Sennet/Sennet.hpp>
 
 #include <SennetZED/Recorder.hpp>
+#include <SennetZED/Messages/Request.hpp>
+#include <SennetZED/Messages/Response.hpp>
 
 namespace Sennet
 {

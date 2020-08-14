@@ -8,7 +8,6 @@
 
 #include <SennetZED/Messages/Request.hpp>
 #include <SennetZED/Messages/Response.hpp>
-#include <SennetZED/Primitives/Settings.hpp>
 
 namespace Sennet
 {
@@ -16,11 +15,11 @@ namespace Sennet
 namespace ZED
 {
 
-class ControlLayer : public Layer
+class DisplayLayer : public Layer
 {
 public:
-	ControlLayer();
-	~ControlLayer();
+	DisplayLayer();
+	~DisplayLayer();
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -32,22 +31,12 @@ public:
 	virtual void OnMessage(Ref<Message> msg) override;
 
 private:
-	bool OnCommandResponse(Ref<CommandResponse> msg);
-	bool OnSettingsResponse(Ref<SettingsResponse> msg);
+	bool OnImageMessage(Ref<ImageMessage> msg);
 	bool OnStateResponse(Ref<StateResponse> msg);
 
-	void RenderControlWindow();
-	void RenderControlExportCommandsWindow();
-	void RenderControlExportSettingsWindow();
-
-	void RenderInitParametersTreeNode();
-	void RenderRecordingParametersTreeNode();
-	void RenderRuntimeParametersTreeNode();
-
 private:
-	InitParameters m_InitParameters;
-	RecordingParameters m_RecordingParameters;
-	RuntimeParameters m_RuntimeParameters;
+	Sennet::Ref<Sennet::VertexArray> m_SquareVa;
+	Sennet::OrthographicCameraController m_CameraController;
 };
 
 }

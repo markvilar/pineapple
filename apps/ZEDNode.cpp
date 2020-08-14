@@ -1,6 +1,6 @@
 #include <Sennet/Sennet.hpp>
 
-#include <SennetZED/SennetZED.hpp>
+#include <SennetZED/RecorderNode.hpp>
 
 // Register messages.
 namespace
