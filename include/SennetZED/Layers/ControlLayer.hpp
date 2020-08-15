@@ -16,7 +16,7 @@ namespace Sennet
 namespace ZED
 {
 
-class ControlLayer : public Layer
+class ControlLayer : public Sennet::Layer
 {
 public:
 	ControlLayer();
@@ -36,18 +36,26 @@ private:
 	bool OnSettingsResponse(Ref<SettingsResponse> msg);
 	bool OnStateResponse(Ref<StateResponse> msg);
 
-	void RenderControlWindow();
-	void RenderControlExportCommandsWindow();
-	void RenderControlExportSettingsWindow();
+	void SubmitCommandRequest(const std::string address, 
+		const std::string port);
+	void SubmitSettingsRequest(const std::string address, 
+		const std::string port);
+	void SubmitStateRequest(const std::string address, 
+		const std::string port);
 
-	void RenderInitParametersTreeNode();
-	void RenderRecordingParametersTreeNode();
-	void RenderRuntimeParametersTreeNode();
+	void RenderControlWindow();
+	void RenderCommandsHeader();
+	void RenderSettingsHeader();
+
+	void RenderSettingsInitParametersNode();
+	void RenderSettingsRecordingParametersNode();
+	void RenderSettingsRuntimeParametersNode();
+	void RenderSettingsSubmissionNode();
 
 private:
-	InitParameters m_InitParameters;
-	RecordingParameters m_RecordingParameters;
-	RuntimeParameters m_RuntimeParameters;
+	InitParametersData m_InitData;
+	RecordingParametersData m_RecordingData;
+	RuntimeParametersData m_RuntimeData;
 };
 
 }

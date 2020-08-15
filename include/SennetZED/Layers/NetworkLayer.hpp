@@ -29,8 +29,12 @@ private:
 	void Connect(const std::string address, const std::string port);
 
 	void RenderNetworkWindow();
-	void RenderNetworkWindowConnect();
-	void RenderNetworkWindowConnections();
+
+	void RenderConnectHeader();
+	void RenderConnectionsHeader();
+
+	void RenderConnectNode();
+	void RenderCurrentConnectionsNode();
 
 private:
 	Sennet::ConnectionManager m_ConnectionManager;

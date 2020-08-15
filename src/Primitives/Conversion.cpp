@@ -210,7 +210,7 @@ sl::InitParameters SennetToStereolabs(
 		SennetToStereolabs(data.coordinateUnits);
 	slInitParameters.coordinate_system = 
 		SennetToStereolabs(data.coordinateSystem);
-	slInitParameters.depth_stabilization = data.depthStabilization;
+	slInitParameters.depth_stabilization = (int)data.enableDepthStabilization;
 	slInitParameters.depth_minimum_distance = data.minDepth;
 	slInitParameters.depth_maximum_distance = data.maxDepth;
 	slInitParameters.enable_right_side_measure = data.enableRightSideDepth;
@@ -445,7 +445,7 @@ Sennet::ZED::InitParameters StereolabsToSennet(
 	data.depthMode = StereolabsToSennet(initParameters.depth_mode);
 	data.coordinateUnits = StereolabsToSennet(initParameters.coordinate_units);
 	data.coordinateSystem = StereolabsToSennet(initParameters.coordinate_system);
-	data.depthStabilization = initParameters.depth_stabilization;
+	data.enableDepthStabilization = (bool)initParameters.depth_stabilization;
 	data.minDepth = initParameters.depth_minimum_distance;
 	data.maxDepth = initParameters.depth_maximum_distance;
 	data.enableRightSideDepth = initParameters.enable_right_side_measure;

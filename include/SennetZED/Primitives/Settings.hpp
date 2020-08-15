@@ -7,54 +7,54 @@ namespace Sennet
 namespace ZED
 {
 
-enum class CoordinateSystem
+enum class CoordinateSystem : int
 {
-	None = 0, Image, LeftHandedYUp, RightHandedYUp, RightHandedZUp,
-	LeftHandedZUp, RightHandedZUpXForward
+	None = 0, Image = 1, LeftHandedYUp = 2, RightHandedYUp = 3, 
+	RightHandedZUp = 4, LeftHandedZUp = 5, RightHandedZUpXForward = 6
 };
 
-enum class DepthMode 
+enum class DepthMode : int
 { 
-	None = 0, Performance, Quality, Ultra
+	None = 0, Performance = 1, Quality = 2, Ultra = 3
 };
 
-enum class ReferenceFrame 
+enum class ReferenceFrame : int
 { 
-	None = 0, World, Camera 
+	None = 0, World = 1, Camera = 2
 };
 
-enum class Resolution 
+enum class Resolution : int
 { 
-	None = 0, HD2K, HD1080, HD720, VGA 
+	None = 0, HD2K = 1, HD1080 = 2, HD720 = 3, VGA = 4
 };
 
-enum class SVOCompressionMode
+enum class SVOCompressionMode : int
 { 
-	None = 0, Lossless, H264, H265 
+	None = 0, Lossless = 1, H264 = 2, H265 = 3
 };
 
-enum class SensingMode 
+enum class SensingMode : int
 { 
-	None = 0, Standard, Fill 
+	None = 0, Standard = 1, Fill = 2
 };
 
-enum class Unit 
+enum class Unit : int
 { 
-	None = 0, Millimeter, Centimeter, Meter, Inch, Foot 
+	None = 0, Millimeter = 1, Centimeter = 2, Meter = 3, Inch = 4, Foot = 5
 };
 
-enum class VideoSettings
+enum class VideoSettings : int
 { 
-	None = 0, Brightness, Contrast, Hue, Saturation, Sharpness, Gain, 
-	Exposure, AECAGC, WhitebalanceTemperature, WhitebalanceAuto,
-	LEDStatus
+	None = 0, Brightness = 1, Contrast = 2, Hue = 3, Saturation = 4, 
+	Sharpness = 5, Gain = 6, Exposure = 7, AECAGC = 8, 
+	WhitebalanceTemperature = 9, WhitebalanceAuto = 10, LEDStatus = 11
 };
 
-enum class View 
+enum class View : int
 { 
-	None = 0, Left, Right, LeftGray, RightGray, LeftUnrectified,
-	RightUnrectified, LeftUnrectifiedGray, RightUnrectifiedGray,
-	SideBySide
+	None = 0, Left = 1, Right = 2, LeftGray = 3, RightGray = 4, 
+	LeftUnrectified = 5, RightUnrectified = 6, LeftUnrectifiedGray = 7, 
+	RightUnrectifiedGray = 8, SideBySide = 9
 };
 
 struct InitParametersData
@@ -67,7 +67,7 @@ public:
 		archive(self.depthMode);
 		archive(self.coordinateUnits);
 		archive(self.coordinateSystem);
-		archive(self.depthStabilization);
+		archive(self.enableDepthStabilization);
 		archive(self.minDepth);
 		archive(self.maxDepth);
 		archive(self.enableRightSideDepth);
@@ -85,7 +85,7 @@ public:
 	DepthMode depthMode = DepthMode::Ultra;
 	Unit coordinateUnits = Unit::Millimeter;
 	CoordinateSystem coordinateSystem = CoordinateSystem::Image;
-	int depthStabilization = 1;
+	bool enableDepthStabilization = true;
 	float minDepth = -1;
 	float maxDepth = -1;
 	bool enableRightSideDepth = false;
@@ -105,7 +105,7 @@ class InitParameters
 	// Stereolabs SDK that is considered unimportant for recording.
 public:
 	InitParameters() = default;
-	InitParameters(const InitParametersData& data) : m_Data(data) {}
+	InitParameters(const InitParametersData data) : m_Data(data) {}
 	~InitParameters() = default;
 
 	InitParametersData GetData() const { return m_Data; }
@@ -151,7 +151,7 @@ class RecordingParameters
 	// Stereolabs SDK that is considered unimportant for recording.
 public:
 	RecordingParameters() = default;
-	RecordingParameters(const RecordingParametersData& data) 
+	RecordingParameters(const RecordingParametersData data) 
 		: m_Data(data) {}
 	~RecordingParameters() = default;
 
@@ -201,7 +201,7 @@ class RuntimeParameters
 	// Stereolabs SDK that is considered unimportant for recording.
 public:
 	RuntimeParameters() = default;
-	RuntimeParameters(const RuntimeParametersData& data) 
+	RuntimeParameters(const RuntimeParametersData data) 
 		: m_Data(data) {}
 	~RuntimeParameters() = default;
 

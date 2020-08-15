@@ -50,12 +50,12 @@ void NetworkLayer::OnEvent(Event& event)
 
 void NetworkLayer::OnMessage(Ref<Message> msg)
 {
-	SN_TRACE("[NetworkLayer] Got message: {0}", msg->ToString());
+	SN_TRACE("Got message: {0}", msg->ToString());
 }
 
 void NetworkLayer::Connect(const std::string address, const std::string port)
 {
-	SN_TRACE("[NetworkLayer] Connecting to {0}:{1}.", address, port);
+	SN_TRACE("Connecting to {0}:{1}.", address, port);
 	m_ConnectionManager.Connect(address, port);
 }
 
@@ -63,13 +63,13 @@ void NetworkLayer::RenderNetworkWindow()
 {
 	ImGui::Begin("Network");
 
-	RenderNetworkWindowConnect();
-	RenderNetworkWindowConnections();
+	RenderConnectHeader();
+	RenderConnectionsHeader();
 
 	ImGui::End();
 }
 
-void NetworkLayer::RenderNetworkWindowConnect()
+void NetworkLayer::RenderConnectHeader()
 {
 	bool collapsed = !ImGui::CollapsingHeader("Connect");
 	ImGui::SameLine();
@@ -79,33 +79,16 @@ void NetworkLayer::RenderNetworkWindowConnect()
 	if (collapsed)
         	return;
 
-	ImGui::PushID("Connect");
-		
-	static char addressBuffer[20];
-	static char portBuffer[10];
-	ImGui::InputText("Address", addressBuffer, IM_ARRAYSIZE(addressBuffer));
-	ImGui::InputText("Port", portBuffer, IM_ARRAYSIZE(portBuffer));
-	if(ImGui::Button("Connect"))
+	if (ImGui::TreeNode("Connect"))
 	{
-		ImGui::Text("Connecting...");
-		try
-		{
-			Connect(addressBuffer, portBuffer);
-		}
-		catch (std::exception e)
-		{
-			SN_TRACE("Could not connect.");
-		}
-	}
-	else
-	{
-		ImGui::Dummy(ImVec2(0.0f, 13.0f));
+		RenderConnectNode();
+		ImGui::TreePop();
 	}
 }
 
-void NetworkLayer::RenderNetworkWindowConnections()
+void NetworkLayer::RenderConnectionsHeader()
 {
-	bool collapsed = !ImGui::CollapsingHeader("Current Connections");
+	bool collapsed = !ImGui::CollapsingHeader("Connections");
 	ImGui::SameLine();
 	Sennet::ImGuiHelpMarker("Information about the connection managers current "
 		"connections.");
@@ -113,8 +96,28 @@ void NetworkLayer::RenderNetworkWindowConnections()
 	if (collapsed)
 		return;
 
-	ImGui::PushID("Current Connections");
+	if (ImGui::TreeNode("Current Connections"))
+	{
+		RenderCurrentConnectionsNode();
+		ImGui::TreePop();
+	}
 
+}
+
+void NetworkLayer::RenderConnectNode()
+{
+	static char addressBuffer[20];
+	static char portBuffer[10];
+	ImGui::InputText("Address", addressBuffer, IM_ARRAYSIZE(addressBuffer));
+	ImGui::InputText("Port", portBuffer, IM_ARRAYSIZE(portBuffer));
+	if (ImGui::Button("Connect"))
+	{
+		Connect(addressBuffer, portBuffer);
+	}
+}
+
+void NetworkLayer::RenderCurrentConnectionsNode()
+{
 	ImGui::Columns(2, "EndpointColumns");
 	ImGui::Text("Local endpoints");
 	auto localEndpoints = m_ConnectionManager.GetLocalEndpointsData();
