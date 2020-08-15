@@ -1,7 +1,3 @@
-# cmake_cxx_template
+# sennet-zed
 
-[![Build Status](https://travis-ci.com/markvilar/cmake_cxx_template.svg?token=4KHysSpwLbgMpqpB7Gp3&branch=master)](https://travis-ci.com/markvilar/cmake_cxx_template)
-
-A CMake template for C++ projects.
-
-
+Sennet ZED module.
