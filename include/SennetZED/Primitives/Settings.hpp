@@ -68,9 +68,9 @@ public:
 		archive(self.coordinateUnits);
 		archive(self.coordinateSystem);
 		archive(self.depthStabilization);
-		archive(self.depthStabilization);
-		archive(self.depthStabilization);
-		archive(self.depthStabilization);
+		archive(self.minDepth);
+		archive(self.maxDepth);
+		archive(self.enableRightSideDepth);
 
 		archive(self.resolution);
 		archive(self.cameraFPS);
