@@ -123,6 +123,7 @@ public:
 	static void serialize(Archive& archive, Self& self)
 	{
 		Response::serialize(archive, self);
+		archive(self.m_RecorderState);
 		archive(self.m_InitParameters);
 		archive(self.m_RecordingParameters);
 		archive(self.m_RuntimeParameters);
@@ -130,6 +131,7 @@ public:
 	}
 
 private:
+	RecorderState m_RecorderState;
 	InitParameters m_InitParameters;
 	RecordingParameters m_RecordingParameters;
 	RuntimeParameters m_RuntimeParameters;

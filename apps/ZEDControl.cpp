@@ -33,13 +33,13 @@ Sennet::Application* Sennet::CreateApplication()
 {
 	unsigned short port = 6000;
 	uint64_t waitFor = 1;
-	return new Sennet::ZED::Controller(port, waitFor);
+	bool verbose = false;
+	return new Sennet::ZED::Controller(port, waitFor, verbose);
 }
 
 int Sennet::main(int argc, char** argv)
 {
 	Sennet::Log::Init();
-
 	auto app = Sennet::CreateApplication();
 	app->Run();
 	return 0;

@@ -31,6 +31,8 @@ public:
 
 	virtual std::string ToString() const override { return GetName(); }
 
+	const Command GetCommand() const { return m_Command; }
+
 	friend zpp::serializer::access;
 	template <typename Archive, typename Self>
 	static void serialize(Archive& archive, Self& self)

@@ -65,7 +65,8 @@ void testRecorder()
 	handle->StartRecord();
 	SleepThisThread(1000);
 
-	auto initParameters = handle->GetInitParameters();
+	auto [initParameters, recordingParameters, runtimeParameters] = 
+		handle->GetParameters();
 	SN_INFO(initParameters.ToString());
 
 	int count = 0;
@@ -94,8 +95,6 @@ void testRecorder()
 int main(int argc, char* argv[])
 {
 	Sennet::Log::Init();
-
 	testRecorder();
-
 	return 0;
 }

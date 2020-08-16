@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include <sl/Camera.hpp>
 
 #include <Sennet/Sennet.hpp>
@@ -12,7 +14,7 @@ namespace Sennet
 namespace ZED
 {
 
-class Recorder : public SourceHandle
+class Recorder
 {
 	// Handle for recording with a ZED camera. The ZED camera is operated
 	// in a separate execution thread. The handle public member functions
@@ -25,29 +27,32 @@ public:
 	Recorder();
 	~Recorder();
 
-	void Init() override;
-	void Shutdown() override;
-
-	SOURCE_HANDLE_CLASS_TYPE(ZEDRecorder);
-
-	std::string ToString() const override;
-
-	// ZED ZEDRecorder specific member functions.
+	// Actions
+	void Initialize();
+	void Shutdown();
 	void StartRecord();
 	void StopRecord();
 
+	std::string ToString() const;
+
 	bool IsRunning() const { return m_Running; }
 	bool IsRecording() const { return m_Recording; }
-	bool IsCameraOpened() const;
+	bool IsCameraOpened();
 
-	Ref<Image> GetImage(const View& view = View::Left) const;
-	InitParameters GetInitParameters() const;
-	RecordingParameters GetRecordingParameters() const;
-	RuntimeParameters GetRuntimeParameters() const;
+	RecorderState GetState() const;
+	Ref<Image> GetImage(const View& view = View::Left);
 
-	void SetInitParameters(const InitParameters& initParameters);
-	void SetRecordingParameters(const RecordingParameters& recordingParameters);
-	void SetRuntimeParameters(const RuntimeParameters& runtimeParameters);
+	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
+		GetParameters();
+
+	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
+		GetParametersCache();
+
+	void SetParametersCache(const InitParameters initParameters,
+		const RecordingParameters recordingParameters,
+		const RuntimeParameters runtimeParameters);
+
+	
 
 private:
 	void ExecutionWorker();
@@ -58,14 +63,15 @@ private:
 	void JoinExecutionThread();
 
 private:
-	// Sensor members.
-	sl::InitParameters m_InitParameters;
-	sl::RecordingParameters m_RecordingParameters;
-	sl::RuntimeParameters m_RuntimeParameters;
+	InitParameters m_InitParameters;
+	RecordingParameters m_RecordingParameters;
+	RuntimeParameters m_RuntimeParameters;
+
 	Scope<sl::Camera> m_Camera;
 
-	// Thread members.
-	Scope<std::mutex> m_Mutex;
+	std::mutex m_CameraMutex;
+	std::mutex m_ParametersMutex;
+
 	Scope<std::thread> m_ExecutionThread;
 	std::chrono::milliseconds m_InitTimeout;
 	std::chrono::milliseconds m_WorkerTimeout;

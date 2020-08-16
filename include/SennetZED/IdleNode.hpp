@@ -10,10 +10,10 @@ namespace Sennet
 namespace ZED
 {
 
-class IdleNode : public ::Sennet::Node
+class IdleNode : public Sennet::Node
 {
 public:
-	IdleNode(unsigned short port, uint64_t waitFor);
+	IdleNode(unsigned short port, uint64_t waitFor = 1, bool verbose = false);
 	~IdleNode();
 
 private:

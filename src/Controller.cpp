@@ -12,7 +12,8 @@ namespace Sennet
 namespace ZED
 {
 
-Controller::Controller(unsigned short port, uint64_t waitFor)
+Controller::Controller(unsigned short port, uint64_t waitFor, bool verbose)
+	: Sennet::Application(verbose)
 {
 	PushLayer(new NetworkLayer(port, waitFor));
 	PushLayer(new DisplayLayer());

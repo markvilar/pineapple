@@ -9,7 +9,8 @@ namespace Sennet
 namespace ZED
 {
 
-RecorderNode::RecorderNode(unsigned short port, uint64_t waitFor=1)	
+RecorderNode::RecorderNode(unsigned short port, uint64_t waitFor, bool verbose)
+	: Sennet::Node(verbose)
 {
 	PushLayer(new NetworkLayer(port, waitFor));
 	PushLayer(new SensorLayer());

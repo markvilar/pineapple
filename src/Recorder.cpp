@@ -1,5 +1,7 @@
 #include <SennetZED/Recorder.hpp>
 
+#include <mutex>
+
 #include <SennetZED/Primitives/Conversion.hpp>
 
 namespace Sennet
@@ -15,13 +17,14 @@ Recorder::Recorder()
 	m_Camera(CreateScope<sl::Camera>()),
 	m_Running(false),
 	m_Recording(false),
-	m_Mutex(CreateScope<std::mutex>()),
+	m_CameraMutex(),
+	m_ParametersMutex(),
 	m_ExecutionThread(),
 	m_InitTimeout(100),
 	m_WorkerTimeout(100),
 	m_RecordTimeout(10)
 {
-	Init();
+	Initialize();
 }
 
 Recorder::~Recorder()
@@ -29,21 +32,21 @@ Recorder::~Recorder()
 	Shutdown();
 }
 
-void Recorder::Init()
+void Recorder::Initialize()
 {
 	if (m_Running)
 	{
-		SN_CORE_WARN("[Recorder] Already initialized.");
+		SN_CORE_WARN("Recorder already initialized.");
 		return;
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_CORE_ERROR("[Recorder] Critical situation! Forcing\
+		SN_CORE_ERROR("Recorder critical situation! Forcing\
 			shutdown and re-initialization.");
 	}
 	else if (not m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Starting initialization.");
+		SN_CORE_TRACE("Recorder starting initialization.");
 	}
 
 	StopExecutionThread();
@@ -58,16 +61,15 @@ void Recorder::Shutdown()
 {
 	if (not m_Running and not m_Recording)
 	{
-		SN_CORE_WARN("[Recorder] Already shut down.");
+		SN_CORE_WARN("Recorder already shut down.");
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_CORE_ERROR("[Recorder] Critical situation! Forcing\
-			shutdown.");
+		SN_CORE_ERROR("Recorder critical situation! Forcing shutdown.");
 	}
 	else if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Starting shutdown.");
+		SN_CORE_TRACE("Recorder starting shutdown.");
 	}
 
 	StopExecutionThread();
@@ -76,24 +78,23 @@ void Recorder::Shutdown()
 
 std::string Recorder::ToString() const
 {
-	// TODO: Implement.
-	return std::string("");
+	return std::string("Recorder");
 }
 
 void Recorder::StartRecord()
 {
 	if (not m_Running)
 	{
-		SN_CORE_TRACE("[Recorder] Not initialized, cannot record.");
+		SN_CORE_TRACE("Recorder not initialized.");
 	}
 	else if (m_Running and m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Already recording.");
+		SN_CORE_TRACE("Recorder already recording.");
 		m_ShouldRecord = true;
 	}
 	else if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Starting record.");
+		SN_CORE_TRACE("Recorder starting record.");
 		m_ShouldRecord = true;
 	}
 }
@@ -102,24 +103,44 @@ void Recorder::StopRecord()
 {
 	if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Not recording.");
+		SN_CORE_TRACE("Recorder not recording.");
 	}
 	else if (m_Running and m_Recording)
 	{
-		SN_CORE_TRACE("[Recorder] Stopping record.");
+		SN_CORE_TRACE("Recorder stopping record.");
 	}
 	m_ShouldRecord = false;
 }
 
-bool Recorder::IsCameraOpened() const
+bool Recorder::IsCameraOpened()
 {
-	std::lock_guard<std::mutex> lock(*m_Mutex);
+	std::lock_guard<std::mutex> lock(m_CameraMutex);	
 	return m_Camera->isOpened();
 }
 
-Ref<Image> Recorder::GetImage(const View& view) const
+RecorderState Recorder::GetState() const
 {
-	std::lock_guard<std::mutex> lock(*m_Mutex);
+	if (m_Running and m_Recording)
+	{
+		return RecorderState::Record;
+	}
+	else if (m_Running and !m_Recording)
+	{
+		return RecorderState::Standby;
+	}
+	else if (!m_Running and !m_Recording)
+	{
+		return RecorderState::Idle;
+	}
+	else
+	{
+		return RecorderState::None;
+	}
+}
+
+Ref<Image> Recorder::GetImage(const View& view)
+{
+	std::lock_guard<std::mutex> lock(m_CameraMutex);
 	if (m_Camera->isOpened())
 	{
 		auto mat = CreateRef<sl::Mat>();
@@ -132,47 +153,39 @@ Ref<Image> Recorder::GetImage(const View& view) const
 	}
 }
 
-InitParameters Recorder::GetInitParameters() const
+std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
+	Recorder::GetParameters()
 {
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	return ::StereolabsToSennet(m_InitParameters);
+	std::lock_guard<std::mutex> lock(m_CameraMutex);
+	auto initParameters = StereolabsToSennet(m_Camera->getInitParameters());
+	auto recordingParameters = StereolabsToSennet(
+		m_Camera->getRecordingParameters());
+	auto runtimeParameters = StereolabsToSennet(
+		m_Camera->getRuntimeParameters());
+	return { initParameters, recordingParameters, runtimeParameters };
 }
 
-RecordingParameters Recorder::GetRecordingParameters() const
+std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
+	Recorder::GetParametersCache()
 {
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	return ::StereolabsToSennet(m_RecordingParameters);
+	std::lock_guard<std::mutex> lock(m_ParametersMutex);
+	return { m_InitParameters, m_RecordingParameters, m_RuntimeParameters};
 }
 
-RuntimeParameters Recorder::GetRuntimeParameters() const
+void Recorder::SetParametersCache(const InitParameters initParameters,
+	const RecordingParameters recordingParameters,
+	const RuntimeParameters runtimeParameters)
 {
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	return ::StereolabsToSennet(m_RuntimeParameters);
-		
-}
-
-void Recorder::SetInitParameters(const InitParameters& init_params)
-{
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	m_InitParameters = ::SennetToStereolabs(init_params);
-}
-
-void Recorder::SetRecordingParameters(const RecordingParameters& rec_params)
-{
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	m_RecordingParameters = ::SennetToStereolabs(rec_params);
-}
-
-void Recorder::SetRuntimeParameters(const RuntimeParameters& run_params)
-{
-	std::lock_guard<std::mutex> lock(*m_Mutex);
-	m_RuntimeParameters = ::SennetToStereolabs(run_params);
+	std::lock_guard<std::mutex> lock(m_ParametersMutex);
+	m_InitParameters = initParameters;
+	m_RecordingParameters = recordingParameters;
+	m_RuntimeParameters = runtimeParameters;
 }
 
 void Recorder::ExecutionWorker()
 {
 	m_Running = true;
-	SN_CORE_TRACE("[Recorder] Execution worker started.");
+	SN_CORE_TRACE("Recorder execution worker started.");
 	while (m_ShouldRun)
 	{
 		if (m_ShouldRecord)
@@ -181,59 +194,57 @@ void Recorder::ExecutionWorker()
 		}
 		std::this_thread::sleep_for(m_WorkerTimeout);
 	}
-	SN_CORE_TRACE("[Recorder] Execution worker finished.");
+	SN_CORE_TRACE("Recorder execution worker finished.");
 	m_Running = false;
 }
 
 void Recorder::RecordLoop()
 {
 	m_Recording = true;
-	SN_CORE_TRACE("[Recorder] Record loop started.");
 
-	m_Mutex->lock();
-	auto openError = m_Camera->open(m_InitParameters);
-	m_Mutex->unlock();
+	// Get parameters from parameter cache.
+	m_ParametersMutex.lock();
+	auto initParameters = SennetToStereolabs(m_InitParameters);
+	auto recordingParameters = SennetToStereolabs(m_RecordingParameters);
+	auto runtimeParameters = SennetToStereolabs(m_RuntimeParameters);
+	m_ParametersMutex.unlock();
+
+	m_CameraMutex.lock();
+	auto openError = m_Camera->open(initParameters);
+	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_CORE_WARN("[Recorder] Could not open ZED!");
-	}
-	else
-	{
-		SN_CORE_TRACE("[Recorder] ZED opened.");
+		SN_CORE_WARN("Recorder could not open ZED!");
 	}
 
-	m_Mutex->lock();
-	auto recordError = m_Camera->enableRecording(m_RecordingParameters);
-	m_Mutex->unlock();
+	m_CameraMutex.lock();
+	auto recordError = m_Camera->enableRecording(recordingParameters);
+	m_CameraMutex.unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_CORE_WARN("[Recorder] ZED couldn't enable recording!");
-	}
-	else
-	{
-		SN_CORE_TRACE("[Recorder] ZED recording enabled.");
+		SN_CORE_WARN("Recorder could not enable ZED recording!");
 	}
 
 	sl::ERROR_CODE grabError;
-	SN_CORE_TRACE("[Recorder] ZED recording.");
+	SN_CORE_TRACE("Recorder recording.");
 	while (m_ShouldRecord)
 	{
-		m_Mutex->lock();
-		grabError = m_Camera->grab(m_RuntimeParameters);
-		m_Mutex->unlock();
+		m_CameraMutex.lock();
+		grabError = m_Camera->grab(runtimeParameters);
+		m_CameraMutex.unlock();
 		if (grabError != sl::ERROR_CODE::SUCCESS)
 		{
-			SN_CORE_WARN("[Recorder] ZED grab failed!");
+			SN_CORE_WARN("Recorder could not grab ZED data!");
 		}
 
 		std::this_thread::sleep_for(m_RecordTimeout);
 	}
 
-	m_Mutex->lock();
+	m_CameraMutex.lock();
 	m_Camera->close();
-	m_Mutex->unlock();
+	m_CameraMutex.unlock();
 
-	SN_CORE_TRACE("[Recorder] Record loop finished.");
+	SN_CORE_TRACE("Recorder recording finished.");
 	m_Recording = false;
 }
 
@@ -259,7 +270,7 @@ void Recorder::JoinExecutionThread()
 	else if (m_ExecutionThread->joinable())
 	{
 		m_ExecutionThread->join();
-		SN_CORE_INFO("[Recorder] Joined execution thread.");
+		SN_CORE_TRACE("Recorder joined execution thread.");
 	}
 }
 

@@ -51,7 +51,8 @@ static void Print(const InitParametersData& data)
 
 static void Print(const RecordingParametersData& data)
 {
-	SN_TRACE("SVO filename: 			{0}", data.filename);
+	SN_TRACE("SVO filename: 			{0}", 
+		data.filename);
 	SN_TRACE("SVO Compression Mode: 		{0}", 
 		data.compressionMode);
 }
@@ -136,56 +137,64 @@ void ControlLayer::SubmitCommandRequest(const std::string address,
 	const std::string port)
 {
 	auto connectionManager = Sennet::ConnectionManager::GetPtr();
-	if (connectionManager)
-	{
-	}
-	else
+	if (!connectionManager)
 	{
 		SN_WARN("Connection manager not initialized!");
-			
+		return;
 	}
+
+	auto connection = connectionManager->FindConnection(address,
+		StringToUnsignedShort(port));
+	if (!connection)
+	{
+		SN_WARN("Could not find connection with remote endpoint: "
+			"{0}:{1}", address, port);
+		return;
+	}
+
+	auto msg = Sennet::CreateRef<CommandRequest>(
+		connection->GetLocalInformation().first,
+		connection->GetLocalInformation().second,
+		m_Command);
+	connectionManager->SubmitMessage(connection, msg);
+	SN_TRACE("Submitted message {0} to {1}:{2}", msg->ToString(),
+		connection->GetRemoteInformation().first,
+		connection->GetRemoteInformation().second);
 }
 
 void ControlLayer::SubmitSettingsRequest(const std::string address,
 	const std::string port)
 {
-	//Print(m_InitData);
-	//Print(m_RecordingData);
-	//Print(m_RuntimeData);
-
 	auto connectionManager = Sennet::ConnectionManager::GetPtr();
-	if (connectionManager)
-	{
-		auto connection = connectionManager->FindConnection(address,
-			StringToUnsignedShort(port));
-		if (connection)
-		{
-			InitParameters initParameters(m_InitData);
-			RecordingParameters recordingParameters(m_RecordingData);
-			RuntimeParameters runtimeParameters(m_RuntimeData);
-
-			auto msg = Sennet::CreateRef<SettingsRequest>(
-				connection->GetLocalInformation().first,
-				connection->GetLocalInformation().second,
-				initParameters, 
-				recordingParameters,
-				runtimeParameters);
-			connectionManager->SubmitMessage(connection, msg);
-			SN_TRACE("Sent message {0} to {1}:{2}", 
-				msg->ToString(),
-				connection->GetRemoteInformation().first,
-				connection->GetRemoteInformation().second);
-		}
-		else
-		{
-			SN_WARN("Could not find connection with remote "
-				"endpoint: {0}:{1}", address, port);
-		}
-	}
-	else
+	if (!connectionManager)
 	{
 		SN_WARN("Connection manager not initialized!");
+		return;
 	}
+
+	auto connection = connectionManager->FindConnection(address,
+		StringToUnsignedShort(port));
+	if (!connection)
+	{
+		SN_WARN("Could not find connection with remote endpoint: "
+			"{0}:{1}", address, port);
+		return;
+	}
+
+	InitParameters initParameters(m_InitData);
+	RecordingParameters recordingParameters(m_RecordingData);
+	RuntimeParameters runtimeParameters(m_RuntimeData);
+
+	auto msg = Sennet::CreateRef<SettingsRequest>(
+		connection->GetLocalInformation().first,
+		connection->GetLocalInformation().second,
+		initParameters, 
+		recordingParameters,
+		runtimeParameters);
+	connectionManager->SubmitMessage(connection, msg);
+	SN_TRACE("Submitted message {0} to {1}:{2}", msg->ToString(),
+		connection->GetRemoteInformation().first,
+		connection->GetRemoteInformation().second);
 }
 
 void ControlLayer::SubmitStateRequest(const std::string address,
@@ -208,13 +217,13 @@ void ControlLayer::RenderControlWindow()
 {
 	ImGui::Begin("Control");
 
-	RenderCommandsHeader();
+	RenderCommandHeader();
 	RenderSettingsHeader();
 
 	ImGui::End();
 }
 
-void ControlLayer::RenderCommandsHeader()
+void ControlLayer::RenderCommandHeader()
 {
 	bool collapsed = !ImGui::CollapsingHeader("Commands");
 	ImGui::SameLine();
@@ -224,11 +233,71 @@ void ControlLayer::RenderCommandsHeader()
 	if (collapsed)
 		return;
 
+	if (ImGui::TreeNode("Command Configuration"))
+	{
+		RenderCommandConfigurationNode();
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Command Submission"))
+	{
+		RenderCommandSubmissionNode();
+		ImGui::TreePop();
+	}
+}
+
+void ControlLayer::RenderCommandConfigurationNode()
+{
+	const char* commands[] = { "None", "Initialize", "Shutdown", 
+		"Start Record", "Stop Record" };
+	static const char* currentCommand = "None";
+	if (ImGui::BeginCombo("Command", currentCommand))
+	{
+		for (int n = 0; n < IM_ARRAYSIZE(commands); n++)
+		{
+			bool isSelected = (currentCommand == commands[n]);
+			if (ImGui::Selectable(commands[n], isSelected))
+			{
+				currentCommand = commands[n];
+				switch (n)
+				{
+					case 0: 
+						m_Command = Command::None;
+						break;
+					case 1:
+						m_Command = Command::Initialize;
+						break;
+					case 2:
+						m_Command = Command::Shutdown;
+						break;
+					case 3:
+						m_Command = Command::StartRecord;
+						break;
+					case 4:
+						m_Command = Command::StopRecord;
+						break;
+				}
+			}
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+}
+
+void ControlLayer::RenderCommandSubmissionNode()
+{
 	static char addressBuffer[20];
 	static char portBuffer[10];
 	ImGui::InputText("Target Address", addressBuffer, 
 		IM_ARRAYSIZE(addressBuffer));
 	ImGui::InputText("Target Port", portBuffer, IM_ARRAYSIZE(portBuffer));
+	if (ImGui::Button("Submit Command"))
+	{
+		SubmitCommandRequest(addressBuffer, portBuffer);
+	}
 }
 
 void ControlLayer::RenderSettingsHeader()
@@ -321,33 +390,56 @@ void ControlLayer::RenderSettingsInitParametersNode()
 	ImGui::Checkbox("Enable Right Side Depth", 
 		&m_InitData.enableRightSideDepth);
 
+	static int resolutionIndex = 0;
 	const char* resolutionOptions = "None\0HD2K\0HD1080\0HD720\0VGA\0";
-	if (ImGui::Combo("Resolution", (int*)&m_InitData.resolution, 
-		resolutionOptions))
+	if (ImGui::Combo("Resolution", &resolutionIndex, resolutionOptions))
 	{
-		switch (m_InitData.resolution)
+		switch (resolutionIndex)
 		{
-			case Sennet::ZED::Resolution::HD2K:
+			case 0:
+				m_InitData.resolution = 
+					Sennet::ZED::Resolution::None;
 				break;
-			case Sennet::ZED::Resolution::HD1080:
+			case 1:
+				m_InitData.resolution = 
+					Sennet::ZED::Resolution::HD2K;
 				break;
-			case Sennet::ZED::Resolution::HD720:
+			case 2:
+				m_InitData.resolution = 
+					Sennet::ZED::Resolution::HD1080;
 				break;
-			case Sennet::ZED::Resolution::VGA:
+			case 3:
+				m_InitData.resolution = 
+					Sennet::ZED::Resolution::HD720;
 				break;
-			default:
+			case 4:
+				m_InitData.resolution = 
+					Sennet::ZED::Resolution::VGA;
 				break;
 		}
 	}
 
-	// TODO: Revise. Depends upon resolution!
-	const char* cameraFPSOptions = "15\0" "30\0" "60\0" "100\0";
-	if (ImGui::Combo("Camera FPS", &m_InitData.cameraFPS, cameraFPSOptions))
+	const char* FPSOptions[] = { "15", "30", "60", "100" };
+	static const char* currentFPS = "15";
+	if (ImGui::BeginCombo("Camera FPS", currentFPS))
 	{
-		switch (m_InitData.cameraFPS)
+		for (int n = 0; n < IM_ARRAYSIZE(FPSOptions); n++)
 		{
+			bool isSelected = (currentFPS == FPSOptions[n]);
+			if (ImGui::Selectable(FPSOptions[n], isSelected))
+			{
+				currentFPS = FPSOptions[n];
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
 		}
+		m_InitData.cameraFPS = std::stoi(currentFPS);
+		ImGui::EndCombo();
 	}
+
 
 	ImGui::Checkbox("Enable Image Enhancement", 
 		&m_InitData.enableImageEnhancement);
@@ -359,8 +451,10 @@ void ControlLayer::RenderSettingsInitParametersNode()
 
 void ControlLayer::RenderSettingsRecordingParametersNode()
 {
-	ImGui::InputText("SVO Filename", m_RecordingData.filename.data(), 
-		m_RecordingData.filename.size());
+	static char filenameBuffer[20];
+	ImGui::InputText("SVO Filename", filenameBuffer, 
+		IM_ARRAYSIZE(filenameBuffer));
+	m_RecordingData.filename = std::string(filenameBuffer);
 
 	const char* compressionModeOptions = "None\0Lossless\0H264\0H265\0";
 	if (ImGui::Combo("SVO Compression Mode", 

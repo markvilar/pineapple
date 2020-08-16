@@ -29,9 +29,10 @@ zpp::serializer::register_types<
 
 Sennet::Node* Sennet::CreateNode()
 {
-	unsigned int port = 7000;
+	unsigned int port = 8000;
 	uint64_t waitFor = 1;
-	return new Sennet::ZED::RecorderNode(port, waitFor);
+	bool verbose = false;
+	return new Sennet::ZED::RecorderNode(port, waitFor, verbose);
 }
 
 int Sennet::main(int argc, char** argv)

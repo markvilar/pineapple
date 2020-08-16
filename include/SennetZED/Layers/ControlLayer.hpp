@@ -44,15 +44,19 @@ private:
 		const std::string port);
 
 	void RenderControlWindow();
-	void RenderCommandsHeader();
-	void RenderSettingsHeader();
 
+	void RenderCommandHeader();
+	void RenderCommandConfigurationNode();
+	void RenderCommandSubmissionNode();
+
+	void RenderSettingsHeader();
 	void RenderSettingsInitParametersNode();
 	void RenderSettingsRecordingParametersNode();
 	void RenderSettingsRuntimeParametersNode();
 	void RenderSettingsSubmissionNode();
 
 private:
+	Command m_Command;
 	InitParametersData m_InitData;
 	RecordingParametersData m_RecordingData;
 	RuntimeParametersData m_RuntimeData;

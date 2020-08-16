@@ -7,6 +7,14 @@ namespace Sennet
 namespace ZED
 {
 
+enum class RecorderState : int
+{
+	None 	= 0,
+	Idle 	= 1,
+	Standby = 2,
+	Record 	= 3
+};
+
 enum class CoordinateSystem : int
 {
 	None = 0, Image = 1, LeftHandedYUp = 2, RightHandedYUp = 3, 

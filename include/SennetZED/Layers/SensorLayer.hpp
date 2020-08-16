@@ -20,12 +20,17 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void OnUpdate(Timestep ts) override;
+	virtual void OnUpdate(Sennet::Timestep ts) override;
 
-	virtual void OnMessage(Ref<Message> msg) override;
+	virtual void OnMessage(Sennet::Ref<Sennet::Message> msg) override;
 
 private:
-	Recorder m_Recorder;
+	bool OnCommandRequest(Ref<CommandRequest> msg);
+	bool OnSettingsRequest(Ref<SettingsRequest> msg);
+	bool OnStateRequest(Ref<StateRequest> msg);
+
+private:
+	Sennet::Scope<Recorder> m_Recorder;
 };
 
 }
