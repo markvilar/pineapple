@@ -50,7 +50,6 @@ void NetworkLayer::OnEvent(Event& event)
 
 void NetworkLayer::OnMessage(Ref<Message> msg)
 {
-	SN_TRACE("[Network Layer] Got message: {0}", msg->ToString());
 }
 
 void NetworkLayer::Connect(const std::string address, const std::string port)

@@ -24,7 +24,6 @@ Recorder::Recorder()
 	m_WorkerTimeout(100),
 	m_RecordTimeout(10)
 {
-	Initialize();
 }
 
 Recorder::~Recorder()
@@ -36,17 +35,17 @@ void Recorder::Initialize()
 {
 	if (m_Running)
 	{
-		SN_CORE_WARN("Recorder already initialized.");
+		SN_WARN("Recorder already initialized.");
 		return;
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_CORE_ERROR("Recorder critical situation! Forcing\
+		SN_ERROR("Recorder critical situation! Forcing\
 			shutdown and re-initialization.");
 	}
 	else if (not m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("Recorder starting initialization.");
+		SN_TRACE("Recorder initializing.");
 	}
 
 	StopExecutionThread();
@@ -61,15 +60,15 @@ void Recorder::Shutdown()
 {
 	if (not m_Running and not m_Recording)
 	{
-		SN_CORE_WARN("Recorder already shut down.");
+		SN_WARN("Recorder already shut down.");
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_CORE_ERROR("Recorder critical situation! Forcing shutdown.");
+		SN_ERROR("Recorder critical situation! Forcing shutdown.");
 	}
 	else if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("Recorder starting shutdown.");
+		SN_TRACE("Recorder starting shutdown.");
 	}
 
 	StopExecutionThread();
@@ -85,16 +84,14 @@ void Recorder::StartRecord()
 {
 	if (not m_Running)
 	{
-		SN_CORE_TRACE("Recorder not initialized.");
+		SN_TRACE("Recorder not initialized.");
 	}
 	else if (m_Running and m_Recording)
 	{
-		SN_CORE_TRACE("Recorder already recording.");
-		m_ShouldRecord = true;
+		SN_TRACE("Recorder already recording.");
 	}
 	else if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("Recorder starting record.");
 		m_ShouldRecord = true;
 	}
 }
@@ -103,11 +100,11 @@ void Recorder::StopRecord()
 {
 	if (m_Running and not m_Recording)
 	{
-		SN_CORE_TRACE("Recorder not recording.");
+		SN_TRACE("Recorder not recording.");
 	}
 	else if (m_Running and m_Recording)
 	{
-		SN_CORE_TRACE("Recorder stopping record.");
+		SN_TRACE("Recorder stopping record.");
 	}
 	m_ShouldRecord = false;
 }
@@ -185,7 +182,7 @@ void Recorder::SetParametersCache(const InitParameters initParameters,
 void Recorder::ExecutionWorker()
 {
 	m_Running = true;
-	SN_CORE_TRACE("Recorder execution worker started.");
+	SN_TRACE("Recorder standing by.");
 	while (m_ShouldRun)
 	{
 		if (m_ShouldRecord)
@@ -194,7 +191,7 @@ void Recorder::ExecutionWorker()
 		}
 		std::this_thread::sleep_for(m_WorkerTimeout);
 	}
-	SN_CORE_TRACE("Recorder execution worker finished.");
+	SN_TRACE("Recorder idling.");
 	m_Running = false;
 }
 
@@ -214,7 +211,7 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_CORE_WARN("Recorder could not open ZED!");
+		SN_WARN("Recorder could not open ZED!");
 	}
 
 	m_CameraMutex.lock();
@@ -222,11 +219,11 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_CORE_WARN("Recorder could not enable ZED recording!");
+		SN_WARN("Recorder could not enable ZED recording!");
 	}
 
 	sl::ERROR_CODE grabError;
-	SN_CORE_TRACE("Recorder recording.");
+	SN_TRACE("Recorder recording.");
 	while (m_ShouldRecord)
 	{
 		m_CameraMutex.lock();
@@ -234,7 +231,7 @@ void Recorder::RecordLoop()
 		m_CameraMutex.unlock();
 		if (grabError != sl::ERROR_CODE::SUCCESS)
 		{
-			SN_CORE_WARN("Recorder could not grab ZED data!");
+			SN_WARN("Recorder could not grab ZED data!");
 		}
 
 		std::this_thread::sleep_for(m_RecordTimeout);
@@ -244,7 +241,6 @@ void Recorder::RecordLoop()
 	m_Camera->close();
 	m_CameraMutex.unlock();
 
-	SN_CORE_TRACE("Recorder recording finished.");
 	m_Recording = false;
 }
 
@@ -270,7 +266,6 @@ void Recorder::JoinExecutionThread()
 	else if (m_ExecutionThread->joinable())
 	{
 		m_ExecutionThread->join();
-		SN_CORE_TRACE("Recorder joined execution thread.");
 	}
 }
 

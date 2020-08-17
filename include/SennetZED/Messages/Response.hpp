@@ -91,13 +91,15 @@ public:
 	StateResponse() = default;
 	StateResponse(const std::string address, 
 		const unsigned int port,
+		const RecorderState state,
 		const InitParameters initParameters,
 		const RecordingParameters recordingParameters,
 		const RuntimeParameters runtimeParameters,
-		const Image& image);
+		const Image image,
+		const std::vector<std::pair<std::string, int>> settings);
 	~StateResponse() = default;
 
-	MESSAGE_CLASS_TYPE(ZEDCommandResponse);
+	MESSAGE_CLASS_TYPE(ZEDStateResponse);
 
 	virtual std::string ToString() const override { return GetName(); }
 
@@ -128,6 +130,7 @@ public:
 		archive(self.m_RecordingParameters);
 		archive(self.m_RuntimeParameters);
 		archive(self.m_Image);
+		archive(self.m_Settings);
 	}
 
 private:
@@ -136,6 +139,7 @@ private:
 	RecordingParameters m_RecordingParameters;
 	RuntimeParameters m_RuntimeParameters;
 	Image m_Image;
+	std::vector<std::pair<std::string, int>> m_Settings;
 };
 
 }

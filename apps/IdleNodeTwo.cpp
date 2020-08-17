@@ -1,8 +1,4 @@
-#include <Sennet/Sennet.hpp>
-
-#include <SennetZED/Controller.hpp>
-#include <SennetZED/Messages/Request.hpp>
-#include <SennetZED/Messages/Response.hpp>
+#include <SennetZED/IdleNode.hpp>
 
 // Register messages.
 namespace
@@ -29,19 +25,19 @@ zpp::serializer::register_types<
 
 }
 
-Sennet::Application* Sennet::CreateApplication()
+Sennet::Node* Sennet::CreateNode()
 {
-	unsigned short port = 7000;
+	unsigned int port = 9000;
 	uint64_t waitFor = 1;
 	bool verbose = false;
-	return new Sennet::ZED::Controller(port, waitFor, verbose);
+	return new Sennet::ZED::IdleNode(port, waitFor, verbose);
 }
 
 int Sennet::main(int argc, char** argv)
 {
 	Sennet::Log::Init();
-	auto app = Sennet::CreateApplication();
-	app->Run();
+	auto node = Sennet::CreateNode();
+	node->Run();
 	return 0;
 }
 

@@ -52,8 +52,6 @@ public:
 		const RecordingParameters recordingParameters,
 		const RuntimeParameters runtimeParameters);
 
-	
-
 private:
 	void ExecutionWorker();
 	void RecordLoop();

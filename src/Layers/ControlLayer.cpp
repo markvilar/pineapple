@@ -19,60 +19,8 @@ static unsigned short StringToUnsignedShort(const std::string s)
 	return (unsigned short) number;
 }
 
-static void Print(const InitParametersData& data)
-{
-	SN_TRACE("Depth Mode: 				{0}", 
-		data.depthMode);
-	SN_TRACE("Coord. Units: 			{0}", 
-		data.coordinateUnits);
-	SN_TRACE("Coord. System: 			{0}", 
-		data.coordinateSystem);
-	SN_TRACE("Depth Stabilization: 			{0}", 
-		data.enableDepthStabilization);
-	SN_TRACE("Min. Depth: 				{0}", 
-		data.minDepth);
-	SN_TRACE("Max. Depth: 				{0}", 
-		data.maxDepth);
-	SN_TRACE("Enable Right Side Depth: 		{0}", 
-		data.enableRightSideDepth);
-	SN_TRACE("Resolution: 				{0}", 
-		data.resolution);
-	SN_TRACE("Camera FPS: 				{0}", 
-		data.cameraFPS);
-	SN_TRACE("Enable Image Enhancement: 		{0}", 
-		data.enableImageEnhancement);
-	SN_TRACE("Disable Self Calibration: 		{0}", 
-		data.disableSelfCalibration);
-	SN_TRACE("Enable Verbose SDK: 			{0}", 
-		data.enableVerboseSDK);
-	SN_TRACE("Require Sensors: 			{0}", 
-		data.requireSensors);
-}
-
-static void Print(const RecordingParametersData& data)
-{
-	SN_TRACE("SVO filename: 			{0}", 
-		data.filename);
-	SN_TRACE("SVO Compression Mode: 		{0}", 
-		data.compressionMode);
-}
-
-static void Print(const RuntimeParametersData& data)
-{
-	SN_TRACE("Sensing Mode: 			{0}", 
-		data.sensingMode);
-	SN_TRACE("Reference Frame: 			{0}", 
-		data.referenceFrame);
-	SN_TRACE("Enable Depth: 			{0}", 
-		data.enableDepth);
-	SN_TRACE("Confidence threshold:			{0}", 
-		data.confidenceThreshold);
-	SN_TRACE("Texture confidence threshold:		{0}", 
-		data.textureConfidenceThreshold);
-}
-
 ControlLayer::ControlLayer()
-	: Layer("Information") 
+	: Layer("Control") 
 {
 }
 
@@ -110,26 +58,17 @@ void ControlLayer::OnMessage(Ref<Message> msg)
 	dispatcher.Dispatch<SettingsResponse>(
 		std::bind(&ControlLayer::OnSettingsResponse, this, 
 		std::placeholders::_1));
-	dispatcher.Dispatch<StateResponse>(
-		std::bind(&ControlLayer::OnStateResponse, this, 
-		std::placeholders::_1));
 }
 
 bool ControlLayer::OnCommandResponse(Ref<CommandResponse> msg)
 {
-	SN_TRACE("[ControlLayer] {0}", msg->GetMessageType());
+	SN_TRACE("ControlLayer: {0}", msg->GetMessageType());
 	return true;
 }
 
 bool ControlLayer::OnSettingsResponse(Ref<SettingsResponse> msg)
 {
-	SN_TRACE("[ControlLayer] {0}", msg->GetMessageType());
-	return true;
-}
-
-bool ControlLayer::OnStateResponse(Ref<StateResponse> msg)
-{
-	SN_TRACE("[ControlLayer] {0}", msg->GetMessageType());
+	SN_TRACE("ControlLayer: {0}", msg->GetMessageType());
 	return true;
 }
 
@@ -196,22 +135,6 @@ void ControlLayer::SubmitSettingsRequest(const std::string address,
 		connection->GetRemoteInformation().first,
 		connection->GetRemoteInformation().second);
 }
-
-void ControlLayer::SubmitStateRequest(const std::string address,
-	const std::string port)
-{
-	auto connectionManager = Sennet::ConnectionManager::GetPtr();
-	if (connectionManager)
-	{
-		SN_TRACE("SubmitStateRequest: Got connection manager.");
-	}
-	else
-	{
-		SN_WARN("SubmitStateRequest: Connection manager not "
-			"initialized!");
-	}
-}
-
 
 void ControlLayer::RenderControlWindow()
 {
@@ -451,7 +374,7 @@ void ControlLayer::RenderSettingsInitParametersNode()
 
 void ControlLayer::RenderSettingsRecordingParametersNode()
 {
-	static char filenameBuffer[20];
+	static char filenameBuffer[30];
 	ImGui::InputText("SVO Filename", filenameBuffer, 
 		IM_ARRAYSIZE(filenameBuffer));
 	m_RecordingData.filename = std::string(filenameBuffer);

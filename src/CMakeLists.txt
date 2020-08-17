@@ -1,9 +1,9 @@
 # Headers
 set(HEADER_LIST 
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/ControlLayer.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/DisplayLayer.hpp"
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/NetworkLayer.hpp"
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/SensorLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/StateLayer.hpp"
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Messages/Request.hpp"
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Messages/Response.hpp"
 	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/Conversion.hpp"
@@ -18,9 +18,9 @@ set(HEADER_LIST
 # Library
 add_library(SennetZED STATIC
 	Layers/ControlLayer.cpp
-	Layers/DisplayLayer.cpp
 	Layers/NetworkLayer.cpp
 	Layers/SensorLayer.cpp
+	Layers/StateLayer.cpp
 	Messages/Request.cpp
 	Messages/Response.cpp
 	Primitives/Conversion.cpp

@@ -29,6 +29,9 @@ private:
 	bool OnSettingsRequest(Ref<SettingsRequest> msg);
 	bool OnStateRequest(Ref<StateRequest> msg);
 
+	void SubmitStateResponse(const std::string address, 
+		const unsigned short port);
+
 private:
 	Sennet::Scope<Recorder> m_Recorder;
 };

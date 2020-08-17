@@ -34,13 +34,10 @@ public:
 private:
 	bool OnCommandResponse(Ref<CommandResponse> msg);
 	bool OnSettingsResponse(Ref<SettingsResponse> msg);
-	bool OnStateResponse(Ref<StateResponse> msg);
 
 	void SubmitCommandRequest(const std::string address, 
 		const std::string port);
 	void SubmitSettingsRequest(const std::string address, 
-		const std::string port);
-	void SubmitStateRequest(const std::string address, 
 		const std::string port);
 
 	void RenderControlWindow();

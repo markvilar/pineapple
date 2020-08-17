@@ -1,7 +1,12 @@
-# Sandbox
-add_executable(IdleNode IdleNode.cpp)
-target_compile_features(IdleNode PRIVATE cxx_std_17)
-target_link_libraries(IdleNode PRIVATE Sennet SennetZED)
+# IdleNodeOne
+add_executable(IdleNodeOne IdleNodeOne.cpp)
+target_compile_features(IdleNodeOne PRIVATE cxx_std_17)
+target_link_libraries(IdleNodeOne PRIVATE Sennet SennetZED)
+
+# IdleNodeTwo
+add_executable(IdleNodeTwo IdleNodeTwo.cpp)
+target_compile_features(IdleNodeTwo PRIVATE cxx_std_17)
+target_link_libraries(IdleNodeTwo PRIVATE Sennet SennetZED)
 
 # Sandbox
 add_executable(Sandbox Sandbox.cpp)
