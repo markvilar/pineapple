@@ -8,6 +8,7 @@
 
 #include <SennetZED/Messages/Request.hpp>
 #include <SennetZED/Messages/Response.hpp>
+#include <SennetZED/Primitives/Settings.hpp>
 
 namespace Sennet
 {
@@ -39,13 +40,17 @@ private:
 	void RenderStateWindow();
 	void RenderNodeSelectionHeader();
 	void RenderNodeStateHeader();
+	void RenderNodeStateInitParameters();
+	void RenderNodeStateRecordingParameters();
+	void RenderNodeStateRuntimeParameters();
+
 
 	void StartMonitoringNode(const std::string address,
 		const std::string port);
 	void StopMonitoringNode();
 
 private:
-	Sennet::Ref<Sennet::Texture2D> m_Texture;
+	Sennet::Ref<Sennet::Texture2D> m_ImageTexture;
 	Sennet::Ref<Sennet::Shader> m_TextureShader;	
 	Sennet::Ref<Sennet::VertexArray> m_SquareVa;
 
@@ -53,14 +58,17 @@ private:
 	float m_CameraTranslationSpeed = 1.5f;
 	float m_CameraRotationSpeed = 70.0f;
 
-	Sennet::Image m_Image;
-
 	bool m_ShouldMonitor = false;
 	std::string m_MonitoringNodeAddress = "";
 	std::string m_MonitoringNodePort = "";
 
-	float m_StateRequestFrequency = 5.0f;
+	float m_StateRequestFrequency = 30.0f;
 	float m_LastStateRequestTime = 0.0f;
+
+	RecorderState m_RecorderState;
+	InitParameters m_InitParameters;
+	RecordingParameters m_RecordingParameters;
+	RuntimeParameters m_RuntimeParameters;
 };
 
 }

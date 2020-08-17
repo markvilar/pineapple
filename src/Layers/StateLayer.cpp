@@ -29,16 +29,17 @@ static unsigned short StringToUnsignedShort(const std::string s)
 }
 
 StateLayer::StateLayer()
-	: Layer("State"), m_CameraController(1280.0f / 720.0f, false)
+	: Layer("State"), m_CameraController(1280.0f / 720.0f, false),
+	m_ImageTexture(nullptr)
 {
 	m_SquareVa = Sennet::VertexArray::Create();
 
 	float squareVertices[4 * 5] = 
 	{
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
+		-0.5f, -0.2813f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.2813f, 0.0f, 1.0f, 0.0f,
+		 0.5f,  0.2813f, 0.0f, 1.0f, 1.0f,
+		-0.5f,  0.2813f, 0.0f, 0.0f, 1.0f
 	};
 	
 	Sennet::Ref<Sennet::VertexBuffer> squareVb(
@@ -64,9 +65,12 @@ StateLayer::StateLayer()
 		
 		layout(location = 0) in vec3 a_Position;
 		layout(location = 1) in vec2 a_TexCoord;
+
 		uniform mat4 u_ViewProjection;
 		uniform mat4 u_Transform;
+
 		out vec2 v_TexCoord;
+
 		void main()
 		{
 			v_TexCoord = a_TexCoord;
@@ -79,8 +83,11 @@ StateLayer::StateLayer()
 		#version 330 core
 		
 		layout(location = 0) out vec4 color;
+
 		in vec2 v_TexCoord;
+
 		uniform sampler2D u_Texture;
+
 		void main()
 		{
 			color = texture(u_Texture, v_TexCoord);
@@ -90,12 +97,6 @@ StateLayer::StateLayer()
 	m_TextureShader = Sennet::Shader::Create("Texture",
 		textureShaderVertexSrc,
 		textureShaderFragmentSrc);
-
-	std::dynamic_pointer_cast<Sennet::OpenGLShader>(
-		m_TextureShader)->Bind();	
-
-	m_Texture = Sennet::Texture2D::Create(
-		"/home/martin/dev/sennet-zed/assets/textures/checkerboard.png");
 
 	std::dynamic_pointer_cast<Sennet::OpenGLShader>(
 		m_TextureShader)->Bind();
@@ -125,14 +126,15 @@ void StateLayer::OnUpdate(Timestep ts)
 
 	Sennet::Renderer::BeginScene(m_CameraController.GetCamera());	
 
-	// Create texture
+	if (m_ImageTexture)
+	{
+		// Bind texture
+		m_ImageTexture->Bind();
 
-	// Bind texture
-	m_Texture->Bind();
-
-	// Bind shader
-	Sennet::Renderer::Submit(m_TextureShader, m_SquareVa, 
-		glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		// Bind shader
+		Sennet::Renderer::Submit(m_TextureShader, m_SquareVa, 
+			glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	}
 		
 	Sennet::Renderer::EndScene();
 	
@@ -162,7 +164,14 @@ void StateLayer::OnMessage(Ref<Message> msg)
 
 bool StateLayer::OnStateResponse(Ref<StateResponse> msg)
 {
-	m_Image = msg->GetImage();
+	auto image = msg->GetImage();
+	if (image.GetWidth() > 0 && image.GetHeight() > 0)
+	{
+		m_ImageTexture = Sennet::Texture2D::Create(image);
+		m_InitParameters = msg->GetInitParameters();
+		m_RecordingParameters = msg->GetRecordingParameters();
+		m_RuntimeParameters = msg->GetRuntimeParameters();
+	}
 	return false;
 }
 
@@ -266,6 +275,48 @@ void StateLayer::RenderNodeStateHeader()
 	if (collapsed)
 		return;
 
+	if (!m_ShouldMonitor)
+		return;
+
+	if (ImGui::TreeNode("Node States"))
+	{
+		RenderNodeStateInitParameters();
+		ImGui::TreePop();
+	}
+	
+}
+
+void StateLayer::RenderNodeStateInitParameters()
+{
+	auto initData = m_InitParameters.GetData();
+	auto recordingData = m_RecordingParameters.GetData();
+	auto runtimeData = m_RuntimeParameters.GetData();
+
+	ImGui::Columns(2, "InitParameterColumns");
+	ImGui::Columns(1);
+	ImGui::Text("Recorder State");
+	ImGui::NextColumn();
+	ImGui::Text("%d", m_RecorderState);
+
+	ImGui::Columns(1);
+	ImGui::Text("Camera Resolution");
+	ImGui::NextColumn();
+	ImGui::Text("%d", initData.resolution);
+
+	ImGui::Columns(1);
+	ImGui::Text("Camera FPS");
+	ImGui::NextColumn();
+	ImGui::Text("%d", initData.cameraFPS);
+}
+
+void StateLayer::RenderNodeStateRecordingParameters()
+{
+
+}
+
+void StateLayer::RenderNodeStateRuntimeParameters()
+{
+
 }
 
 void StateLayer::StartMonitoringNode(const std::string address,
@@ -290,6 +341,7 @@ void StateLayer::StopMonitoringNode()
 	m_MonitoringNodeAddress = "";
 	m_MonitoringNodePort = "";
 	m_ShouldMonitor = false;
+	m_ImageTexture = nullptr;
 }
 
 }

@@ -87,7 +87,7 @@ void NetworkLayer::RenderConnectHeader()
 
 void NetworkLayer::RenderConnectionsHeader()
 {
-	bool collapsed = !ImGui::CollapsingHeader("Connections");
+	bool collapsed = !ImGui::CollapsingHeader("Current Connections");
 	ImGui::SameLine();
 	Sennet::ImGuiHelpMarker("Information about the connection managers current "
 		"connections.");
@@ -95,12 +95,7 @@ void NetworkLayer::RenderConnectionsHeader()
 	if (collapsed)
 		return;
 
-	if (ImGui::TreeNode("Current Connections"))
-	{
-		RenderCurrentConnectionsNode();
-		ImGui::TreePop();
-	}
-
+	RenderCurrentConnectionsNode();
 }
 
 void NetworkLayer::RenderConnectNode()
