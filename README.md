@@ -9,11 +9,11 @@ The module includes:
 - A ZED remote control application as well as a ZED node.
 
 ## CMake configuration and building
-Configure CMake:
+To build the Sennet ZED moduel, first configure CMake by setting source and build directory: 
+``` 
+cmake -S . -B build 
 ```
-cmake -S . -B build -DBOOST_ROOT=/path/to/boost
-```
-To build:
+Then, build the extension by issuing following command:
 ```
 cmake --build build
 ```
