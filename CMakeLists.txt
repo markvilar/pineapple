@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.13...3.16)
 project(SennetZED VERSION 1.0 LANGUAGES CXX)
 
-option(LINK_SHARED_ZED "Link with the ZED SDK shared executable" ON)
+option(ZED_LINK_SHARED "Link with the ZED SDK shared executable" ON)
 
 # If main project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -24,12 +24,12 @@ message(STATUS "Found ZED SDK ${ZED_VERSION} at ${ZED_DIR}. ZED CUDA version:
 	${ZED_CUDA_VERSION}")
 find_package(CUDA REQUIRED)
 
-if(NOT LINK_SHARED_ZED AND MSVC)
-    message(FATAL_ERROR "LINK_SHARED_ZED OFF : ZED SDK static libraries not available on Windows")
+if(NOT ZED_LINK_SHARED AND MSVC)
+    message(FATAL_ERROR "ZED_LINK_SHARED OFF : ZED SDK static libraries not available on Windows")
 endif()
 
 # ZED libraries - static or dynamic linking
-if(LINK_SHARED_ZED)
+if(ZED_LINK_SHARED)
     	SET(ZED_LIBS ${ZED_LIBRARIES} ${CUDA_CUDA_LIBRARY} 
 		${CUDA_CUDART_LIBRARY} ${CUDA_NPP_LIBRARIES_ZED})
 else()
