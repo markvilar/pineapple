@@ -1,7 +1,7 @@
-#include <SennetZED/RecorderNode.hpp>
+#include "Sennet/ZED/RecorderNode.hpp"
 
-#include <SennetZED/Layers/NetworkLayer.hpp>
-#include <SennetZED/Layers/SensorLayer.hpp>
+#include "Sennet/ZED/Layers/NetworkLayer.hpp"
+#include "Sennet/ZED/Layers/SensorLayer.hpp"
 
 namespace Sennet
 {

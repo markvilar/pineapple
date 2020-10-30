@@ -1,4 +1,4 @@
-#include <SennetZED/Primitives/Settings.hpp>
+#include "Sennet/ZED/Parameters/InitParameters.hpp"
 
 namespace Sennet
 {
@@ -20,33 +20,6 @@ std::string InitParameters::ToString() const
 std::ostream& operator<<(std::ostream& os, const InitParameters& ip)
 {
 	return os << ip.ToString();
-}
-
-std::string RecordingParameters::ToString() const
-{
-	std::stringstream ss;
-	ss << "Filename: " << m_Data.filename
-		<< ", Compression Mode: " << ::ToString(m_Data.compressionMode);
-	return ss.str();
-}
-
-std::ostream& operator<<(std::ostream& os, const RecordingParameters& rp)
-{
-	return os << rp.ToString();
-}
-
-std::string RuntimeParameters::ToString() const
-{
-	std::stringstream ss;
-	ss << "Sensing Mode: " << ::ToString(m_Data.sensingMode)
-		<< ", Reference Frame: " << ::ToString(m_Data.referenceFrame)
-		<< ", Depth Enabled: " << m_Data.enableDepth;
-	return ss.str();
-}
-
-std::ostream& operator<<(std::ostream& os, const RuntimeParameters& rp)
-{
-	return os << rp.ToString();
 }
 
 }
@@ -88,18 +61,7 @@ std::string ToString(const Sennet::ZED::DepthMode depthMode)
 	}
 }
 
-std::string ToString(const Sennet::ZED::ReferenceFrame referenceFrame)
-{
-	switch (referenceFrame)
-	{
-		case Sennet::ZED::ReferenceFrame::World:
-			return std::string("World");
-		case Sennet::ZED::ReferenceFrame::Camera:
-			return std::string("Camera");
-		default:
-			return std::string("None");
-	}
-}
+
 
 std::string ToString(const Sennet::ZED::Resolution resolution)
 {
@@ -113,34 +75,6 @@ std::string ToString(const Sennet::ZED::Resolution resolution)
 			return std::string("HD720");
 		case Sennet::ZED::Resolution::VGA:
 			return std::string("VGA");
-		default:
-			return std::string("None");
-	}
-}
-
-std::string ToString(const Sennet::ZED::SVOCompressionMode compressionMode)
-{
-	switch (compressionMode)
-	{
-		case Sennet::ZED::SVOCompressionMode::Lossless:
-			return std::string("Lossless");
-		case Sennet::ZED::SVOCompressionMode::H264:
-			return std::string("H264");
-		case Sennet::ZED::SVOCompressionMode::H265:
-			return std::string("H265");
-		default:
-			return std::string("None");
-	}
-}
-
-std::string ToString(const Sennet::ZED::SensingMode sensingMode)
-{
-	switch (sensingMode)
-	{
-		case Sennet::ZED::SensingMode::Standard:
-			return std::string("Standard");
-		case Sennet::ZED::SensingMode::Fill:
-			return std::string("Fill");
 		default:
 			return std::string("None");
 	}
@@ -236,27 +170,9 @@ std::ostream& operator<<(std::ostream& os,
 }
 
 std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::ReferenceFrame referenceFrame)
-{
-	return os << ToString(referenceFrame);
-}
-
-std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::Resolution resolution)
 {
 	return os << ToString(resolution);
-}
-
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SVOCompressionMode compressionMode)
-{
-	return os << ToString(compressionMode);
-}
-
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SensingMode sensingMode)
-{
-	return os << ToString(sensingMode);
 }
 
 std::ostream& operator<<(std::ostream& os, const Sennet::ZED::Unit unit)

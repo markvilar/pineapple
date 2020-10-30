@@ -1,15 +1,15 @@
-#include <SennetZED/Layers/StateLayer.hpp>
+#include "Sennet/ZED/Layers/StateLayer.hpp"
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-#include <imgui.h>
+#include "imgui.h"
 
 // Temporary.
-#include <Sennet/Platform/OpenGL/OpenGLShader.hpp>
+#include "Sennet/Platform/OpenGL/OpenGLShader.hpp"
 
 namespace Sennet
 {
@@ -292,6 +292,7 @@ void StateLayer::RenderNodeStateInitParameters()
 	auto recordingData = m_RecordingParameters.GetData();
 	auto runtimeData = m_RuntimeParameters.GetData();
 
+	/*
 	ImGui::Columns(2, "InitParameterColumns");
 	ImGui::Columns(1);
 	ImGui::Text("Recorder State");
@@ -307,6 +308,7 @@ void StateLayer::RenderNodeStateInitParameters()
 	ImGui::Text("Camera FPS");
 	ImGui::NextColumn();
 	ImGui::Text("%d", initData.cameraFPS);
+	*/
 }
 
 void StateLayer::RenderNodeStateRecordingParameters()

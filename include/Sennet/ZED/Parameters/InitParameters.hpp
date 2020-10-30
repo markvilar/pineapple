@@ -1,5 +1,9 @@
 #pragma once
-#include <Sennet/Sennet.hpp>
+
+#include <iostream>
+#include <sstream>
+
+#include "serializer/serializer.h"
 
 namespace Sennet
 {
@@ -26,24 +30,9 @@ enum class DepthMode : int
 	None = 0, Performance = 1, Quality = 2, Ultra = 3
 };
 
-enum class ReferenceFrame : int
-{ 
-	None = 0, World = 1, Camera = 2
-};
-
 enum class Resolution : int
 { 
 	None = 0, HD2K = 1, HD1080 = 2, HD720 = 3, VGA = 4
-};
-
-enum class SVOCompressionMode : int
-{ 
-	None = 0, Lossless = 1, H264 = 2, H265 = 3
-};
-
-enum class SensingMode : int
-{ 
-	None = 0, Standard = 1, Fill = 2
 };
 
 enum class Unit : int
@@ -133,114 +122,12 @@ private:
 	InitParametersData m_Data;
 };
 
-struct RecordingParametersData
-{
-public:
-	friend zpp::serializer::access;
-	template <typename Archive, typename Self>
-	static void serialize(Archive& archive, Self& self)
-	{
-		archive(self.filename);
-		archive(self.compressionMode);
-		archive(self.targetBitRate);
-		archive(self.targetFrameRate);
-	}
-
-public:
-	std::string filename = "myRecording.svo";
-	SVOCompressionMode compressionMode = SVOCompressionMode::H264;
-	unsigned int targetBitRate = 0;
-	unsigned int targetFrameRate = 0;
-};
-
-class RecordingParameters
-{
-	// Wrapper for sl::RecordingParameters. Neglects functionality of the
-	// Stereolabs SDK that is considered unimportant for recording.
-public:
-	RecordingParameters() = default;
-	RecordingParameters(const RecordingParametersData data) 
-		: m_Data(data) {}
-	~RecordingParameters() = default;
-
-	RecordingParametersData GetData() const { return m_Data; }
-	void SetData(const RecordingParametersData& data) { m_Data = data; }
-
-	std::string ToString() const;
-	friend std::ostream& operator<<(std::ostream& os, 
-		const RecordingParameters& rp);
-
-	friend zpp::serializer::access;
-	template <typename Archive, typename Self>
-	static void serialize(Archive& archive, Self& self)
-	{
-		archive(self.m_Data);
-	}
-
-private:
-	RecordingParametersData m_Data;
-};
-
-struct RuntimeParametersData
-{
-public:
-	friend zpp::serializer::access;
-	template <typename Archive, typename Self>
-	static void serialize(Archive& archive, Self& self)
-	{
-		archive(self.sensingMode);
-		archive(self.referenceFrame);
-		archive(self.enableDepth);
-		archive(self.confidenceThreshold);
-		archive(self.textureConfidenceThreshold);
-	}
-
-public:
-	SensingMode sensingMode = SensingMode::Standard;
-	ReferenceFrame referenceFrame = ReferenceFrame::Camera;
-	bool enableDepth = true;
-	int confidenceThreshold = 100;
-	int textureConfidenceThreshold = 100;
-};
-
-class RuntimeParameters
-{
-	// Wrapper for sl::RuntimeParameters. Neglects functionality of the
-	// Stereolabs SDK that is considered unimportant for recording.
-public:
-	RuntimeParameters() = default;
-	RuntimeParameters(const RuntimeParametersData data) 
-		: m_Data(data) {}
-	~RuntimeParameters() = default;
-
-	RuntimeParametersData GetData() const { return m_Data; }
-	void SetData(const RuntimeParametersData& data) { m_Data = data; }
-
-	std::string ToString() const;
-	friend std::ostream& operator<<(std::ostream& os, 
-		const RuntimeParameters& rp);
-
-	friend zpp::serializer::access;
-	template <typename Archive, typename Self>
-	static void serialize(Archive& archive, Self& self)
-	{
-		archive(self.m_Data);
-	}
-
-
-private:
-	RuntimeParametersData m_Data;
-};
-
 }
 }
 
 std::string ToString(const Sennet::ZED::CoordinateSystem coordinateSystem);
 std::string ToString(const Sennet::ZED::DepthMode depthMode);
-std::string ToString(const Sennet::ZED::ReferenceFrame referenceFrame);
 std::string ToString(const Sennet::ZED::Resolution resolution);
-std::string ToString(const Sennet::ZED::SVOCompressionMode compressionMode);
-std::string ToString(const Sennet::ZED::SensingMode sensingMode);
 std::string ToString(const Sennet::ZED::Unit unit);
 std::string ToString(const Sennet::ZED::VideoSettings videoSettings);
 std::string ToString(const Sennet::ZED::View view);
@@ -250,13 +137,7 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::DepthMode depthMode);
 std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::ReferenceFrame referenceFrame);
-std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::Resolution resolution);
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SVOCompressionMode compressionMode);
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SensingMode sensingMode);
 std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::Unit unit);
 std::ostream& operator<<(std::ostream& os, 

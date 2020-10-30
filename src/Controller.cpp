@@ -1,10 +1,10 @@
-#include <SennetZED/Controller.hpp>
+#include "Sennet/ZED/Controller.hpp"
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
-#include <SennetZED/Layers/ControlLayer.hpp>
-#include <SennetZED/Layers/NetworkLayer.hpp>
-#include <SennetZED/Layers/StateLayer.hpp>
+#include "Sennet/ZED/Layers/ControlLayer.hpp"
+#include "Sennet/ZED/Layers/NetworkLayer.hpp"
+#include "Sennet/ZED/Layers/StateLayer.hpp"
 
 namespace Sennet
 {

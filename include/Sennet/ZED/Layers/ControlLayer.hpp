@@ -1,14 +1,17 @@
 #pragma once
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-#include <imgui.h>
+#include "imgui.h"
 
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
-#include <SennetZED/Messages/Request.hpp>
-#include <SennetZED/Messages/Response.hpp>
-#include <SennetZED/Primitives/Settings.hpp>
+#include "Sennet/ZED/Messages/Request.hpp"
+#include "Sennet/ZED/Messages/Response.hpp"
+
+#include "Sennet/ZED/Parameters/InitParameters.hpp"
+#include "Sennet/ZED/Parameters/RecordingParameters.hpp"
+#include "Sennet/ZED/Parameters/RuntimeParameters.hpp"
 
 namespace Sennet
 {

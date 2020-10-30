@@ -1,31 +1,33 @@
 # Headers
 set(HEADER_LIST 
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/ControlLayer.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/NetworkLayer.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/SensorLayer.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Layers/StateLayer.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Messages/Request.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Messages/Response.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/Conversion.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/IO.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Primitives/Settings.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Controller.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/IdleNode.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/Recorder.hpp"
-	"${PROJECT_SOURCE_DIR}/include/SennetZED/RecorderNode.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Layers/ControlLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Layers/NetworkLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Layers/SensorLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Layers/StateLayer.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Messages/Request.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Messages/Response.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Parameters/InitParameters.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Parameters/RecordingParameters.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Parameters/RuntimeParameters.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Parameters/Conversion.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Controller.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/IdleNode.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Recorder.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/RecorderNode.hpp"
 	)
 
 # Library
-add_library(SennetZED STATIC
+add_library(Sennet-ZED STATIC
 	Layers/ControlLayer.cpp
 	Layers/NetworkLayer.cpp
 	Layers/SensorLayer.cpp
 	Layers/StateLayer.cpp
 	Messages/Request.cpp
 	Messages/Response.cpp
-	Primitives/Conversion.cpp
-	Primitives/IO.cpp
-	Primitives/Settings.cpp
+	Parameters/InitParameters.cpp
+	Parameters/RecordingParameters.cpp
+	Parameters/RuntimeParameters.cpp
+	Parameters/Conversion.cpp
 	Controller.cpp
 	IdleNode.cpp
 	Recorder.cpp
@@ -33,7 +35,7 @@ add_library(SennetZED STATIC
 	"${HEADER_LIST}")
 
 # Library include directory
-target_include_directories(SennetZED PUBLIC 
+target_include_directories(Sennet-ZED PUBLIC 
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_SOURCE_DIR}/extern/sennet/include"
 	${CUDA_INCLUDE_DIRS} 
@@ -41,13 +43,13 @@ target_include_directories(SennetZED PUBLIC
 	)
 
 # Library linking
-target_link_libraries(SennetZED PRIVATE
+target_link_libraries(Sennet-ZED PRIVATE
 	Sennet
 	${ZED_LIBS}
 	)
 
 # Library compilation
-target_compile_features(SennetZED PUBLIC cxx_std_17)
+target_compile_features(Sennet-ZED PUBLIC cxx_std_17)
 
 # IDEs source
 source_group(TREE "${PROJECT_SOURCE_DIR}/include"

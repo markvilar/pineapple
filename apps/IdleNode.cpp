@@ -1,4 +1,4 @@
-#include <SennetZED/IdleNode.hpp>
+#include "Sennet/ZED/IdleNode.hpp"
 
 // Register messages.
 namespace

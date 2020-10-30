@@ -4,55 +4,10 @@
 
 #include <sl/Camera.hpp>
 
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
-#include <SennetZED/Recorder.hpp>
-#include <SennetZED/Primitives/Conversion.hpp>
-#include <SennetZED/Primitives/IO.hpp>
-
-void test_params()
-{
-	Sennet::ZED::InitParameters init_params;
-	Sennet::ZED::RecordingParameters rec_params;
-	Sennet::ZED::RuntimeParameters run_params;
-
-	std::cout << init_params << "\n";
-	std::cout << rec_params << "\n";
-	std::cout << run_params << "\n";
-}
-
-void test_SennetToStereolabs()
-{
-	Sennet::ZED::InitParameters init_params;
-	Sennet::ZED::RecordingParameters rec_params;
-	Sennet::ZED::RuntimeParameters run_params;
-
-	std::cout << init_params << "\n";
-	std::cout << SennetToStereolabs(init_params) << "\n";
-
-	std::cout << rec_params << "\n";
-	std::cout << SennetToStereolabs(rec_params) << "\n";
-
-	std::cout << run_params << "\n";
-	std::cout << SennetToStereolabs(run_params) << "\n";
-}
-
-void test_StereolabsToSennet()
-{
-	sl::InitParameters init_params;
-	sl::RecordingParameters rec_params;
-	sl::RuntimeParameters run_params;
-
-	std::cout << init_params << "\n";
-	std::cout << StereolabsToSennet(init_params) << "\n";	
-
-	std::cout << rec_params << "\n";
-	std::cout << StereolabsToSennet(rec_params) << "\n";
-
-	std::cout << run_params << "\n";
-	std::cout << StereolabsToSennet(run_params) << "\n";
-
-}
+#include "Sennet/ZED/Recorder.hpp"
+#include "Sennet/ZED/Parameters/Conversion.hpp"
 
 void SleepThisThread(int ms)
 {
@@ -79,13 +34,14 @@ void testRecorder()
 		if (image)
 		{
 			std::cout << *image << "\n";
-			std::cout << static_cast<int>(image->GetPixel(640, 360, 0))
-				<< ", " 
-				<< static_cast<int>(image->GetPixel(640, 360, 1))
-				<< ", " 
-				<< static_cast<int>(image->GetPixel(640, 360, 2))
-				<< ", " 
-				<< static_cast<int>(image->GetPixel(640, 360, 3))
+			std::cout << 
+				static_cast<int>(image->GetPixel(640, 360, 0))
+				<< ", " << 
+				static_cast<int>(image->GetPixel(640, 360, 1))
+				<< ", " << 
+				static_cast<int>(image->GetPixel(640, 360, 2))
+				<< ", " << 
+				static_cast<int>(image->GetPixel(640, 360, 3))
 				<< "\n";
 			count++;
 			SleepThisThread(1000);

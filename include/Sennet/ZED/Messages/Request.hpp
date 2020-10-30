@@ -1,7 +1,9 @@
 #pragma once
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
-#include <SennetZED/Primitives/Settings.hpp>
+#include "Sennet/ZED/Parameters/InitParameters.hpp"
+#include "Sennet/ZED/Parameters/RecordingParameters.hpp"
+#include "Sennet/ZED/Parameters/RuntimeParameters.hpp"
 
 namespace Sennet
 {

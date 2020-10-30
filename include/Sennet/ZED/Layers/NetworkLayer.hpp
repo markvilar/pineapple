@@ -1,8 +1,8 @@
 #pragma once
 
-#include <imgui.h>
+#include "imgui.h"
 
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
 namespace Sennet
 {

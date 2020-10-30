@@ -1,5 +1,5 @@
 #pragma once
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
 namespace Sennet
 {

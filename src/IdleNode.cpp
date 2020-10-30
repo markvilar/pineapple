@@ -1,6 +1,6 @@
-#include <SennetZED/IdleNode.hpp>
+#include "Sennet/ZED/IdleNode.hpp"
 
-#include <SennetZED/Layers/NetworkLayer.hpp>
+#include "Sennet/ZED/Layers/NetworkLayer.hpp"
 
 namespace Sennet
 {

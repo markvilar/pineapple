@@ -1,4 +1,4 @@
-#include <SennetZED/Primitives/Conversion.hpp>
+#include "Sennet/ZED/Parameters/Conversion.hpp"
 
 sl::VIEW SennetToStereolabs(const Sennet::ZED::View& view)
 {
@@ -245,7 +245,7 @@ sl::RuntimeParameters SennetToStereolabs(
 		SennetToStereolabs(data.referenceFrame);
 	slRuntimeParameters.enable_depth = data.enableDepth;
 	slRuntimeParameters.confidence_threshold = data.confidenceThreshold;
-	slRuntimeParameters.textureness_confidence_threshold 
+	slRuntimeParameters.texture_confidence_threshold 
 		= data.textureConfidenceThreshold;
 	return slRuntimeParameters;
 }
@@ -479,6 +479,6 @@ Sennet::ZED::RuntimeParameters StereolabsToSennet(
 	data.enableDepth = runtimeParameters.enable_depth;
 	data.confidenceThreshold = runtimeParameters.confidence_threshold;
 	data.textureConfidenceThreshold = 
-		runtimeParameters.textureness_confidence_threshold;
+		runtimeParameters.texture_confidence_threshold;
 	return Sennet::ZED::RuntimeParameters(data);
 }

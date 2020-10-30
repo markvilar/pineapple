@@ -1,4 +1,4 @@
-#include <SennetZED/Layers/NetworkLayer.hpp>
+#include "Sennet/ZED/Layers/NetworkLayer.hpp"
 
 namespace Sennet
 {

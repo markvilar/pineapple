@@ -1,8 +1,8 @@
-#include <SennetZED/Recorder.hpp>
+#include "Sennet/ZED/Recorder.hpp"
 
 #include <mutex>
 
-#include <SennetZED/Primitives/Conversion.hpp>
+#include "Sennet/ZED/Parameters/Conversion.hpp"
 
 namespace Sennet
 {

@@ -1,6 +1,6 @@
-#include <SennetZED/Layers/ControlLayer.hpp>
+#include "Sennet/ZED/Layers/ControlLayer.hpp"
 
-#include <imgui.h>
+#include "imgui.h"
 
 namespace Sennet
 {

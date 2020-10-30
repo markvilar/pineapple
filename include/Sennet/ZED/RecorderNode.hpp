@@ -1,8 +1,8 @@
 #pragma once
-#include <Sennet/Sennet.hpp>
+#include "Sennet/Sennet.hpp"
 
-#include <SennetZED/Messages/Request.hpp>
-#include <SennetZED/Messages/Response.hpp>
+#include "Sennet/ZED/Messages/Request.hpp"
+#include "Sennet/ZED/Messages/Response.hpp"
 
 namespace Sennet
 {
