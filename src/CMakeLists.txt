@@ -1,5 +1,9 @@
 # Headers
 set(HEADER_LIST 
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Panels/ClientPanel.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Panels/InitParametersPanel.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Panels/RecordingParametersPanel.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/ControlLayer.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Conversion.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/InitParameters.hpp"
@@ -13,6 +17,10 @@ set(HEADER_LIST
 
 # Library
 add_library(Sennet-ZED STATIC
+	Panels/ClientPanel.cpp
+	Panels/InitParametersPanel.cpp
+	Panels/RecordingParametersPanel.cpp
+	Panels/RuntimeParametersPanel.cpp
 	ControlLayer.cpp
 	Conversion.cpp
 	InitParameters.cpp

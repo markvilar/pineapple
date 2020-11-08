@@ -4,10 +4,10 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/InitParameters.hpp"
-#include "Sennet/ZED/RecordingParameters.hpp"
-#include "Sennet/ZED/RuntimeParameters.hpp"
+#include "Sennet/ZED/Panels/ClientPanel.hpp"
+#include "Sennet/ZED/Panels/InitParametersPanel.hpp"
+#include "Sennet/ZED/Panels/RecordingParametersPanel.hpp"
+#include "Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -24,13 +24,20 @@ public:
 	virtual void OnEvent(Event& e) override;
 
 private:
-	// Graphics
+	// Rendering
 	OrthographicCameraController m_CameraController;
 	Ref<Texture2D> m_CheckerboardTexture;
 
-	// Network
-	Client<MessageTypes> m_Client;
+	// Panels
+	ClientPanel m_ClientPanel;
+	InitParametersPanel m_InitParametersPanel;
+	RecordingParametersPanel m_RecordingParametersPanel;
+	RuntimeParametersPanel m_RuntimeParametersPanel;
 
+	// Network
+	Ref<Client<MessageTypes>> m_Client;
+
+	// Parameters
 	Ref<InitParameters> m_InitParameters;
 	Ref<RecordingParameters> m_RecordingParameters;
 	Ref<RuntimeParameters> m_RuntimeParameters;

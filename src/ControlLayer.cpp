@@ -15,6 +15,16 @@ void ControlLayer::OnAttach()
 {
 	m_CheckerboardTexture = Sennet::Texture2D::Create(
 		"../../extern/sennet/assets/textures/Checkerboard-600x600.png");
+
+	m_Client = CreateRef<Client<MessageTypes>>();
+	m_InitParameters = CreateRef<InitParameters>();
+	m_RecordingParameters = CreateRef<RecordingParameters>();
+	m_RuntimeParameters = CreateRef<RuntimeParameters>();
+
+	m_ClientPanel.SetContext(m_Client);
+	m_InitParametersPanel.SetContext(m_InitParameters);
+	m_RecordingParametersPanel.SetContext(m_RecordingParameters);
+	m_RuntimeParametersPanel.SetContext(m_RuntimeParameters);
 }
 
 void ControlLayer::OnDetach()
@@ -42,11 +52,31 @@ void ControlLayer::OnImGuiRender()
 {
 	static bool show = true;
 	ImGui::ShowDemoWindow(&show);
+
+	ImGui::SetNextWindowSize(ImVec2(520,600));
+	if (ImGui::Begin("ZED"))
+	{
+		m_ClientPanel.OnImGuiRender();
+		ImGui::Separator();
+		m_InitParametersPanel.OnImGuiRender();
+		m_RecordingParametersPanel.OnImGuiRender();
+		m_RuntimeParametersPanel.OnImGuiRender();
+
+		// Settings
+
+		// Image
+
+		ImGui::End();
+	}
+
+	
 }
 
 void ControlLayer::OnEvent(Event& e)
 {
 	m_CameraController.OnEvent(e);
 }
+
+
 
 }}
