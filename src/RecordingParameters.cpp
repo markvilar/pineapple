@@ -1,16 +1,12 @@
-#include "Sennet/ZED/Parameters/RecordingParameters.hpp"
+#include "Sennet/ZED/RecordingParameters.hpp"
 
-namespace Sennet
-{
-
-namespace ZED
-{
+namespace Sennet { namespace ZED {
 
 std::string RecordingParameters::ToString() const
 {
 	std::stringstream ss;
-	ss << "Filename: " << m_Data.filename
-		<< ", Compression Mode: " << ::ToString(m_Data.compressionMode);
+	ss << "Filename: " << filename
+		<< ", Compression Mode: " << ::ToString(compressionMode);
 	return ss.str();
 }
 

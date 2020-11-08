@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Parameters/Conversion.hpp"
+#include "Sennet/ZED/Conversion.hpp"
 
 sl::VIEW SennetToStereolabs(const Sennet::ZED::View& view)
 {
@@ -203,51 +203,54 @@ Sennet::Ref<sl::Mat> SennetToStereolabs(const Sennet::Ref<Sennet::Image>& image)
 sl::InitParameters SennetToStereolabs(
 	const Sennet::ZED::InitParameters& initParameters)
 {
-	auto data = initParameters.GetData();
-	sl::InitParameters slInitParameters;
-	slInitParameters.depth_mode = SennetToStereolabs(data.depthMode);
-	slInitParameters.coordinate_units = 
-		SennetToStereolabs(data.coordinateUnits);
-	slInitParameters.coordinate_system = 
-		SennetToStereolabs(data.coordinateSystem);
-	slInitParameters.depth_stabilization = (int)data.enableDepthStabilization;
-	slInitParameters.depth_minimum_distance = data.minDepth;
-	slInitParameters.depth_maximum_distance = data.maxDepth;
-	slInitParameters.enable_right_side_measure = data.enableRightSideDepth;
+	sl::InitParameters params;
+	params.depth_mode = SennetToStereolabs(
+		initParameters.depthMode);
+	params.coordinate_units = SennetToStereolabs(
+		initParameters.coordinateUnits);
+		
+	params.coordinate_system = 
+		SennetToStereolabs(initParameters.coordinateSystem);
+	params.depth_stabilization = 
+		(int)initParameters.enableDepthStabilization;
+	params.depth_minimum_distance = initParameters.minDepth;
+	params.depth_maximum_distance = initParameters.maxDepth;
+	params.enable_right_side_measure = initParameters.enableRightSideDepth;
 
-	slInitParameters.camera_resolution = SennetToStereolabs(data.resolution);
-	slInitParameters.camera_fps = data.cameraFPS;
-	slInitParameters.enable_image_enhancement = data.enableImageEnhancement;
-	slInitParameters.camera_disable_self_calib = data.disableSelfCalibration;
-	slInitParameters.sdk_verbose = data.enableVerboseSDK;
-	slInitParameters.sensors_required = data.requireSensors;
-	return slInitParameters;
+	params.camera_resolution = SennetToStereolabs(
+		initParameters.resolution);
+	params.camera_fps = initParameters.cameraFPS;
+	params.enable_image_enhancement = initParameters.enableImageEnhancement;
+	params.camera_disable_self_calib = 
+		initParameters.disableSelfCalibration;
+	params.sdk_verbose = initParameters.enableVerboseSDK;
+	params.sensors_required = initParameters.requireSensors;
+	return params;
 }
 
 sl::RecordingParameters SennetToStereolabs(
 	const Sennet::ZED::RecordingParameters& recordingParameters)
 {
-	auto data = recordingParameters.GetData();
-	sl::RecordingParameters slRecordingParameters;
-	slRecordingParameters.video_filename = sl::String(data.filename.c_str());
-	slRecordingParameters.compression_mode = 
-		SennetToStereolabs(data.compressionMode);
-	return slRecordingParameters;
+	sl::RecordingParameters params;
+	params.video_filename = 
+		sl::String(recordingParameters.filename.c_str());
+	params.compression_mode = 
+		SennetToStereolabs(recordingParameters.compressionMode);
+	return params;
 }
 
 sl::RuntimeParameters SennetToStereolabs(
 	const Sennet::ZED::RuntimeParameters& runtimeParameters)
 {
-	auto data = runtimeParameters.GetData();
-	sl::RuntimeParameters slRuntimeParameters;
-	slRuntimeParameters.sensing_mode = SennetToStereolabs(data.sensingMode);
-	slRuntimeParameters.measure3D_reference_frame = 
-		SennetToStereolabs(data.referenceFrame);
-	slRuntimeParameters.enable_depth = data.enableDepth;
-	slRuntimeParameters.confidence_threshold = data.confidenceThreshold;
-	slRuntimeParameters.texture_confidence_threshold 
-		= data.textureConfidenceThreshold;
-	return slRuntimeParameters;
+	sl::RuntimeParameters params;
+	params.sensing_mode = SennetToStereolabs(runtimeParameters.sensingMode);
+	params.measure3D_reference_frame = 
+		SennetToStereolabs(runtimeParameters.referenceFrame);
+	params.enable_depth = runtimeParameters.enableDepth;
+	params.confidence_threshold = runtimeParameters.confidenceThreshold;
+	params.texture_confidence_threshold 
+		= runtimeParameters.textureConfidenceThreshold;
+	return params;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -441,44 +444,47 @@ Sennet::Ref<Sennet::Image> StereolabsToSennet(
 Sennet::ZED::InitParameters StereolabsToSennet(
 	const sl::InitParameters& initParameters)
 {
-	Sennet::ZED::InitParametersData data;
-	data.depthMode = StereolabsToSennet(initParameters.depth_mode);
-	data.coordinateUnits = StereolabsToSennet(initParameters.coordinate_units);
-	data.coordinateSystem = StereolabsToSennet(initParameters.coordinate_system);
-	data.enableDepthStabilization = (bool)initParameters.depth_stabilization;
-	data.minDepth = initParameters.depth_minimum_distance;
-	data.maxDepth = initParameters.depth_maximum_distance;
-	data.enableRightSideDepth = initParameters.enable_right_side_measure;
+	Sennet::ZED::InitParameters params;
+	params.depthMode = StereolabsToSennet(initParameters.depth_mode);
+	params.coordinateUnits = StereolabsToSennet(
+		initParameters.coordinate_units);
+	params.coordinateSystem = StereolabsToSennet(
+		initParameters.coordinate_system);
+	params.enableDepthStabilization = 
+		(bool)initParameters.depth_stabilization;
+	params.minDepth = initParameters.depth_minimum_distance;
+	params.maxDepth = initParameters.depth_maximum_distance;
+	params.enableRightSideDepth = initParameters.enable_right_side_measure;
 
-	data.resolution = StereolabsToSennet(initParameters.camera_resolution);
-	data.cameraFPS = initParameters.camera_fps;
-	data.enableImageEnhancement = initParameters.enable_image_enhancement;
-	data.disableSelfCalibration = initParameters.camera_disable_self_calib;
-	data.enableVerboseSDK = initParameters.sdk_verbose;
-	data.requireSensors = initParameters.sensors_required;
-	return Sennet::ZED::InitParameters(data);
+	params.resolution = StereolabsToSennet(initParameters.camera_resolution);
+	params.cameraFPS = initParameters.camera_fps;
+	params.enableImageEnhancement = initParameters.enable_image_enhancement;
+	params.disableSelfCalibration = initParameters.camera_disable_self_calib;
+	params.enableVerboseSDK = initParameters.sdk_verbose;
+	params.requireSensors = initParameters.sensors_required;
+	return params;
 }
 
 Sennet::ZED::RecordingParameters StereolabsToSennet(
 	const sl::RecordingParameters& recordingParameters)
 {
-	Sennet::ZED::RecordingParametersData data;
-	data.filename = std::string(recordingParameters.video_filename.get());
-	data.compressionMode = 
+	Sennet::ZED::RecordingParameters params;
+	params.filename = std::string(recordingParameters.video_filename.get());
+	params.compressionMode = 
 		StereolabsToSennet(recordingParameters.compression_mode);
-	return Sennet::ZED::RecordingParameters(data);
+	return params;
 }
 
 Sennet::ZED::RuntimeParameters StereolabsToSennet(
 	const sl::RuntimeParameters& runtimeParameters)
 {
-	Sennet::ZED::RuntimeParametersData data;
-	data.sensingMode = StereolabsToSennet(runtimeParameters.sensing_mode);
-	data.referenceFrame = 
+	Sennet::ZED::RuntimeParameters params;
+	params.sensingMode = StereolabsToSennet(runtimeParameters.sensing_mode);
+	params.referenceFrame = 
 		StereolabsToSennet(runtimeParameters.measure3D_reference_frame);
-	data.enableDepth = runtimeParameters.enable_depth;
-	data.confidenceThreshold = runtimeParameters.confidence_threshold;
-	data.textureConfidenceThreshold = 
+	params.enableDepth = runtimeParameters.enable_depth;
+	params.confidenceThreshold = runtimeParameters.confidence_threshold;
+	params.textureConfidenceThreshold = 
 		runtimeParameters.texture_confidence_threshold;
-	return Sennet::ZED::RuntimeParameters(data);
+	return params;
 }

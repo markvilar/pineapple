@@ -1,8 +1,6 @@
 #include "Sennet/ZED/Recorder.hpp"
 
-#include <mutex>
-
-#include "Sennet/ZED/Parameters/Conversion.hpp"
+#include "Sennet/ZED/Conversion.hpp"
 
 namespace Sennet
 {
@@ -10,7 +8,7 @@ namespace Sennet
 namespace ZED
 {
 
-Recorder::Recorder()
+Recorder::Recorder(const std::string& rootDirectory)
 	: m_InitParameters(),
 	m_RecordingParameters(),
 	m_RuntimeParameters(),
@@ -24,6 +22,13 @@ Recorder::Recorder()
 	m_WorkerTimeout(100),
 	m_RecordTimeout(10)
 {
+	SN_CORE_ASSERT(std::filesystem::exists(std::filesystem::path(
+		rootDirectory)), "Recorder root directory does not exist.");
+	SN_CORE_ASSERT(rootDirectory.back() == '/',
+		"Recorder root directory must end with '/'.");
+	m_RootDirectory = rootDirectory;
+	m_RecordingParameters.filename = rootDirectory 
+		+ m_RecordingParameters.filename;
 }
 
 Recorder::~Recorder()
@@ -35,17 +40,17 @@ void Recorder::Initialize()
 {
 	if (m_Running)
 	{
-		SN_WARN("Recorder already initialized.");
+		SN_CORE_WARN("Recorder already initialized.");
 		return;
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_ERROR("Recorder critical situation! Forcing\
+		SN_CORE_ERROR("Recorder critical situation! Forcing\
 			shutdown and re-initialization.");
 	}
 	else if (not m_Running and not m_Recording)
 	{
-		SN_TRACE("Recorder initializing.");
+		SN_CORE_TRACE("Recorder initializing.");
 	}
 
 	StopExecutionThread();
@@ -60,24 +65,19 @@ void Recorder::Shutdown()
 {
 	if (not m_Running and not m_Recording)
 	{
-		SN_WARN("Recorder already shut down.");
+		SN_CORE_WARN("Recorder already shut down.");
 	}
 	else if (not m_Running and m_Recording)
 	{
-		SN_ERROR("Recorder critical situation! Forcing shutdown.");
+		SN_CORE_ERROR("Recorder critical situation! Forcing shutdown.");
 	}
 	else if (m_Running and not m_Recording)
 	{
-		SN_TRACE("Recorder starting shutdown.");
+		SN_CORE_TRACE("Recorder starting shutdown.");
 	}
 
 	StopExecutionThread();
 	JoinExecutionThread();
-}
-
-std::string Recorder::ToString() const
-{
-	return std::string("Recorder");
 }
 
 void Recorder::StartRecord()
@@ -115,26 +115,6 @@ bool Recorder::IsCameraOpened()
 	return m_Camera->isOpened();
 }
 
-RecorderState Recorder::GetState() const
-{
-	if (m_Running and m_Recording)
-	{
-		return RecorderState::Record;
-	}
-	else if (m_Running and !m_Recording)
-	{
-		return RecorderState::Standby;
-	}
-	else if (!m_Running and !m_Recording)
-	{
-		return RecorderState::Idle;
-	}
-	else
-	{
-		return RecorderState::None;
-	}
-}
-
 Ref<Image> Recorder::GetImage(const View& view)
 {
 	std::lock_guard<std::mutex> lock(m_CameraMutex);
@@ -151,9 +131,9 @@ Ref<Image> Recorder::GetImage(const View& view)
 }
 
 std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-	Recorder::GetParameters()
+	Recorder::GetCurrentCameraParameters()
 {
-	std::lock_guard<std::mutex> lock(m_CameraMutex);
+	std::scoped_lock lock(m_CameraMutex);
 	auto initParameters = StereolabsToSennet(m_Camera->getInitParameters());
 	auto recordingParameters = StereolabsToSennet(
 		m_Camera->getRecordingParameters());
@@ -162,20 +142,43 @@ std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
 	return { initParameters, recordingParameters, runtimeParameters };
 }
 
-std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-	Recorder::GetParametersCache()
+InitParameters Recorder::GetInitParameters()
 {
-	std::lock_guard<std::mutex> lock(m_ParametersMutex);
-	return { m_InitParameters, m_RecordingParameters, m_RuntimeParameters};
+	std::scoped_lock lock(m_ParametersMutex);
+	return m_InitParameters;
 }
 
-void Recorder::SetParametersCache(const InitParameters initParameters,
-	const RecordingParameters recordingParameters,
-	const RuntimeParameters runtimeParameters)
+RecordingParameters Recorder::GetRecordingParameters()
 {
-	std::lock_guard<std::mutex> lock(m_ParametersMutex);
+	std::scoped_lock lock(m_ParametersMutex);
+	return m_RecordingParameters;
+}
+
+RuntimeParameters Recorder::GetRuntimeParameters()
+{
+	std::scoped_lock lock(m_ParametersMutex);
+	return m_RuntimeParameters;
+}
+
+void Recorder::SetInitParameters(const InitParameters& initParameters)
+{
+	std::scoped_lock lock(m_ParametersMutex);
 	m_InitParameters = initParameters;
+}
+
+void Recorder::SetRecordingParameters(
+	const RecordingParameters& recordingParameters)
+{
+	std::scoped_lock lock(m_ParametersMutex);
 	m_RecordingParameters = recordingParameters;
+	m_RecordingParameters.filename = m_RootDirectory 
+		+ m_RecordingParameters.filename;
+}
+
+void Recorder::SetRuntimeParameters(
+	const RuntimeParameters& runtimeParameters)
+{
+	std::scoped_lock lock(m_ParametersMutex);
 	m_RuntimeParameters = runtimeParameters;
 }
 
@@ -211,7 +214,11 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_WARN("Recorder could not open ZED!");
+		SN_WARN("ZED Open Error: {0}", 
+			toString(openError).get());
+		m_ShouldRecord = false;
+		m_Recording = false;
+		return;
 	}
 
 	m_CameraMutex.lock();
@@ -219,7 +226,11 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_WARN("Recorder could not enable ZED recording!");
+		SN_WARN("ZED Enable Record Error: {0}", 
+			toString(recordError).get());
+		m_ShouldRecord = false;
+		m_Recording = false;
+		return;
 	}
 
 	sl::ERROR_CODE grabError;

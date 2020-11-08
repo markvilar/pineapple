@@ -1,20 +1,20 @@
 #pragma once
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
+#include <filesystem>
 #include <mutex>
+#include <tuple>
 
 #include <sl/Camera.hpp>
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Parameters/InitParameters.hpp"
-#include "Sennet/ZED/Parameters/RecordingParameters.hpp"
-#include "Sennet/ZED/Parameters/RuntimeParameters.hpp"
+#include "Sennet/ZED/InitParameters.hpp"
+#include "Sennet/ZED/RecordingParameters.hpp"
+#include "Sennet/ZED/RuntimeParameters.hpp"
+#include "Sennet/ZED/Settings.hpp"
 
-namespace Sennet
-{
-
-namespace ZED
-{
+namespace Sennet { namespace ZED {
 
 class Recorder
 {
@@ -26,7 +26,7 @@ class Recorder
 
 public:
 	// Source handle member functions.
-	Recorder();
+	Recorder(const std::string& rootDirectory = std::string(""));
 	~Recorder();
 
 	// Actions
@@ -35,24 +35,23 @@ public:
 	void StartRecord();
 	void StopRecord();
 
-	std::string ToString() const;
-
 	bool IsRunning() const { return m_Running; }
 	bool IsRecording() const { return m_Recording; }
 	bool IsCameraOpened();
 
-	RecorderState GetState() const;
 	Ref<Image> GetImage(const View& view = View::Left);
 
 	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-		GetParameters();
+		GetCurrentCameraParameters();
 
-	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-		GetParametersCache();
+	InitParameters GetInitParameters();
+	RecordingParameters GetRecordingParameters();
+	RuntimeParameters GetRuntimeParameters();
 
-	void SetParametersCache(const InitParameters initParameters,
-		const RecordingParameters recordingParameters,
-		const RuntimeParameters runtimeParameters);
+	void SetInitParameters(const InitParameters& initParameters);
+	void SetRecordingParameters(
+		const RecordingParameters& recordingParameters);
+	void SetRuntimeParameters(const RuntimeParameters& runtimeParameters);
 
 private:
 	void ExecutionWorker();
@@ -66,6 +65,7 @@ private:
 	InitParameters m_InitParameters;
 	RecordingParameters m_RecordingParameters;
 	RuntimeParameters m_RuntimeParameters;
+	std::string m_RootDirectory;
 
 	Scope<sl::Camera> m_Camera;
 
@@ -86,5 +86,4 @@ private:
 	std::atomic<bool> m_ShouldRecord;
 };
 
-}
-}
+}}

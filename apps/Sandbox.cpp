@@ -1,26 +1,46 @@
+#include <filesystem>
 #include <iostream>
-
-#include <sl/Camera.hpp>
+#include <signal.h>
 
 #include "Sennet/Sennet.hpp"
 
+#include "Sennet/ZED/Messages.hpp"
+#include "Sennet/ZED/Recorder.hpp"
+
+sig_atomic_t stopFlag = 0;
+
+void interrupt_handler(int)
+{
+	stopFlag = 1;
+}
+
 int main()
 {
+	// Set up interrupt handler.
+	signal(SIGINT, &interrupt_handler);
+
 	Sennet::Log::Init();
-	SN_INFO("Hello world!");
 
-	sl::Camera camera;
+	// Initialize recorder and get recording parameters.
+	Sennet::ZED::Recorder recorder("/home/martin/Documents/");
+	auto recordingParameters = recorder.GetRecordingParameters();
+	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
 
-	auto error = camera.open();
-	if (error != sl::ERROR_CODE::SUCCESS)
+	// Update recording parameters.
+	recordingParameters.filename = "testRecording.svo";
+	recorder.SetRecordingParameters(recordingParameters);
+
+	// Get new recording parameters.
+	recordingParameters = recorder.GetRecordingParameters();
+	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
+
+	recorder.Initialize();
+	recorder.StartRecord();
+
+	while (!stopFlag)
 	{
-		std::cout << sl::toString(error) << std::endl;
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
-	else
-	{
-		std::cout << "Opened camera!" << std::endl;
-		camera.close();
-	}
-	
+
 	return 0;
 }

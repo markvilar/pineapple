@@ -1,17 +1,13 @@
-#include "Sennet/ZED/Parameters/RuntimeParameters.hpp"
+#include "Sennet/ZED/RuntimeParameters.hpp"
 
-namespace Sennet
-{
-
-namespace ZED
-{
+namespace Sennet { namespace ZED {
 
 std::string RuntimeParameters::ToString() const
 {
 	std::stringstream ss;
-	ss << "Sensing Mode: " << ::ToString(m_Data.sensingMode)
-		<< ", Reference Frame: " << ::ToString(m_Data.referenceFrame)
-		<< ", Depth Enabled: " << m_Data.enableDepth;
+	ss << "Sensing Mode: " << ::ToString(sensingMode)
+		<< ", Reference Frame: " << ::ToString(referenceFrame)
+		<< ", Depth Enabled: " << enableDepth;
 	return ss.str();
 }
 
