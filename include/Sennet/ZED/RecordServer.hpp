@@ -10,27 +10,22 @@
 
 namespace Sennet { namespace ZED {
 
-class RecordServer : public ::Sennet::Server<MessageTypes>
+class RecordServer : public Sennet::Server<MessageTypes>
 {
 public:
 	RecordServer(const uint16_t& port, const std::string& root);
 	virtual ~RecordServer();
 
 protected:
-	virtual bool OnClientConnect(
-		Sennet::Ref<Sennet::Connection<MessageTypes>> client)
+	virtual bool OnClientConnect(Ref<Connection<MessageTypes>> client)
 		override;
 
-	virtual void OnClientDisconnect(
-		Sennet::Ref<Sennet::Connection<MessageTypes>>) 
+	virtual void OnClientDisconnect(Ref<Connection<MessageTypes>>)
 		override;
 
-	virtual void OnMessage(
-		Sennet::Ref<Sennet::Connection<MessageTypes>> client,
-		Sennet::Message<MessageTypes>& message) 
-		override;
-
-
+	virtual void OnMessage(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) override;
+		
 private:
 	Recorder m_Recorder;
 	uint8_t m_Clients = 0;

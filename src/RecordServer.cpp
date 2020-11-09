@@ -3,7 +3,7 @@
 namespace Sennet { namespace ZED {
 
 RecordServer::RecordServer(const uint16_t& port, const std::string& root)
-	: ::Sennet::Server<MessageTypes>(port), m_Recorder(root)
+	: Server<MessageTypes>(port), m_Recorder(root)
 {
 }
 
@@ -12,15 +12,13 @@ RecordServer::~RecordServer()
 	m_Recorder.Shutdown();
 }
 
-bool RecordServer::OnClientConnect(
-	Sennet::Ref<Sennet::Connection<MessageTypes>> client)
+bool RecordServer::OnClientConnect(Ref<Connection<MessageTypes>> client)
 {
 	m_Clients++;
 	return true;
 }
 
-void RecordServer::OnClientDisconnect(
-	Sennet::Ref<Sennet::Connection<MessageTypes>>) 
+void RecordServer::OnClientDisconnect(Ref<Connection<MessageTypes>>)
 {
 	m_Clients--;
 	if (m_Clients == 0)
@@ -29,9 +27,8 @@ void RecordServer::OnClientDisconnect(
 	}
 }
 
-void RecordServer::OnMessage(
-	Sennet::Ref<Sennet::Connection<MessageTypes>> client,
-	Sennet::Message<MessageTypes>& message) 
+void RecordServer::OnMessage(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) 
 {
 	switch (message.Header.ID)
 	{

@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/ClientPanel.hpp"
+#include "Sennet/ZED/Panels/RecordClientPanel.hpp"
 
 static void Strtrim(char* s)
 { 
@@ -10,17 +10,17 @@ static void Strtrim(char* s)
 
 namespace Sennet { namespace ZED {
 
-ClientPanel::ClientPanel(const Ref<Client<MessageTypes>>& context)
+RecordClientPanel::RecordClientPanel(const Ref<RecordClient>& context)
 {
 	SetContext(context);
 }
 
-void ClientPanel::SetContext(const Ref<Client<MessageTypes>>& context)
+void RecordClientPanel::SetContext(const Ref<RecordClient>& context)
 {
 	m_Context = context;
 }
 
-void ClientPanel::OnImGuiRender()
+void RecordClientPanel::OnImGuiRender()
 {
 	static char InputBuf[256];
 	static bool reclaim_focus = false;
@@ -42,7 +42,6 @@ void ClientPanel::OnImGuiRender()
 	}
 
 	static ImU16 port = 0;
-	ImGui::SameLine();
 	ImGui::InputScalar("Port", ImGuiDataType_U16, &port, NULL, NULL, "%u");
 	
 	if (ImGui::SmallButton("Connect"))

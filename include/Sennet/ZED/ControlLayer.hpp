@@ -4,8 +4,10 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Panels/ClientPanel.hpp"
+#include "Sennet/ZED/RecordClient.hpp"
+
 #include "Sennet/ZED/Panels/InitParametersPanel.hpp"
+#include "Sennet/ZED/Panels/RecordClientPanel.hpp"
 #include "Sennet/ZED/Panels/RecordingParametersPanel.hpp"
 #include "Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
 
@@ -29,13 +31,13 @@ private:
 	Ref<Texture2D> m_CheckerboardTexture;
 
 	// Panels
-	ClientPanel m_ClientPanel;
+	RecordClientPanel m_ClientPanel;
 	InitParametersPanel m_InitParametersPanel;
 	RecordingParametersPanel m_RecordingParametersPanel;
 	RuntimeParametersPanel m_RuntimeParametersPanel;
 
 	// Network
-	Ref<Client<MessageTypes>> m_Client;
+	Ref<RecordClient> m_Client;
 
 	// Parameters
 	Ref<InitParameters> m_InitParameters;

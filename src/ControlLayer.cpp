@@ -16,7 +16,7 @@ void ControlLayer::OnAttach()
 	m_CheckerboardTexture = Sennet::Texture2D::Create(
 		"../../extern/sennet/assets/textures/Checkerboard-600x600.png");
 
-	m_Client = CreateRef<Client<MessageTypes>>();
+	m_Client = CreateRef<RecordClient>();
 	m_InitParameters = CreateRef<InitParameters>();
 	m_RecordingParameters = CreateRef<RecordingParameters>();
 	m_RuntimeParameters = CreateRef<RuntimeParameters>();
