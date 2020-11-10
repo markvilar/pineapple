@@ -23,22 +23,8 @@ void RecordClientPanel::SetContext(const Ref<RecordClient>& context)
 void RecordClientPanel::OnImGuiRender()
 {
 	static char InputBuf[256];
-	static bool reclaim_focus = false;
-	ImGuiInputTextFlags input_text_flags = 
-		ImGuiInputTextFlags_EnterReturnsTrue 
-		| ImGuiInputTextFlags_CallbackCompletion 
-		| ImGuiInputTextFlags_CallbackHistory;
-	if (ImGui::InputText("Address", InputBuf, 
-		IM_ARRAYSIZE(InputBuf), input_text_flags))
+	if (ImGui::InputText("Address", InputBuf, IM_ARRAYSIZE(InputBuf)))
 	{
-		char* s = InputBuf;
-		Strtrim(s);
-		if (s[0])
-		{
-			//ExecCommand(s);
-		}
-		strcpy(s, "");
-		reclaim_focus = true;
 	}
 
 	static ImU16 port = 0;
@@ -63,6 +49,57 @@ void RecordClientPanel::OnImGuiRender()
 	ImGui::SameLine();
 	ImGui::Text("Status: %s", m_Context && m_Context->IsConnected() ?
 		"Connected" : "Not Connected");
+
+	ImGui::Dummy(ImVec2(0.0f, 15.0f));
+	ImGui::Columns(2, "Action Columns", true);
+
+	if (ImGui::SmallButton("Ping Server"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->PingServer();
+		}
+	}
+	if (ImGui::SmallButton("Synchronize Server"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->SynchronizeServer();
+		}
+	}
+
+	if (ImGui::SmallButton("Initialize Recorder"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->InitializeRecorder();
+		}
+	}
+	if (ImGui::SmallButton("Shutdown Recorder"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->ShutdownRecorder();
+		}
+	}
+	
+	ImGui::NextColumn();
+	if (ImGui::SmallButton("Start Record"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->StartRecord();
+		}
+	}
+	if (ImGui::SmallButton("Stop Record"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->StopRecord();
+		}
+	}
+	
+	ImGui::Columns(1);
 }
 
 }}

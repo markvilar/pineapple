@@ -50,7 +50,7 @@ public:
 
 	// Generic members.
 	Resolution resolution = Resolution::HD720;
-	int cameraFPS = 0;
+	uint32_t cameraFPS = 0;
 	bool enableImageEnhancement = true;
 	bool disableSelfCalibration = false;
 	bool enableVerboseSDK = false;

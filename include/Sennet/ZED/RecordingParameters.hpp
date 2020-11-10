@@ -25,8 +25,8 @@ public:
 public:
 	std::string filename = "myRecording.svo";
 	SVOCompressionMode compressionMode = SVOCompressionMode::H264;
-	unsigned int targetBitRate = 0;
-	unsigned int targetFrameRate = 0;
+	uint32_t targetBitRate = 0;
+	uint32_t targetFrameRate = 0;
 };
 
 }

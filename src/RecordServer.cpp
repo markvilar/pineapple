@@ -36,25 +36,35 @@ void RecordServer::OnMessage(Ref<Connection<MessageTypes>> client,
 		SN_INFO("[{0}] Server Ping.", client->GetID());
 		client->Send(message);
 		break;
+	case MessageTypes::ServerSynchronize:
+		SN_INFO("[{0}] Server Synchronize.", client->GetID());
+		break;
 	case MessageTypes::RecorderInitialize:
-		// TODO: Add feedback.
 		SN_INFO("[{0}] Recorder Initialize.", client->GetID());
-		m_Recorder.Initialize();
+		//m_Recorder.Initialize();
 		break;
 	case MessageTypes::RecorderShutdown:
 		SN_INFO("[{0}] Recorder Shutdown.", client->GetID());
-		m_Recorder.Shutdown();
+		//m_Recorder.Shutdown();
 		break;
 	case MessageTypes::StartRecord:
 		SN_INFO("[{0}] Recorder Start Record.", client->GetID());
-		m_Recorder.StartRecord();
+		//m_Recorder.StartRecord();
 		break;
 	case MessageTypes::StopRecord:
 		SN_INFO("[{0}] Recorder Stop Record.", client->GetID());
-		m_Recorder.StartRecord();
+		//m_Recorder.StartRecord();
+		break;
+	case MessageTypes::InitParameters:
+		SN_INFO("[{0}] Initialization Parameters.", client->GetID());
+		break;
+	case MessageTypes::RecordingParameters:
+		SN_INFO("[{0}] Recording Parameters.", client->GetID());
+		break;
+	case MessageTypes::RuntimeParameters:
+		SN_INFO("[{0}] Runtime Parameters.", client->GetID());
 		break;
 	}
 }
-
 
 }}

@@ -33,16 +33,15 @@ void InitParametersPanel::OnImGuiRender()
 				return true; 
 			} 
 		};
-		static int currentResolution= 0;
-		const char* resolutionOptions[] = { "HD2K", "HD1080", "HD720", 
-			"VGA"};
-		ImGui::Combo("Resolution", &currentResolution, 
+
+		const char* resolutionOptions[] = { "None", "HD2K", "HD1080", 
+			"HD720", "VGA"};
+		ImGui::Combo("Resolution", (int*)&m_Context->resolution, 
 			&FuncHolder::ItemGetter, resolutionOptions, 
 			IM_ARRAYSIZE(resolutionOptions));
 
-		static int currentFPS = 0;
-		const char* fpsOptions[] = { "15", "30", "60", "100" };
-		ImGui::Combo("Camera FPS", &currentFPS, 
+		const char* fpsOptions[] = { "0", "15", "30", "60", "100" };
+		ImGui::Combo("Camera FPS", (int*)&m_Context->cameraFPS, 
 			&FuncHolder::ItemGetter, fpsOptions, 
 			IM_ARRAYSIZE(fpsOptions));
 
@@ -58,19 +57,25 @@ void InitParametersPanel::OnImGuiRender()
 		ImGui::Dummy(ImVec2(0.0f, 15.0f));
 		ImGui::Text("Depth Related Initialization Parameters");
 
-		static int currentDepthMode = 0;
-		const char* depthModeOptions[] = { "None", "Performance", 
+		static const char* depthModeOptions[] = { "None", "Performance", 
 			"Quality", "Ultra" };
-		ImGui::Combo("Depth Mode", &currentDepthMode, 
-			&FuncHolder::ItemGetter, depthModeOptions, 
-			IM_ARRAYSIZE(depthModeOptions));
+		ImGui::SliderInt("Depth Mode", (int*)&m_Context->depthMode,
+			0, 3, depthModeOptions[(int)m_Context->depthMode]);
 
-		static int currentCoordinateUnit= 0;
-		const char* coordinateUnitOptions[] = { "None", "Millimeter", 
+		static const char* coordUnitOptions[] = { "None", "Millimeter", 
 			"Centimeter", "Meter", "Inch", "Foot" };
-		ImGui::Combo("Coordinate Unit", &currentCoordinateUnit, 
-			&FuncHolder::ItemGetter, coordinateUnitOptions, 
-			IM_ARRAYSIZE(coordinateUnitOptions));
+		ImGui::SliderInt("Coordinate Unit", 
+			(int*)&m_Context->coordinateUnits, 0, 
+			IM_ARRAYSIZE(coordUnitOptions) - 1, 
+			coordUnitOptions[(int)m_Context->coordinateUnits]);
+
+		static const char* coordSysOptions[] = { "None", "Image", 
+			"LeftHandedYUp", "RightHandYUp", "RightHandedZUp", 
+			"LeftHandedZUp", "RightHandedZUpXForward" };
+		ImGui::SliderInt("Coordinate System",
+			(int*)&m_Context->coordinateSystem, 0,
+			IM_ARRAYSIZE(coordSysOptions) - 1,
+			coordSysOptions[(int)m_Context->coordinateSystem]);
 
             	ImGui::SliderFloat("Minimum Depth", &m_Context->minDepth, -1.0f, 
 			10000.0f, "%.1f");

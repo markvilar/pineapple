@@ -32,8 +32,9 @@ public:
 	SensingMode sensingMode = SensingMode::Standard;
 	ReferenceFrame referenceFrame = ReferenceFrame::Camera;
 	bool enableDepth = true;
-	int confidenceThreshold = 100;
-	int textureConfidenceThreshold = 100;};
+	uint32_t confidenceThreshold = 100;
+	uint32_t textureConfidenceThreshold = 100;
+};
 
 };
 
