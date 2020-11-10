@@ -20,6 +20,18 @@ void RecordClientPanel::SetContext(const Ref<RecordClient>& context)
 	m_Context = context;
 }
 
+void RecordClientPanel::SetParameters(const Ref<InitParameters>& parameters)
+{
+}
+
+void RecordClientPanel::SetParameters(const Ref<RecordingParameters>& parameters)
+{
+}
+
+void RecordClientPanel::SetParameters(const Ref<RuntimeParameters>& parameters)
+{
+}
+
 void RecordClientPanel::OnImGuiRender()
 {
 	static char InputBuf[256];
@@ -57,14 +69,14 @@ void RecordClientPanel::OnImGuiRender()
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->PingServer();
+			m_Context->RequestServerPing();
 		}
 	}
 	if (ImGui::SmallButton("Synchronize Server"))
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->SynchronizeServer();
+			m_Context->RequestServerSynchronization();
 		}
 	}
 
@@ -72,34 +84,45 @@ void RecordClientPanel::OnImGuiRender()
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->InitializeRecorder();
+			m_Context->RequestRecorderInitialization();
 		}
 	}
 	if (ImGui::SmallButton("Shutdown Recorder"))
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->ShutdownRecorder();
+			m_Context->RequestRecorderShutdown();
 		}
 	}
 	
-	ImGui::NextColumn();
 	if (ImGui::SmallButton("Start Record"))
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->StartRecord();
+			m_Context->RequestStartRecord();
 		}
 	}
 	if (ImGui::SmallButton("Stop Record"))
 	{
 		if (m_Context && m_Context->IsConnected())
 		{
-			m_Context->StopRecord();
+			m_Context->RequestStopRecord();
 		}
 	}
+
+	ImGui::NextColumn();
 	
 	ImGui::Columns(1);
+}
+
+void RecordClientPanel::OnServerPing(Message<MessageTypes>& message)
+{
+	std::chrono::system_clock::time_point timeNow = 
+		std::chrono::system_clock::now();
+	std::chrono::system_clock::time_point timeThen;
+	message >> timeThen;
+	auto duration = std::chrono::duration<double>(timeNow-timeThen).count();
+	SN_CORE_INFO("Ping: {0}", duration);
 }
 
 }}

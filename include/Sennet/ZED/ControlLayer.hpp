@@ -26,6 +26,9 @@ public:
 	virtual void OnEvent(Event& e) override;
 
 private:
+	void OnMessage(Message<MessageTypes>& message);
+
+private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
 	Ref<Texture2D> m_CheckerboardTexture;

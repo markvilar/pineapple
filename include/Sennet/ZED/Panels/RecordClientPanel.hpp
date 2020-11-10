@@ -16,10 +16,18 @@ public:
 	RecordClientPanel(const Ref<RecordClient>& context);
 
 	void SetContext(const Ref<RecordClient>& context);
+	void SetParameters(const Ref<InitParameters>& parameters);
+	void SetParameters(const Ref<RecordingParameters>& parameters);
+	void SetParameters(const Ref<RuntimeParameters>& parameters);
+
 	void OnImGuiRender();
+
+	void OnServerPing(Message<MessageTypes>& message);
 
 private:
 	Ref<RecordClient> m_Context;
+
+	// TODO: Information holders?
 };
 
 }}

@@ -11,7 +11,7 @@ RecordClient::~RecordClient()
 {
 }
 
-void RecordClient::PingServer()
+void RecordClient::RequestServerPing()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::ServerPing;
@@ -22,68 +22,68 @@ void RecordClient::PingServer()
 	Send(message);
 }
 
-void RecordClient::SynchronizeServer()
+void RecordClient::RequestServerSynchronization()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::ServerSynchronize;
 	Send(message);
 }
 
-void RecordClient::InitializeRecorder()
+void RecordClient::RequestRecorderInitialization()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::RecorderInitialize;
 	Send(message);
 }
 
-void RecordClient::ShutdownRecorder()
+void RecordClient::RequestRecorderShutdown()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::RecorderShutdown;
 	Send(message);
 }
 
-void RecordClient::StartRecord()
+void RecordClient::RequestStartRecord()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::StartRecord;
 	Send(message);
 }
 
-void RecordClient::StopRecord()
+void RecordClient::RequestStopRecord()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::StopRecord;
 	Send(message);
 }
 
-void RecordClient::SendInitParameters()
+void RecordClient::RequestInitParametersUpdate(
+	const Ref<InitParameters>& parameters)
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::InitParameters;
+	message.Header.ID = MessageTypes::InitParametersUpdate;
 
-	InitParameters parameters;
-	message << parameters;
+	message << *parameters;
 	Send(message);
 }
 
-void RecordClient::SendRecordingParameters()
+void RecordClient::RequestRecordingParametersUpdate(
+	const Ref<RecordingParameters>& parameters)
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::RecordingParameters;
+	message.Header.ID = MessageTypes::RecordingParametersUpdate;
 
-	RecordingParameters parameters;
-	message << parameters;
+	message << *parameters;
 	Send(message);
 }
 
-void RecordClient::SendRuntimeParameters()
+void RecordClient::RequestRuntimeParametersUpdate(
+	const Ref<RuntimeParameters>& parameters)
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::RuntimeParameters;
+	message.Header.ID = MessageTypes::RuntimeParametersUpdate;
 
-	RuntimeParameters parameters;
-	message << parameters;
+	message << *parameters;
 	Send(message);
 }
 

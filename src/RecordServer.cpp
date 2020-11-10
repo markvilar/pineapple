@@ -41,27 +41,27 @@ void RecordServer::OnMessage(Ref<Connection<MessageTypes>> client,
 		break;
 	case MessageTypes::RecorderInitialize:
 		SN_INFO("[{0}] Recorder Initialize.", client->GetID());
-		//m_Recorder.Initialize();
+		m_Recorder.Initialize();
 		break;
 	case MessageTypes::RecorderShutdown:
 		SN_INFO("[{0}] Recorder Shutdown.", client->GetID());
-		//m_Recorder.Shutdown();
+		m_Recorder.Shutdown();
 		break;
 	case MessageTypes::StartRecord:
 		SN_INFO("[{0}] Recorder Start Record.", client->GetID());
-		//m_Recorder.StartRecord();
+		m_Recorder.StartRecord();
 		break;
 	case MessageTypes::StopRecord:
 		SN_INFO("[{0}] Recorder Stop Record.", client->GetID());
-		//m_Recorder.StartRecord();
+		m_Recorder.StopRecord();
 		break;
-	case MessageTypes::InitParameters:
+	case MessageTypes::InitParametersUpdate:
 		SN_INFO("[{0}] Initialization Parameters.", client->GetID());
 		break;
-	case MessageTypes::RecordingParameters:
+	case MessageTypes::RecordingParametersUpdate:
 		SN_INFO("[{0}] Recording Parameters.", client->GetID());
 		break;
-	case MessageTypes::RuntimeParameters:
+	case MessageTypes::RuntimeParametersUpdate:
 		SN_INFO("[{0}] Runtime Parameters.", client->GetID());
 		break;
 	}

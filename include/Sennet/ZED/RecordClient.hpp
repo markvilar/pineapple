@@ -15,17 +15,20 @@ public:
 	RecordClient();
 	virtual ~RecordClient();
 
-	void PingServer();
-	void SynchronizeServer();
+	void RequestServerPing();
+	void RequestServerSynchronization();
 	
-	void InitializeRecorder();
-	void ShutdownRecorder();
-	void StartRecord();
-	void StopRecord();
+	void RequestRecorderInitialization();
+	void RequestRecorderShutdown();
+	void RequestStartRecord();
+	void RequestStopRecord();
 
-	void SendInitParameters();
-	void SendRecordingParameters();
-	void SendRuntimeParameters();
+	void RequestInitParametersUpdate(
+		const Ref<InitParameters>& parameters);
+	void RequestRecordingParametersUpdate(
+		const Ref<RecordingParameters>& parameters);
+	void RequestRuntimeParametersUpdate(
+		const Ref<RuntimeParameters>& parameters);
 
 	void RequestSettings();
 	void RequestImage();
