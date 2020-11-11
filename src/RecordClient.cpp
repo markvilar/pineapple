@@ -89,10 +89,16 @@ void RecordClient::RequestRuntimeParametersUpdate(
 
 void RecordClient::RequestSettings()
 {
+	Message<MessageTypes> message;
+	message.Header.ID = MessageTypes::SettingsRequest;
+	Send(message);
 }
 
 void RecordClient::RequestImage()
 {
+	Message<MessageTypes> message;
+	message.Header.ID = MessageTypes::ImageRequest;
+	Send(message);
 }
 
 }}

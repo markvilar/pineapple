@@ -23,10 +23,10 @@ enum class MessageTypes: uint32_t
 	ParametersUpdateAccept		= 20,
 	ParametersUpdateDeny		= 21,
 
-	RequestSettings			= 22,
+	SettingsRequest			= 22,
 	Settings			= 23,
 
-	RequestImage			= 24,
+	ImageRequest			= 24,
 	Image				= 25,
 };
 

@@ -30,41 +30,119 @@ void RecordServer::OnClientDisconnect(Ref<Connection<MessageTypes>>)
 void RecordServer::OnMessage(Ref<Connection<MessageTypes>> client,
 	Message<MessageTypes>& message) 
 {
+	// Dispatch the message to the right function based on the header ID.
 	switch (message.Header.ID)
 	{
 	case MessageTypes::ServerPing:
-		SN_INFO("[{0}] Server Ping.", client->GetID());
-		client->Send(message);
+		OnPingRequest(client, message);
 		break;
 	case MessageTypes::ServerSynchronize:
-		SN_INFO("[{0}] Server Synchronize.", client->GetID());
+		OnSynchronizationRequest(client, message);
 		break;
 	case MessageTypes::RecorderInitialize:
-		SN_INFO("[{0}] Recorder Initialize.", client->GetID());
-		m_Recorder.Initialize();
+		OnInitializationRequest(client, message);
 		break;
 	case MessageTypes::RecorderShutdown:
-		SN_INFO("[{0}] Recorder Shutdown.", client->GetID());
-		m_Recorder.Shutdown();
+		OnShutdownRequest(client, message);
 		break;
 	case MessageTypes::StartRecord:
-		SN_INFO("[{0}] Recorder Start Record.", client->GetID());
-		m_Recorder.StartRecord();
+		OnStartRecordRequest(client, message);
 		break;
 	case MessageTypes::StopRecord:
-		SN_INFO("[{0}] Recorder Stop Record.", client->GetID());
-		m_Recorder.StopRecord();
+		OnStopRecordRequest(client, message);
 		break;
 	case MessageTypes::InitParametersUpdate:
-		SN_INFO("[{0}] Initialization Parameters.", client->GetID());
+		OnInitParametersUpdate(client, message);
 		break;
 	case MessageTypes::RecordingParametersUpdate:
-		SN_INFO("[{0}] Recording Parameters.", client->GetID());
+		OnRecordingParametersUpdate(client, message);
 		break;
 	case MessageTypes::RuntimeParametersUpdate:
-		SN_INFO("[{0}] Runtime Parameters.", client->GetID());
+		OnRuntimeParametersUpdate(client, message);
+		break;
+	case MessageTypes::SettingsRequest:
+		OnSettingsRequest(client, message);
+		break;
+	case MessageTypes::ImageRequest:
+		OnImageRequest(client, message);
 		break;
 	}
+}
+
+void RecordServer::OnPingRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Ping Request.", client->GetID());
+	client->Send(message);
+}
+
+void RecordServer::OnSynchronizationRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Synchronization Request.", client->GetID());
+}
+
+void RecordServer::OnInitializationRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Initialization Request.", client->GetID());
+}
+
+void RecordServer::OnShutdownRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Shutdown Request.", client->GetID());
+}
+
+void RecordServer::OnStartRecordRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Start Record Request.", client->GetID());
+}
+
+void RecordServer::OnStopRecordRequest(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Stop Record Request.", client->GetID());
+}
+
+void RecordServer::OnInitParametersUpdate(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Initialization Parameters Request.", client->GetID());
+}
+
+void RecordServer::OnRecordingParametersUpdate(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Recording Parameters Request.", client->GetID());
+}
+
+void RecordServer::OnRuntimeParametersUpdate(
+	Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Runtime Parameters Request.", client->GetID());
+}
+
+void RecordServer::OnSettingsRequest(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Settings Request.", client->GetID());
+}
+
+void RecordServer::OnImageRequest(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message) const
+{
+	SN_INFO("[{0}] Image Request.", client->GetID());
 }
 
 }}

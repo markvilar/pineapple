@@ -37,7 +37,7 @@ public:
 
 	bool IsRunning() const { return m_Running; }
 	bool IsRecording() const { return m_Recording; }
-	bool IsCameraOpened();
+	bool IsCameraOpen();
 
 	Ref<Image> GetImage(const View& view = View::Left);
 

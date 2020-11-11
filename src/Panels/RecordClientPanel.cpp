@@ -109,6 +109,20 @@ void RecordClientPanel::OnImGuiRender()
 			m_Context->RequestStopRecord();
 		}
 	}
+	if (ImGui::SmallButton("Request Settings"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->RequestSettings();
+		}
+	}
+	if (ImGui::SmallButton("Request Image"))
+	{
+		if (m_Context && m_Context->IsConnected())
+		{
+			m_Context->RequestImage();
+		}
+	}
 
 	ImGui::NextColumn();
 	

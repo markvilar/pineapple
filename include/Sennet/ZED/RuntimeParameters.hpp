@@ -23,7 +23,6 @@ public:
 	RuntimeParameters() = default;
 	~RuntimeParameters() = default;
 
-
 	std::string ToString() const;
 	friend std::ostream& operator<<(std::ostream& os, 
 		const RuntimeParameters& rp);
@@ -36,9 +35,7 @@ public:
 	uint32_t textureConfidenceThreshold = 100;
 };
 
-};
-
-}
+}}
 
 std::string ToString(const Sennet::ZED::ReferenceFrame referenceFrame);
 std::string ToString(const Sennet::ZED::SensingMode sensingMode);

@@ -25,6 +25,40 @@ protected:
 
 	virtual void OnMessage(Ref<Connection<MessageTypes>> client,
 		Message<MessageTypes>& message) override;
+
+private:
+	void OnPingRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnSynchronizationRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnInitializationRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnShutdownRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnStartRecordRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnStopRecordRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnInitParametersUpdate(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnRecordingParametersUpdate(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnRuntimeParametersUpdate(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnSettingsRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
+
+	void OnImageRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message) const;
 		
 private:
 	Recorder m_Recorder;

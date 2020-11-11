@@ -109,7 +109,7 @@ void Recorder::StopRecord()
 	m_ShouldRecord = false;
 }
 
-bool Recorder::IsCameraOpened()
+bool Recorder::IsCameraOpen()
 {
 	std::lock_guard<std::mutex> lock(m_CameraMutex);	
 	return m_Camera->isOpened();
