@@ -9,6 +9,7 @@
 
 #include "Sennet/Sennet.hpp"
 
+#include "Sennet/ZED/Image.hpp"
 #include "Sennet/ZED/InitParameters.hpp"
 #include "Sennet/ZED/RecordingParameters.hpp"
 #include "Sennet/ZED/RuntimeParameters.hpp"
@@ -26,7 +27,7 @@ class Recorder
 
 public:
 	// Source handle member functions.
-	Recorder(const std::string& rootDirectory = std::string(""));
+	Recorder(const std::string& rootDirectory = std::string("./"));
 	~Recorder();
 
 	// Actions
@@ -39,7 +40,7 @@ public:
 	bool IsRecording() const { return m_Recording; }
 	bool IsCameraOpen();
 
-	Ref<Image> GetImage(const View& view = View::Left);
+	Ref<Image<uint8_t>> GetImage(const View& view = View::Left);
 
 	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
 		GetCurrentCameraParameters();

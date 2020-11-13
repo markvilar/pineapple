@@ -6,6 +6,7 @@ set(HEADER_LIST
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/ControlLayer.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Conversion.hpp"
+	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Image.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/InitParameters.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/Messages.hpp"
 	"${PROJECT_SOURCE_DIR}/include/Sennet/ZED/RecordClient.hpp"

@@ -74,15 +74,8 @@ void ControlLayer::OnImGuiRender()
 		m_InitParametersPanel.OnImGuiRender();
 		m_RecordingParametersPanel.OnImGuiRender();
 		m_RuntimeParametersPanel.OnImGuiRender();
-
-		// Settings
-
-		// Image
-
 		ImGui::End();
 	}
-
-	
 }
 
 void ControlLayer::OnEvent(Event& e)
@@ -97,7 +90,32 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 		case MessageTypes::ServerPing:
 			m_ClientPanel.OnServerPing(message);
 			break;
+		case MessageTypes::RecorderActionAccept:
+			SN_CORE_INFO("Recorder Action Accepted!");
+			break;
+		case MessageTypes::RecorderActionDeny:
+			SN_CORE_INFO("Recorder Action Denied!");
+			break;
+		case MessageTypes::Image:
+			/*
+			uint32_t width, height, channels;
+			message >> channels >> height >> width;
+			auto image = CreateRef<Image>(width*height*channels);
+			message >> data;
+			CreateImageTexture(data, width, height, channels);
+			*/
+			break;
+		default:
+			break;
 	}
+}
+
+void ControlLayer::CreateImageTexture(const std::vector<uint8_t>& data, 
+	const uint32_t& width, const uint32_t& height, 
+	const uint32_t& channels)
+{
+	SN_CORE_INFO("Creating Image Texture: {0} ({1}, {2}, {3})",
+		data.size(), width, height, channels);
 }
 
 }}

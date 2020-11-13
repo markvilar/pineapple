@@ -34,31 +34,31 @@ private:
 		Message<MessageTypes>& message) const;
 
 	void OnInitializationRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnShutdownRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnStartRecordRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnStopRecordRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnInitParametersUpdate(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnRecordingParametersUpdate(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnRuntimeParametersUpdate(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnSettingsRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 
 	void OnImageRequest(Ref<Connection<MessageTypes>> client,
-		Message<MessageTypes>& message) const;
+		Message<MessageTypes>& message);
 		
 private:
 	Recorder m_Recorder;

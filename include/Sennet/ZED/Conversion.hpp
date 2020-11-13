@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <sl/Camera.hpp>
 
 #include "Sennet/Sennet.hpp"
@@ -28,7 +26,6 @@ sl::COORDINATE_SYSTEM SennetToStereolabs(
 	const Sennet::ZED::CoordinateSystem& coordinateSystem);
 
 // Conversion function from Sennet::ZED classes to sl classes.
-Sennet::Ref<sl::Mat> SennetToStereolabs(const Sennet::Ref<Sennet::Image>& image);
 sl::InitParameters SennetToStereolabs(
 	const Sennet::ZED::InitParameters& initParameters);
 sl::RecordingParameters SennetToStereolabs(
@@ -52,8 +49,6 @@ Sennet::ZED::CoordinateSystem StereolabsToSennet(
 	const sl::COORDINATE_SYSTEM& coordinateSystem);
 
 // Conversion function from sl classes to Sennet::ZED classes.
-Sennet::Ref<Sennet::Image> StereolabsToSennet(
-	const Sennet::Ref<sl::Mat>& mat);
 Sennet::ZED::InitParameters StereolabsToSennet(
 	const sl::InitParameters& initParameters);
 Sennet::ZED::RecordingParameters StereolabsToSennet(

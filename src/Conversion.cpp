@@ -175,31 +175,6 @@ sl::COORDINATE_SYSTEM SennetToStereolabs(
 	}
 }
 
-Sennet::Ref<sl::Mat> SennetToStereolabs(const Sennet::Ref<Sennet::Image>& image)
-{
-	auto mat_type = sl::MAT_TYPE::U8_C1;
-	switch (image->GetChannels())
-	{
-		case 1:
-			mat_type = sl::MAT_TYPE::U8_C1;
-			break;
-		case 2:
-			mat_type = sl::MAT_TYPE::U8_C2;
-			break;
-		case 3:
-			mat_type = sl::MAT_TYPE::U8_C3;
-			break;
-		case 4:
-			mat_type = sl::MAT_TYPE::U8_C4;
-			break;
-		default:
-			return nullptr;
-	}
-	return Sennet::CreateRef<sl::Mat>(image->GetWidth(), 
-		image->GetHeight(), mat_type, (sl::uchar1*)image->GetPtr(),
-		image->GetChannels());
-}
-
 sl::InitParameters SennetToStereolabs(
 	const Sennet::ZED::InitParameters& initParameters)
 {
@@ -431,14 +406,6 @@ Sennet::ZED::CoordinateSystem StereolabsToSennet(
 		default:
 			return CoordinateSystem::None;
 	}
-}
-
-Sennet::Ref<Sennet::Image> StereolabsToSennet(
-	const Sennet::Ref<sl::Mat>& mat)
-{
-	return Sennet::CreateRef<Sennet::Image>(
-		mat->getPtr<unsigned char>(), mat->getWidth(), 
-		mat->getHeight(), mat->getChannels());
 }
 
 Sennet::ZED::InitParameters StereolabsToSennet(

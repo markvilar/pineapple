@@ -1,46 +1,126 @@
-#include <filesystem>
-#include <iostream>
-#include <signal.h>
-
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
+#include "Sennet/ZED/Image.hpp"
 #include "Sennet/ZED/Recorder.hpp"
 
-sig_atomic_t stopFlag = 0;
+#include <imgui.h>
 
-void interrupt_handler(int)
+class TestLayer : public Sennet::Layer
 {
-	stopFlag = 1;
-}
-
-int main()
-{
-	// Set up interrupt handler.
-	signal(SIGINT, &interrupt_handler);
-
-	Sennet::Log::Init();
-
-	// Initialize recorder and get recording parameters.
-	Sennet::ZED::Recorder recorder("/home/martin/Documents/");
-	auto recordingParameters = recorder.GetRecordingParameters();
-	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
-
-	// Update recording parameters.
-	recordingParameters.filename = "testRecording.svo";
-	recorder.SetRecordingParameters(recordingParameters);
-
-	// Get new recording parameters.
-	recordingParameters = recorder.GetRecordingParameters();
-	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
-
-	recorder.Initialize();
-	recorder.StartRecord();
-
-	while (!stopFlag)
+public:
+	TestLayer()
+		: Layer("Test"), m_CameraController(1200.0f / 720.0f)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
+	~TestLayer()
+	{
+	}
+	
+	void OnAttach() override
+	{
+		m_Texture = Sennet::Texture2D::Create(1280, 720,
+			Sennet::Texture::InternalFormat::RGBA8,
+			Sennet::Texture::DataFormat::BGRA);
+		m_Recorder.Initialize();
+	}
+
+	void OnDetach() override
+	{
+		m_Recorder.Shutdown();
+	}
+
+	void OnUpdate(Sennet::Timestep ts) override
+	{
+		m_CameraController.OnUpdate(ts);
+		Sennet::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f});
+		Sennet::RenderCommand::Clear();
+
+		Sennet::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+		if (m_Recorder.IsRecording())
+		{
+			auto image = m_Recorder.GetImage();
+			SN_INFO("Image size: {0} ({1}, {2}, {3})", 
+				image->GetSize(), image->GetWidth(),
+				image->GetHeight(), image->GetChannels());
+			if (image->GetSize() > 0)
+			{
+				m_Texture->SetData(image->GetPtr(), 
+					image->GetSize());
+				Sennet::Renderer2D::DrawQuad({ -1.0f, 0.0f }, 
+					{ 1.6f, 0.9f }, m_Texture);
+			}
+		}
+		else
+		{
+			Sennet::Renderer2D::DrawQuad({ -1.0f, 0.0f }, 
+				{ 1.6f, 0.9f }, { 0.8f, 0.2f, 0.2f, 1.0f });
+		}
+		
+		Sennet::Renderer2D::EndScene();
+	}
+
+	void OnImGuiRender() override
+	{
+		static bool show = true;
+		ImGui::ShowDemoWindow(&show);
+		
+		ImGui::Begin("Recorder");
+		if (ImGui::Button("Start Record"))
+		{
+			if (!m_Recorder.IsRecording())
+				m_Recorder.StartRecord();
+		}
+
+		if (ImGui::Button("Stop Record"))
+		{
+			if (m_Recorder.IsRecording())
+				m_Recorder.StopRecord();
+		}
+		ImGui::End();
+	}
+
+	void OnEvent(Sennet::Event& e) override
+	{
+		m_CameraController.OnEvent(e);
+	}
+	
+private:
+	Sennet::OrthographicCameraController m_CameraController;
+	Sennet::Ref<Sennet::Texture2D> m_Texture;
+
+	Sennet::ZED::Recorder m_Recorder;
+};
+
+class TestApplication : public Sennet::Application
+{
+public:
+	TestApplication() : Application()
+	{
+		PushLayer(new TestLayer());
+	}
+
+	~TestApplication()
+	{
+		SN_INFO("Destructor.");
+	}
+};
+
+Sennet::Application* Sennet::CreateApplication()
+{
+	return new TestApplication();
+}
+
+int Sennet::main(int argc, char** argv)
+{
+	Sennet::Log::Init();
+	auto app = Sennet::CreateApplication();
+	app->Run();
 	return 0;
+}
+
+int main(int argc, char** argv)
+{	
+	return Sennet::main(argc, argv);
 }

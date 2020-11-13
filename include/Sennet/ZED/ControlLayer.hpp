@@ -28,10 +28,14 @@ public:
 private:
 	void OnMessage(Message<MessageTypes>& message);
 
+	void CreateImageTexture(const std::vector<uint8_t>& data, 
+		const uint32_t& width, const uint32_t& height, 
+		const uint32_t& channels);
 private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
 	Ref<Texture2D> m_CheckerboardTexture;
+	Ref<Texture2D> m_ImageTexture;
 
 	// Panels
 	RecordClientPanel m_ClientPanel;

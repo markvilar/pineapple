@@ -38,21 +38,6 @@ Recorder::~Recorder()
 
 void Recorder::Initialize()
 {
-	if (m_Running)
-	{
-		SN_CORE_WARN("Recorder already initialized.");
-		return;
-	}
-	else if (not m_Running and m_Recording)
-	{
-		SN_CORE_ERROR("Recorder critical situation! Forcing\
-			shutdown and re-initialization.");
-	}
-	else if (not m_Running and not m_Recording)
-	{
-		SN_CORE_TRACE("Recorder initializing.");
-	}
-
 	StopExecutionThread();
 	JoinExecutionThread();
 	StartExecutionThread();
@@ -63,34 +48,13 @@ void Recorder::Initialize()
 
 void Recorder::Shutdown()
 {
-	if (not m_Running and not m_Recording)
-	{
-		SN_CORE_WARN("Recorder already shut down.");
-	}
-	else if (not m_Running and m_Recording)
-	{
-		SN_CORE_ERROR("Recorder critical situation! Forcing shutdown.");
-	}
-	else if (m_Running and not m_Recording)
-	{
-		SN_CORE_TRACE("Recorder starting shutdown.");
-	}
-
 	StopExecutionThread();
 	JoinExecutionThread();
 }
 
 void Recorder::StartRecord()
 {
-	if (not m_Running)
-	{
-		SN_TRACE("Recorder not initialized.");
-	}
-	else if (m_Running and m_Recording)
-	{
-		SN_TRACE("Recorder already recording.");
-	}
-	else if (m_Running and not m_Recording)
+	if (m_Running and not m_Recording)
 	{
 		m_ShouldRecord = true;
 	}
@@ -98,14 +62,6 @@ void Recorder::StartRecord()
 
 void Recorder::StopRecord()
 {
-	if (m_Running and not m_Recording)
-	{
-		SN_TRACE("Recorder not recording.");
-	}
-	else if (m_Running and m_Recording)
-	{
-		SN_TRACE("Recorder stopping record.");
-	}
 	m_ShouldRecord = false;
 }
 
@@ -115,18 +71,21 @@ bool Recorder::IsCameraOpen()
 	return m_Camera->isOpened();
 }
 
-Ref<Image> Recorder::GetImage(const View& view)
+Ref<Image<uint8_t>> Recorder::GetImage(const View& view)
 {
 	std::lock_guard<std::mutex> lock(m_CameraMutex);
 	if (m_Camera->isOpened())
 	{
+		// Retrieve image on CPU.
 		auto mat = CreateRef<sl::Mat>();
 		m_Camera->retrieveImage(*mat, SennetToStereolabs(view));
-		return StereolabsToSennet(mat);
+		return CreateRef<Image<uint8_t>>(mat->getPtr<uint8_t>(),
+			mat->getWidth(), mat->getHeight(), mat->getChannels());
 	}
 	else
 	{
-		return nullptr;
+		// Return empty image.
+		return CreateRef<Image<uint8_t>>();
 	}
 }
 
@@ -185,7 +144,6 @@ void Recorder::SetRuntimeParameters(
 void Recorder::ExecutionWorker()
 {
 	m_Running = true;
-	SN_TRACE("Recorder standing by.");
 	while (m_ShouldRun)
 	{
 		if (m_ShouldRecord)
@@ -194,7 +152,6 @@ void Recorder::ExecutionWorker()
 		}
 		std::this_thread::sleep_for(m_WorkerTimeout);
 	}
-	SN_TRACE("Recorder idling.");
 	m_Running = false;
 }
 
@@ -214,7 +171,7 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_WARN("ZED Open Error: {0}", 
+		SN_CORE_WARN("ZED Open Error: {0}", 
 			toString(openError).get());
 		m_ShouldRecord = false;
 		m_Recording = false;
@@ -226,7 +183,7 @@ void Recorder::RecordLoop()
 	m_CameraMutex.unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_WARN("ZED Enable Record Error: {0}", 
+		SN_CORE_WARN("ZED Enable Record Error: {0}", 
 			toString(recordError).get());
 		m_ShouldRecord = false;
 		m_Recording = false;
@@ -234,7 +191,6 @@ void Recorder::RecordLoop()
 	}
 
 	sl::ERROR_CODE grabError;
-	SN_TRACE("Recorder recording.");
 	while (m_ShouldRecord)
 	{
 		m_CameraMutex.lock();
@@ -242,7 +198,7 @@ void Recorder::RecordLoop()
 		m_CameraMutex.unlock();
 		if (grabError != sl::ERROR_CODE::SUCCESS)
 		{
-			SN_WARN("Recorder could not grab ZED data!");
+			SN_CORE_WARN("Recorder could not grab ZED data!");
 		}
 
 		std::this_thread::sleep_for(m_RecordTimeout);
