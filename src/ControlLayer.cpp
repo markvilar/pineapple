@@ -13,9 +13,6 @@ ControlLayer::~ControlLayer()
 
 void ControlLayer::OnAttach()
 {
-	m_CheckerboardTexture = Sennet::Texture2D::Create(
-		"../../extern/sennet/assets/textures/Checkerboard-600x600.png");
-
 	// Set up client and parameters.
 	m_Client = CreateRef<RecordClient>();
 	m_InitParameters = CreateRef<InitParameters>();
@@ -32,6 +29,10 @@ void ControlLayer::OnAttach()
 	m_InitParametersPanel.SetContext(m_InitParameters);
 	m_RecordingParametersPanel.SetContext(m_RecordingParameters);
 	m_RuntimeParametersPanel.SetContext(m_RuntimeParameters);
+
+	// Set up texture and image.
+	m_ImageTexture = Texture2D::Create(1, 1);
+	m_Image = CreateRef<Image<uint8_t>>();
 }
 
 void ControlLayer::OnDetach()
@@ -52,12 +53,29 @@ void ControlLayer::OnUpdate(Timestep ts)
 	RenderCommand::Clear();
 
 	Renderer2D::BeginScene(m_CameraController.GetCamera());
-	Sennet::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, 
+
+	if (m_Image->GetSize() > 0 
+		&& m_Image->GetWidth() != m_ImageTexture->GetWidth()
+		&& m_Image->GetHeight() != m_ImageTexture->GetHeight())
+	{
+		m_ImageTexture = Texture2D::Create(m_Image->GetWidth(),
+			m_Image->GetHeight(), 
+			Texture::InternalFormat::RGBA8,
+			Texture::DataFormat::BGRA);
+	}
+	else if (m_Image->GetSize() > 0 && m_Image->GetHeight() > 0 
+		&& m_Image->GetWidth() == m_ImageTexture->GetWidth() 
+		&& m_Image->GetHeight() == m_ImageTexture->GetHeight())
+	{
+		m_ImageTexture->SetData(m_Image->GetPtr(), m_Image->GetSize());
+		float aspectRatio = (float)m_Image->GetWidth() 
+			/ (float)m_Image->GetHeight();
+		Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f },
+			{ aspectRatio, -1.0f }, m_ImageTexture);
+	}
+
+	Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.6f, 0.9f }, 
 		{ 0.8f, 0.2f, 0.3f, 1.0f });
-	Sennet::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, 
-		{ 0.2f, 0.3f, 0.8f, 1.0f });
-	Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 10.0f, 10.0f }, 
-		m_CheckerboardTexture);	
 	Renderer2D::EndScene();
 }
 
@@ -97,25 +115,16 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 			SN_CORE_INFO("Recorder Action Denied!");
 			break;
 		case MessageTypes::Image:
-			/*
 			uint32_t width, height, channels;
 			message >> channels >> height >> width;
-			auto image = CreateRef<Image>(width*height*channels);
-			message >> data;
-			CreateImageTexture(data, width, height, channels);
-			*/
-			break;
-		default:
+			m_Image = CreateRef<Image<uint8_t>>(width, height, 
+				channels);
+			message >> m_Image->GetBuffer();
+			SN_CORE_INFO("Image: {0} ({1},{2},{3})",
+				m_Image->GetSize(), m_Image->GetWidth(),
+				m_Image->GetHeight(), m_Image->GetChannels());
 			break;
 	}
-}
-
-void ControlLayer::CreateImageTexture(const std::vector<uint8_t>& data, 
-	const uint32_t& width, const uint32_t& height, 
-	const uint32_t& channels)
-{
-	SN_CORE_INFO("Creating Image Texture: {0} ({1}, {2}, {3})",
-		data.size(), width, height, channels);
 }
 
 }}

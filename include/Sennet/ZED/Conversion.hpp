@@ -15,6 +15,7 @@ sl::RESOLUTION SennetToStereolabs(const Sennet::ZED::Resolution& resolution);
 sl::VIDEO_SETTINGS SennetToStereolabs(
 	const Sennet::ZED::VideoSettings& videoSettings);
 sl::DEPTH_MODE SennetToStereolabs(const Sennet::ZED::DepthMode& depthMode);
+sl::FLIP_MODE SennetToStereolabs(const Sennet::ZED::FlipMode& flipMode);
 sl::UNIT SennetToStereolabs(const Sennet::ZED::Unit& unit);
 sl::SVO_COMPRESSION_MODE SennetToStereolabs(
 	const Sennet::ZED::SVOCompressionMode& compressionMode);
@@ -39,6 +40,7 @@ Sennet::ZED::Resolution StereolabsToSennet(const sl::RESOLUTION& resolution);
 Sennet::ZED::VideoSettings StereolabsToSennet(
 	const sl::VIDEO_SETTINGS& videoSettings);
 Sennet::ZED::DepthMode StereolabsToSennet(const sl::DEPTH_MODE& depthMode);
+Sennet::ZED::FlipMode StereolabsToSennet(const int flipMode);
 Sennet::ZED::Unit StereolabsToSennet(const sl::UNIT& unit);
 Sennet::ZED::SVOCompressionMode StereolabsToSennet(
 	const sl::SVO_COMPRESSION_MODE& compressionMode);

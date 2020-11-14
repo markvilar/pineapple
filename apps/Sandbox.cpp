@@ -19,7 +19,7 @@ public:
 	
 	void OnAttach() override
 	{
-		m_Texture = Sennet::Texture2D::Create(1280, 720,
+		m_Texture = Sennet::Texture2D::Create(2560, 720,
 			Sennet::Texture::InternalFormat::RGBA8,
 			Sennet::Texture::DataFormat::BGRA);
 		m_Recorder.Initialize();
@@ -40,7 +40,8 @@ public:
 
 		if (m_Recorder.IsRecording())
 		{
-			auto image = m_Recorder.GetImage();
+			auto image = m_Recorder.GetImage(
+				Sennet::ZED::View::SideBySide);
 			SN_INFO("Image size: {0} ({1}, {2}, {3})", 
 				image->GetSize(), image->GetWidth(),
 				image->GetHeight(), image->GetChannels());
@@ -48,14 +49,14 @@ public:
 			{
 				m_Texture->SetData(image->GetPtr(), 
 					image->GetSize());
-				Sennet::Renderer2D::DrawQuad({ -1.0f, 0.0f }, 
-					{ 1.6f, 0.9f }, m_Texture);
+				Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, 
+					{ 3.2f, -0.9f }, m_Texture);
 			}
 		}
 		else
 		{
-			Sennet::Renderer2D::DrawQuad({ -1.0f, 0.0f }, 
-				{ 1.6f, 0.9f }, { 0.8f, 0.2f, 0.2f, 1.0f });
+			Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, 
+				{ 3.2f, -0.9f }, { 0.8f, 0.2f, 0.2f, 1.0f });
 		}
 		
 		Sennet::Renderer2D::EndScene();
@@ -103,7 +104,6 @@ public:
 
 	~TestApplication()
 	{
-		SN_INFO("Destructor.");
 	}
 };
 

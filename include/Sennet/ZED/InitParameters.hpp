@@ -16,6 +16,11 @@ enum class DepthMode : uint8_t
 	None = 0, Performance = 1, Quality = 2, Ultra = 3
 };
 
+enum class FlipMode : uint8_t
+{
+	None = 0, Off = 1, On = 2, Auto = 3
+};
+
 enum class Resolution : uint8_t
 { 
 	None = 0, HD2K = 1, HD1080 = 2, HD720 = 3, VGA = 4
@@ -50,6 +55,7 @@ public:
 
 	// Generic members.
 	Resolution resolution = Resolution::HD720;
+	FlipMode flipMode = FlipMode::Auto;
 	uint32_t cameraFPS = 0;
 	bool enableImageEnhancement = true;
 	bool disableSelfCalibration = false;
@@ -62,6 +68,7 @@ public:
 
 std::string ToString(const Sennet::ZED::CoordinateSystem coordinateSystem);
 std::string ToString(const Sennet::ZED::DepthMode depthMode);
+std::string ToString(const Sennet::ZED::FlipMode flipMode);
 std::string ToString(const Sennet::ZED::Resolution resolution);
 std::string ToString(const Sennet::ZED::Unit unit);
 
@@ -69,6 +76,8 @@ std::ostream& operator<<(std::ostream& os,
 	const Sennet::ZED::CoordinateSystem coordinateSystem);
 std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::DepthMode depthMode);
+std::ostream& operator<<(std::ostream& os, 
+	const Sennet::ZED::FlipMode flipMode);
 std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::Resolution resolution);
 std::ostream& operator<<(std::ostream& os, 

@@ -197,14 +197,13 @@ void RecordServer::OnImageRequest(Ref<Connection<MessageTypes>> client,
 	SN_INFO("[{0}] Image Request.", client->GetID());
 	if (m_Recorder.IsCameraOpen())
 	{
-		/*
 		auto image = m_Recorder.GetImage();
 		uint32_t width = image->GetWidth();
 		uint32_t height = image->GetHeight();
 		uint32_t channels = image->GetChannels();
 		auto data = image->GetBuffer();
 
-		SN_CORE_INFO("Image: {0} ({1}, {2}, {3})", data.size(),
+		SN_CORE_INFO("Image: {0} ({1}, {2}, {3})", image->GetSize(),
 			width, height, channels);
 
 		Message<MessageTypes> message;
@@ -214,7 +213,6 @@ void RecordServer::OnImageRequest(Ref<Connection<MessageTypes>> client,
 		SN_CORE_INFO("Message size: {0}, Buffer Size: {1}", 
 			message.Size(), data.size());
 		client->Send(message);
-		*/
 	}
 }
 

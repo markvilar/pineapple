@@ -6,6 +6,7 @@
 
 #include "Sennet/ZED/RecordClient.hpp"
 
+#include "Sennet/ZED/Image.hpp"
 #include "Sennet/ZED/Panels/InitParametersPanel.hpp"
 #include "Sennet/ZED/Panels/RecordClientPanel.hpp"
 #include "Sennet/ZED/Panels/RecordingParametersPanel.hpp"
@@ -34,8 +35,8 @@ private:
 private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
-	Ref<Texture2D> m_CheckerboardTexture;
 	Ref<Texture2D> m_ImageTexture;
+	Ref<Image<uint8_t>> m_Image = CreateRef<Image<uint8_t>>();
 
 	// Panels
 	RecordClientPanel m_ClientPanel;

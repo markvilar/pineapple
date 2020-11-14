@@ -91,6 +91,21 @@ sl::DEPTH_MODE SennetToStereolabs(const Sennet::ZED::DepthMode& depthMode)
 	}
 }
 
+sl::FLIP_MODE SennetToStereolabs(const Sennet::ZED::FlipMode& flipMode)
+{
+	switch (flipMode)
+	{
+		case Sennet::ZED::FlipMode::Off:
+			return sl::FLIP_MODE::OFF;
+		case Sennet::ZED::FlipMode::On:
+			return sl::FLIP_MODE::ON;
+		case Sennet::ZED::FlipMode::Auto:
+			return sl::FLIP_MODE::AUTO;
+		default:
+			return sl::FLIP_MODE::OFF;
+	}
+}
+
 sl::UNIT SennetToStereolabs(const Sennet::ZED::Unit& unit)
 {
 	switch (unit)
@@ -194,6 +209,7 @@ sl::InitParameters SennetToStereolabs(
 
 	params.camera_resolution = SennetToStereolabs(
 		initParameters.resolution);
+	params.camera_image_flip = SennetToStereolabs(initParameters.flipMode);
 	params.camera_fps = initParameters.cameraFPS;
 	params.enable_image_enhancement = initParameters.enableImageEnhancement;
 	params.camera_disable_self_calib = 
@@ -323,6 +339,21 @@ Sennet::ZED::DepthMode StereolabsToSennet(const sl::DEPTH_MODE& depthMode)
 	}
 }
 
+Sennet::ZED::FlipMode StereolabsToSennet(const int flipMode)
+{
+	switch (flipMode)
+	{
+		case sl::FLIP_MODE::OFF:
+			return Sennet::ZED::FlipMode::Off;
+		case sl::FLIP_MODE::ON:
+			return Sennet::ZED::FlipMode::On;
+		case sl::FLIP_MODE::AUTO:
+			return Sennet::ZED::FlipMode::Auto;
+		default:
+			return Sennet::ZED::FlipMode::None;
+	}
+}
+
 Sennet::ZED::Unit StereolabsToSennet(const sl::UNIT& unit)
 {
 	switch (unit)
@@ -424,6 +455,7 @@ Sennet::ZED::InitParameters StereolabsToSennet(
 	params.enableRightSideDepth = initParameters.enable_right_side_measure;
 
 	params.resolution = StereolabsToSennet(initParameters.camera_resolution);
+	params.flipMode = StereolabsToSennet(initParameters.camera_image_flip);
 	params.cameraFPS = initParameters.camera_fps;
 	params.enableImageEnhancement = initParameters.enable_image_enhancement;
 	params.disableSelfCalibration = initParameters.camera_disable_self_calib;

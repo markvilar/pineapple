@@ -10,13 +10,22 @@ class Image
 public:
 	Image() = default;
 
-	Image(const std::vector<T>& data, const uint32_t& width,
-		const uint32_t& height, const uint32_t& channels)
+	Image(const uint32_t width, const uint32_t height, 
+		const uint32_t channels)
+		: m_Buffer(width*height*channels), m_Width(width),
+		m_Height(height), m_Channels(channels)
 	{
 	}
 
-	Image(const T* ptr, const uint32_t& width, const uint32_t& height, 
-		const uint32_t& channels)
+	Image(const std::vector<T>& data, const uint32_t width,
+		const uint32_t height, const uint32_t channels)
+		: m_Buffer(data), m_Width(width), m_Height(height), 
+		m_Channels(channels)
+	{
+	}
+
+	Image(const T* ptr, const uint32_t width, const uint32_t height, 
+		const uint32_t channels)
 	{
 		m_Buffer.assign(ptr, ptr + width*height*channels);
 		m_Width = width;

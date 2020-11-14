@@ -57,7 +57,20 @@ std::string ToString(const Sennet::ZED::DepthMode depthMode)
 	}
 }
 
-
+std::string ToString(const Sennet::ZED::FlipMode flipMode)
+{
+	switch (flipMode)
+	{
+		case Sennet::ZED::FlipMode::Off:
+			return std::string("Off");
+		case Sennet::ZED::FlipMode::On:
+			return std::string("On");
+		case Sennet::ZED::FlipMode::Auto:
+			return std::string("Auto");
+		default:
+			return std::string("None");
+	}
+}
 
 std::string ToString(const Sennet::ZED::Resolution resolution)
 {

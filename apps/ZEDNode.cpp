@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	Sennet::Log::Init();
 
 	Sennet::ZED::RecordServer server(60000, "/home/martin/Documents/");
-	server.Start(); // TODO: Makes program not terminate.
+	server.Start(); // Note: Makes program not terminate.
 
 	while (!stopFlag)
 	{
