@@ -1,24 +1,19 @@
-# IdleNodeOne
-add_executable(IdleNode IdleNode.cpp)
-target_compile_features(IdleNode PRIVATE cxx_std_17)
-target_link_libraries(IdleNode PRIVATE Sennet SennetZED)
+# Controller
+add_executable(Controller Controller.cpp)
+target_compile_features(Controller PRIVATE cxx_std_17)
+target_link_libraries(Controller PRIVATE Sennet Sennet-ZED)
 
 # Sandbox
 add_executable(Sandbox Sandbox.cpp)
 target_compile_features(Sandbox PRIVATE cxx_std_17)
-target_link_libraries(Sandbox PRIVATE Sennet SennetZED)
+target_link_libraries(Sandbox PRIVATE Sennet Sennet-ZED)
 
-# ZEDControl
-add_executable(ZEDControl ZEDControl.cpp)
-target_compile_features(ZEDControl PRIVATE cxx_std_17)
-target_link_libraries(ZEDControl PRIVATE Sennet SennetZED)
-
-# ZEDNodeOne
+# ZEDNode
 add_executable(ZEDNode ZEDNode.cpp)
 target_compile_features(ZEDNode PRIVATE cxx_std_17)
-target_link_libraries(ZEDNode PRIVATE Sennet SennetZED)
+target_link_libraries(ZEDNode PRIVATE Sennet Sennet-ZED)
 
-# ZEDSandbox
-add_executable(ZEDSandbox ZEDSandbox.cpp)
-target_compile_features(ZEDSandbox PRIVATE cxx_std_17)
-target_link_libraries(ZEDSandbox PRIVATE Sennet SennetZED)
+# ZEDRecord
+add_executable(ZEDRecord ZEDRecord.cpp)
+target_compile_features(ZEDRecord PRIVATE cxx_std_17)
+target_link_libraries(ZEDRecord PRIVATE Sennet Sennet-ZED)
