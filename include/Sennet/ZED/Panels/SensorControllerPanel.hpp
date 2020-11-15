@@ -20,9 +20,18 @@ public:
 
 	void OnImGuiRender();
 
+	bool HasImage() const { return (bool)m_Image; };
+
+	void UpdateImageTexture();
+
+	Ref<Texture2D> GetImageTexture() const { return m_ImageTexture; }
+	Ref<Image<uint8_t>> GetImage() const { return m_Image; }
+
 	void OnSensorControllerAccept(Message<MessageTypes>& message);
 	void OnSensorControllerDeny(Message<MessageTypes>& message);
-	void OnImage(const Ref<Image<uint8_t>>& image);
+
+	void OnImage(Message<MessageTypes>& message);
+	void OnImageStream(Message<MessageTypes>& message);
 	
 private:
 	Ref<Client> m_Client;
@@ -31,8 +40,6 @@ private:
 
 	View m_OptionView = View::Left;
 	bool m_OptionImageStream = false;
-
-	bool m_StatusRecentImage = false;
 };
 
 }}

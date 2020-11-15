@@ -61,6 +61,9 @@ private:
 
 	void OnImageRequest(Ref<Connection<MessageTypes>> client,
 		Message<MessageTypes>& message);
+
+	void OnImageStreamRequest(Ref<Connection<MessageTypes>> client,
+		Message<MessageTypes>& message);
 		
 private:
 	SensorController m_SensorController;

@@ -28,8 +28,10 @@ enum class MessageTypes: uint32_t
 	SettingsDeny			= 32,
 
 	ImageRequest			= 40,
-	Image				= 41,
-	ImageDeny			= 42,
+	ImageStreamRequest		= 41,
+	Image				= 42,
+	ImageStream			= 43,
+	ImageDeny			= 44,
 };
 
 }}

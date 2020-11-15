@@ -42,8 +42,22 @@ void ControlLayer::OnUpdate(Timestep ts)
 	RenderCommand::Clear();
 
 	Renderer2D::BeginScene(m_CameraController.GetCamera());
-	Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.6f, 0.9f }, 
-		{ 0.8f, 0.2f, 0.3f, 1.0f });
+	
+	if (m_SensorControllerPanel.HasImage())
+	{
+		m_SensorControllerPanel.UpdateImageTexture();
+		auto imageTexture = m_SensorControllerPanel.GetImageTexture();
+		float aspectRatio = (float)imageTexture->GetWidth()
+			/ (float)imageTexture->GetHeight();
+		Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, 
+			{ aspectRatio, -1.0f }, imageTexture);
+	}
+	else
+	{
+		Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, 
+			{ 1.76f, -1.0f }, { 0.8f, 0.2f, 0.2f, 1.0f });
+	}
+
 	Renderer2D::EndScene();
 }
 
@@ -96,12 +110,10 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 			m_SensorControllerPanel.OnSensorControllerDeny(message);
 			break;
 		case MessageTypes::Image:
-			uint32_t width, height, channels;
-			message >> channels >> height >> width;
-			auto image = CreateRef<Image<uint8_t>>(width, height, 
-				channels);
-			message >> image->GetBuffer();
-			m_SensorControllerPanel.OnImage(image);
+			m_SensorControllerPanel.OnImage(message);
+			break;
+		case MessageTypes::ImageStream:
+			m_SensorControllerPanel.OnImageStream(message);
 			break;
 	}
 }

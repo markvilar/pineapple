@@ -9,7 +9,7 @@ Server::Server(const uint16_t& port, const std::string& root)
 
 Server::~Server()
 {
-	m_SensorController.Shutdown();
+	Stop();
 }
 
 bool Server::OnClientConnect(Ref<Connection<MessageTypes>> client)
@@ -64,6 +64,9 @@ void Server::OnMessage(Ref<Connection<MessageTypes>> client,
 		break;
 	case MessageTypes::ImageRequest:
 		OnImageRequest(client, message);
+		break;
+	case MessageTypes::ImageStreamRequest:
+		OnImageStreamRequest(client, message);
 		break;
 	}
 }
@@ -210,6 +213,35 @@ void Server::OnImageRequest(Ref<Connection<MessageTypes>> client,
 
 		Message<MessageTypes> message;
 		message.Header.ID = MessageTypes::Image;
+		message << data;
+		message << width << height << channels;
+		client->Send(message);
+	}
+	else
+	{
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::SensorControllerDeny;
+		client->Send(message);
+	}
+}
+
+void Server::OnImageStreamRequest(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message)
+{
+	SN_INFO("[{0}] Image Stream Request.", client->GetID());
+	if (m_SensorController.IsCameraOpen())
+	{
+		auto image = m_SensorController.GetImage();
+		uint32_t width = image->GetWidth();
+		uint32_t height = image->GetHeight();
+		uint32_t channels = image->GetChannels();
+		auto data = image->GetBuffer();
+
+		SN_CORE_INFO("Image: {0} ({1}, {2}, {3})", image->GetSize(),
+			width, height, channels);
+
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::ImageStream;
 		message << data;
 		message << width << height << channels;
 		client->Send(message);

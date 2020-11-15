@@ -101,4 +101,11 @@ void Client::RequestImage()
 	Send(message);
 }
 
+void Client::RequestImageStream()
+{
+	Message<MessageTypes> message;
+	message.Header.ID = MessageTypes::ImageStreamRequest;
+	Send(message);
+}
+
 }}

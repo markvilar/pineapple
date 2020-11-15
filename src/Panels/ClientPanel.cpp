@@ -24,25 +24,30 @@ void ClientPanel::OnImGuiRender()
 {
 	if (ImGui::CollapsingHeader("Client"))
 	{
+		auto windowWidth = ImGui::GetWindowWidth();
+
 		static char InputBuf[256];
+		ImGui::PushItemWidth(windowWidth * 0.66f);
 		if (ImGui::InputText("Address", InputBuf, 
 			IM_ARRAYSIZE(InputBuf)))
 		{
 		}
 
 		static ImU16 port = 0;
+		ImGui::PushItemWidth(windowWidth * 0.66f);
 		ImGui::InputScalar("Port", ImGuiDataType_U16, &port, NULL, 
 			NULL, "%u");
 		
-		if (ImGui::SmallButton("Connect"))
+		if (ImGui::Button("Connect", ImVec2(windowWidth * 0.33f, 0)))
 		{
 			if (m_Client && !m_Client->IsConnected())
 			{
 				m_Client->Connect(std::string(InputBuf), port);
 			}
 		}
+
 		ImGui::SameLine();
-		if (ImGui::SmallButton("Disconnect"))
+		if (ImGui::Button("Disconnect", ImVec2(windowWidth * 0.33f, 0)))
 		{
 			if (m_Client && m_Client->IsConnected())
 			{
@@ -57,14 +62,15 @@ void ClientPanel::OnImGuiRender()
 		ImGui::Dummy(ImVec2(0.0f, 15.0f));
 		ImGui::Columns(2, "Action Columns", true);
 
-		if (ImGui::SmallButton("Ping Server"))
+		if (ImGui::Button("Ping Server", ImVec2(300, 0)))
 		{
 			if (m_Client && m_Client->IsConnected())
 			{
 				m_Client->RequestServerPing();
 			}
 		}
-		if (ImGui::SmallButton("Synchronize Server"))
+
+		if (ImGui::Button("Synchronize Server"))
 		{
 			if (m_Client && m_Client->IsConnected())
 			{

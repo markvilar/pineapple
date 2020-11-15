@@ -32,6 +32,7 @@ public:
 
 	void RequestSettings();
 	void RequestImage();
+	void RequestImageStream();
 
 private:
 
