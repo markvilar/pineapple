@@ -17,14 +17,44 @@ void RecordingParametersPanel::OnImGuiRender()
 {
 	if (ImGui::CollapsingHeader("Recording Parameters"))
 	{
-		static char InputBuf[256];
-		if (ImGui::InputText("SVO Filename", InputBuf, 
-			IM_ARRAYSIZE(InputBuf)))
+		static char inputBuf[256] = "myRecording.svo";
+		if (ImGui::InputText("SVO Filename", inputBuf, 
+			IM_ARRAYSIZE(inputBuf)))
 		{
+			m_Parameters.filename = std::string(inputBuf);
 		}
 
-		// TODO: SVO Compression Mode
-		
+		const char* svoLabels[] = { "None", "Lossless", "H264", "H265" };
+		SVOCompressionMode svoOptions[] = { SVOCompressionMode::None, 
+			SVOCompressionMode::Lossless, SVOCompressionMode::H264, 
+			SVOCompressionMode::H265 };
+		static_assert(sizeof(svoLabels) / sizeof(svoLabels[0])
+			== sizeof(svoOptions) / sizeof(svoOptions[0]),
+			"SVO compression mode labels and options must be of "
+			"equal size.");
+		static int svoIndex = 2;
+		const char* svoLabel = svoLabels[svoIndex];
+		if (ImGui::BeginCombo("SVO Compression Mode", svoLabel))
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(svoLabels); n++)
+			{
+				const bool isSelected =
+					(m_Parameters.compressionMode 
+					== svoOptions[n]);
+				if (ImGui::Selectable(svoLabels[n], isSelected))
+				{
+					svoIndex = n;
+					m_Parameters.compressionMode = 
+						svoOptions[n];
+				}
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
 		static ImU32 bitRate = 0;
 		if (ImGui::InputScalar("Target Bitrate", ImGuiDataType_U32,
 			&bitRate, NULL, NULL, "%u"))

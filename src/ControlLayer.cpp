@@ -52,11 +52,12 @@ void ControlLayer::OnImGuiRender()
 	static bool show = true;
 	ImGui::ShowDemoWindow(&show);
 
-	ImGui::SetNextWindowSize(ImVec2(500,600));
+	ImGui::SetNextWindowSize(ImVec2(420,600));
 	if (ImGui::Begin("ZED"))
 	{
 		m_ClientPanel.OnImGuiRender();
 		ImGui::Separator();
+		m_SensorControllerPanel.OnImGuiRender();
 		m_InitParametersPanel.OnImGuiRender();
 		m_RecordingParametersPanel.OnImGuiRender();
 		m_RuntimeParametersPanel.OnImGuiRender();
@@ -100,7 +101,7 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 			auto image = CreateRef<Image<uint8_t>>(width, height, 
 				channels);
 			message >> image->GetBuffer();
-			m_SensorControllerPanel.SetImage(image);
+			m_SensorControllerPanel.OnImage(image);
 			break;
 	}
 }

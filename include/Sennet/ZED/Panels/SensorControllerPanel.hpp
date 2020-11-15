@@ -17,12 +17,12 @@ public:
 	~SensorControllerPanel() = default;
 
 	void SetClient(const Ref<Client>& client);
-	void SetImage(const Ref<Image<uint8_t>>& image);
 
 	void OnImGuiRender();
 
 	void OnSensorControllerAccept(Message<MessageTypes>& message);
 	void OnSensorControllerDeny(Message<MessageTypes>& message);
+	void OnImage(const Ref<Image<uint8_t>>& image);
 	
 private:
 	Ref<Client> m_Client;

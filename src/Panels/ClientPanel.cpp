@@ -22,99 +22,60 @@ void ClientPanel::SetClient(const Ref<Client>& client)
 
 void ClientPanel::OnImGuiRender()
 {
-	static char InputBuf[256];
-	if (ImGui::InputText("Address", InputBuf, IM_ARRAYSIZE(InputBuf)))
+	if (ImGui::CollapsingHeader("Client"))
 	{
-	}
+		static char InputBuf[256];
+		if (ImGui::InputText("Address", InputBuf, 
+			IM_ARRAYSIZE(InputBuf)))
+		{
+		}
 
-	static ImU16 port = 0;
-	ImGui::InputScalar("Port", ImGuiDataType_U16, &port, NULL, NULL, "%u");
-	
-	if (ImGui::SmallButton("Connect"))
-	{
-		if (m_Client && !m_Client->IsConnected())
+		static ImU16 port = 0;
+		ImGui::InputScalar("Port", ImGuiDataType_U16, &port, NULL, 
+			NULL, "%u");
+		
+		if (ImGui::SmallButton("Connect"))
 		{
-			m_Client->Connect(std::string(InputBuf), port);
+			if (m_Client && !m_Client->IsConnected())
+			{
+				m_Client->Connect(std::string(InputBuf), port);
+			}
 		}
-	}
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Disconnect"))
-	{
-		if (m_Client && m_Client->IsConnected())
+		ImGui::SameLine();
+		if (ImGui::SmallButton("Disconnect"))
 		{
-			m_Client->Disconnect();
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->Disconnect();
+			}
 		}
-	}
 
-	ImGui::SameLine();
-	ImGui::Text("Status: %s", m_Client && m_Client->IsConnected() ?
-		"Connected" : "Not Connected");
+		ImGui::SameLine();
+		ImGui::Text("Status: %s", m_Client && m_Client->IsConnected() ?
+			"Connected" : "Not Connected");
 
-	ImGui::Dummy(ImVec2(0.0f, 15.0f));
-	ImGui::Columns(2, "Action Columns", true);
+		ImGui::Dummy(ImVec2(0.0f, 15.0f));
+		ImGui::Columns(2, "Action Columns", true);
 
-	if (ImGui::SmallButton("Ping Server"))
-	{
-		if (m_Client && m_Client->IsConnected())
+		if (ImGui::SmallButton("Ping Server"))
 		{
-			m_Client->RequestServerPing();
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestServerPing();
+			}
 		}
-	}
-	if (ImGui::SmallButton("Synchronize Server"))
-	{
-		if (m_Client && m_Client->IsConnected())
+		if (ImGui::SmallButton("Synchronize Server"))
 		{
-			m_Client->RequestServerSynchronization();
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestServerSynchronization();
+			}
 		}
-	}
 
-	if (ImGui::SmallButton("Initialize"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerInitialization();
-		}
+		ImGui::NextColumn();
+		
+		ImGui::Columns(1);
 	}
-	if (ImGui::SmallButton("Shutdown"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerShutdown();
-		}
-	}
-	
-	if (ImGui::SmallButton("Start"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerStart();
-		}
-	}
-	if (ImGui::SmallButton("Stop"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerStop();
-		}
-	}
-	if (ImGui::SmallButton("Request Settings"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSettings();
-		}
-	}
-	if (ImGui::SmallButton("Request Image"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestImage();
-		}
-	}
-
-	ImGui::NextColumn();
-	
-	ImGui::Columns(1);
 }
 
 void ClientPanel::OnServerPing(Message<MessageTypes>& message)
