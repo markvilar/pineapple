@@ -1,17 +1,17 @@
-#include "Sennet/ZED/RecordClient.hpp"
+#include "Sennet/ZED/Client.hpp"
 
 namespace Sennet { namespace ZED {
 
-RecordClient::RecordClient()
-	: Client<MessageTypes>()
+Client::Client()
+	: Sennet::Client<MessageTypes>()
 {
 }
 
-RecordClient::~RecordClient()
+Client::~Client()
 {
 }
 
-void RecordClient::RequestServerPing()
+void Client::RequestServerPing()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::ServerPing;
@@ -22,42 +22,42 @@ void RecordClient::RequestServerPing()
 	Send(message);
 }
 
-void RecordClient::RequestServerSynchronization()
+void Client::RequestServerSynchronization()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::ServerSynchronize;
 	Send(message);
 }
 
-void RecordClient::RequestRecorderInitialization()
+void Client::RequestSensorControllerInitialization()
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::RecorderInitialize;
+	message.Header.ID = MessageTypes::SensorControllerInitialize;
 	Send(message);
 }
 
-void RecordClient::RequestRecorderShutdown()
+void Client::RequestSensorControllerShutdown()
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::RecorderShutdown;
+	message.Header.ID = MessageTypes::SensorControllerShutdown;
 	Send(message);
 }
 
-void RecordClient::RequestStartRecord()
+void Client::RequestSensorControllerStart()
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::StartRecord;
+	message.Header.ID = MessageTypes::SensorControllerStart;
 	Send(message);
 }
 
-void RecordClient::RequestStopRecord()
+void Client::RequestSensorControllerStop()
 {
 	Message<MessageTypes> message;
-	message.Header.ID = MessageTypes::StopRecord;
+	message.Header.ID = MessageTypes::SensorControllerStop;
 	Send(message);
 }
 
-void RecordClient::RequestInitParametersUpdate(
+void Client::RequestInitParametersUpdate(
 	const Ref<InitParameters>& parameters)
 {
 	Message<MessageTypes> message;
@@ -67,7 +67,7 @@ void RecordClient::RequestInitParametersUpdate(
 	Send(message);
 }
 
-void RecordClient::RequestRecordingParametersUpdate(
+void Client::RequestRecordingParametersUpdate(
 	const Ref<RecordingParameters>& parameters)
 {
 	Message<MessageTypes> message;
@@ -77,7 +77,7 @@ void RecordClient::RequestRecordingParametersUpdate(
 	Send(message);
 }
 
-void RecordClient::RequestRuntimeParametersUpdate(
+void Client::RequestRuntimeParametersUpdate(
 	const Ref<RuntimeParameters>& parameters)
 {
 	Message<MessageTypes> message;
@@ -87,14 +87,14 @@ void RecordClient::RequestRuntimeParametersUpdate(
 	Send(message);
 }
 
-void RecordClient::RequestSettings()
+void Client::RequestSettings()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::SettingsRequest;
 	Send(message);
 }
 
-void RecordClient::RequestImage()
+void Client::RequestImage()
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::ImageRequest;

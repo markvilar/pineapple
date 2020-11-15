@@ -5,7 +5,7 @@
 #include "Sennet/Sennet.hpp"
 
 #include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/Recorder.hpp"
+#include "Sennet/ZED/SensorController.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -21,21 +21,21 @@ int main()
 
 	Sennet::Log::Init();
 
-	// Initialize recorder and get recording parameters.
-	Sennet::ZED::Recorder recorder("/home/martin/Documents/");
-	auto recordingParameters = recorder.GetRecordingParameters();
+	// Initialize controller and get recording parameters.
+	Sennet::ZED::SensorController controller("/home/martin/Documents/");
+	auto recordingParameters = controller.GetRecordingParameters();
 	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
 
 	// Update recording parameters.
 	recordingParameters.filename = "testRecording.svo";
-	recorder.SetRecordingParameters(recordingParameters);
+	controller.SetRecordingParameters(recordingParameters);
 
 	// Get new recording parameters.
-	recordingParameters = recorder.GetRecordingParameters();
+	recordingParameters = controller.GetRecordingParameters();
 	SN_INFO("Recording Parameters: {0}", recordingParameters.ToString());
 
-	recorder.Initialize();
-	recorder.StartRecord();
+	controller.Initialize();
+	controller.Start();
 
 	while (!stopFlag)
 	{

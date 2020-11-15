@@ -4,13 +4,13 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/RecordClient.hpp"
+#include "Sennet/ZED/Client.hpp"
 
-#include "Sennet/ZED/Image.hpp"
+#include "Sennet/ZED/Panels/ClientPanel.hpp"
 #include "Sennet/ZED/Panels/InitParametersPanel.hpp"
-#include "Sennet/ZED/Panels/RecordClientPanel.hpp"
 #include "Sennet/ZED/Panels/RecordingParametersPanel.hpp"
 #include "Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
+#include "Sennet/ZED/Panels/SensorControllerPanel.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -29,28 +29,20 @@ public:
 private:
 	void OnMessage(Message<MessageTypes>& message);
 
-	void CreateImageTexture(const std::vector<uint8_t>& data, 
-		const uint32_t& width, const uint32_t& height, 
-		const uint32_t& channels);
 private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
-	Ref<Texture2D> m_ImageTexture;
-	Ref<Image<uint8_t>> m_Image = CreateRef<Image<uint8_t>>();
+
+	// Network
+	Ref<Client> m_Client;
 
 	// Panels
-	RecordClientPanel m_ClientPanel;
+	ClientPanel m_ClientPanel;
 	InitParametersPanel m_InitParametersPanel;
 	RecordingParametersPanel m_RecordingParametersPanel;
 	RuntimeParametersPanel m_RuntimeParametersPanel;
+	SensorControllerPanel m_SensorControllerPanel;
 
-	// Network
-	Ref<RecordClient> m_Client;
-
-	// Parameters
-	Ref<InitParameters> m_InitParameters;
-	Ref<RecordingParameters> m_RecordingParameters;
-	Ref<RuntimeParameters> m_RuntimeParameters;
 };
 
 }}

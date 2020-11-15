@@ -2,46 +2,38 @@
 
 namespace Sennet { namespace ZED {
 
-RuntimeParametersPanel::RuntimeParametersPanel(
-	const Ref<RuntimeParameters>& context)
+RuntimeParametersPanel::RuntimeParametersPanel(const Ref<Client>& client)
 {
-	SetContext(context);
+	m_Client= client;
 }
 
-void RuntimeParametersPanel::SetContext(
-	const Ref<RuntimeParameters>& context)
+void RuntimeParametersPanel::SetClient(const Ref<Client>& client)
 {
-	m_Context = context;
+	m_Client= client;
 }
 
 void RuntimeParametersPanel::OnImGuiRender()
 {
 	if (ImGui::CollapsingHeader("Runtime Parameters"))
 	{
-		if (!m_Context)
-		{
-			ImGui::Text("No Context.");
-			return;
-		}
-
 		static const char* sensingModeOptions[] = { "None", 
 			"Standard", "Fill" };
-		ImGui::SliderInt("Sensing Mode", (int*)&m_Context->sensingMode,
-			0, 2, sensingModeOptions[(int)m_Context->sensingMode]);
+		ImGui::SliderInt("Sensing Mode", (int*)&m_Parameters.sensingMode,
+			0, 2, sensingModeOptions[(int)m_Parameters.sensingMode]);
 
 		static const char* referenceFrameOptions[] = { "None", 
 			"World", "Camera" };
 		ImGui::SliderInt("Reference Frame", 
-			(int*)&m_Context->referenceFrame, 0, 2,
-			referenceFrameOptions[(int)m_Context->referenceFrame]);
+			(int*)&m_Parameters.referenceFrame, 0, 2,
+			referenceFrameOptions[(int)m_Parameters.referenceFrame]);
 
-		ImGui::Checkbox("Enable Depth", &m_Context->enableDepth);
+		ImGui::Checkbox("Enable Depth", &m_Parameters.enableDepth);
 
 		static const ImU32 confThreshMin = 0;
 		static const ImU32 confThreshMax = 100;
             	ImGui::SliderScalar("Confidence Theshold", 
 			ImGuiDataType_U32,
-			&m_Context->confidenceThreshold, 
+			&m_Parameters.confidenceThreshold, 
 			&confThreshMin, 
 			&confThreshMax, 
 			"%u");
@@ -50,14 +42,14 @@ void RuntimeParametersPanel::OnImGuiRender()
 		static const ImU32 textConfThreshMax = 100;
             	ImGui::SliderScalar("Texture Confidence Theshold", 
 			ImGuiDataType_U32,
-			&m_Context->textureConfidenceThreshold,
+			&m_Parameters.textureConfidenceThreshold,
 			&textConfThreshMin, 
 			&textConfThreshMax, 
 			"%u");
 
 		if (ImGui::SmallButton("Debug Runtime Parameters"))
 		{
-			SN_CORE_INFO("{0}", m_Context->ToString());
+			SN_CORE_INFO("{0}", m_Parameters.ToString());
 		}
 	}
 }

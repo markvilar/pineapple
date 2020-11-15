@@ -1,7 +1,7 @@
 #include "Sennet/Sennet.hpp"
 
 #include "Sennet/ZED/Image.hpp"
-#include "Sennet/ZED/Recorder.hpp"
+#include "Sennet/ZED/SensorController.hpp"
 
 #include <imgui.h>
 
@@ -22,12 +22,12 @@ public:
 		m_Texture = Sennet::Texture2D::Create(2560, 720,
 			Sennet::Texture::InternalFormat::RGBA8,
 			Sennet::Texture::DataFormat::BGRA);
-		m_Recorder.Initialize();
+		m_SensorController.Initialize();
 	}
 
 	void OnDetach() override
 	{
-		m_Recorder.Shutdown();
+		m_SensorController.Shutdown();
 	}
 
 	void OnUpdate(Sennet::Timestep ts) override
@@ -38,9 +38,9 @@ public:
 
 		Sennet::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-		if (m_Recorder.IsRecording())
+		if (m_SensorController.IsRecording())
 		{
-			auto image = m_Recorder.GetImage(
+			auto image = m_SensorController.GetImage(
 				Sennet::ZED::View::SideBySide);
 			SN_INFO("Image size: {0} ({1}, {2}, {3})", 
 				image->GetSize(), image->GetWidth(),
@@ -70,14 +70,14 @@ public:
 		ImGui::Begin("Recorder");
 		if (ImGui::Button("Start Record"))
 		{
-			if (!m_Recorder.IsRecording())
-				m_Recorder.StartRecord();
+			if (!m_SensorController.IsRecording())
+				m_SensorController.Start();
 		}
 
 		if (ImGui::Button("Stop Record"))
 		{
-			if (m_Recorder.IsRecording())
-				m_Recorder.StopRecord();
+			if (m_SensorController.IsRecording())
+				m_SensorController.Stop();
 		}
 		ImGui::End();
 	}
@@ -91,7 +91,7 @@ private:
 	Sennet::OrthographicCameraController m_CameraController;
 	Sennet::Ref<Sennet::Texture2D> m_Texture;
 
-	Sennet::ZED::Recorder m_Recorder;
+	Sennet::ZED::SensorController m_SensorController;
 };
 
 class TestApplication : public Sennet::Application

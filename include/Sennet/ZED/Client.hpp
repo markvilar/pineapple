@@ -9,19 +9,19 @@
 
 namespace Sennet { namespace ZED {
 
-class RecordClient : public Sennet::Client<MessageTypes>
+class Client : public Sennet::Client<MessageTypes>
 {
 public:
-	RecordClient();
-	virtual ~RecordClient();
+	Client();
+	virtual ~Client();
 
 	void RequestServerPing();
 	void RequestServerSynchronization();
 	
-	void RequestRecorderInitialization();
-	void RequestRecorderShutdown();
-	void RequestStartRecord();
-	void RequestStopRecord();
+	void RequestSensorControllerInitialization();
+	void RequestSensorControllerShutdown();
+	void RequestSensorControllerStart();
+	void RequestSensorControllerStop();
 
 	void RequestInitParametersUpdate(
 		const Ref<InitParameters>& parameters);

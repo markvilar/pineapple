@@ -17,24 +17,18 @@
 
 namespace Sennet { namespace ZED {
 
-class Recorder
+class SensorController
 {
-	// Handle for recording with a ZED camera. The ZED camera is operated
-	// in a separate execution thread. The handle public member functions
-	// interact with the sensor in a thread safe manner. Additionally, all
-	// returned data types are POD or Sennet types in order to make the 
-	// communication layer independent of the Stereolabs SDK.
 
 public:
-	// Source handle member functions.
-	Recorder(const std::string& rootDirectory = std::string("./"));
-	~Recorder();
+	SensorController(const std::string& rootDirectory = std::string("./"));
+	~SensorController();
 
 	// Actions
 	void Initialize();
 	void Shutdown();
-	void StartRecord();
-	void StopRecord();
+	void Start();
+	void Stop();
 
 	bool IsRunning() const { return m_Running; }
 	bool IsRecording() const { return m_Recording; }
@@ -68,7 +62,7 @@ private:
 	RuntimeParameters m_RuntimeParameters;
 	std::string m_RootDirectory;
 
-	Scope<sl::Camera> m_Camera;
+	sl::Camera m_Camera;
 
 	std::mutex m_CameraMutex;
 	std::mutex m_ParametersMutex;

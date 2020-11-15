@@ -5,6 +5,7 @@
 #include "Sennet/Sennet.hpp"
 
 #include "Sennet/ZED/InitParameters.hpp"
+#include "Sennet/ZED/Client.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -12,13 +13,19 @@ class InitParametersPanel
 {
 public:
 	InitParametersPanel() = default;
-	InitParametersPanel(const Ref<InitParameters>& context);
+	~InitParametersPanel() = default;
 
-	void SetContext(const Ref<InitParameters>& context);
+	void SetClient(const Ref<Client>& client);
+
+	void SetServerParameters(const Ref<InitParameters>& parameters);
+
 	void OnImGuiRender();
 
 private:
-	Ref<InitParameters> m_Context;
+	InitParameters m_Parameters;
+	Ref<InitParameters> m_ServerParameters;
+
+	Ref<Client> m_Client;
 };
 
 }}

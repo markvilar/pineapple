@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Recorder.hpp"
+#include "Sennet/ZED/SensorController.hpp"
 
 #include "Sennet/ZED/Conversion.hpp"
 
@@ -8,11 +8,11 @@ namespace Sennet
 namespace ZED
 {
 
-Recorder::Recorder(const std::string& rootDirectory)
+SensorController::SensorController(const std::string& rootDirectory)
 	: m_InitParameters(),
 	m_RecordingParameters(),
 	m_RuntimeParameters(),
-	m_Camera(CreateScope<sl::Camera>()),
+	m_Camera(),
 	m_Running(false),
 	m_Recording(false),
 	m_CameraMutex(),
@@ -23,20 +23,20 @@ Recorder::Recorder(const std::string& rootDirectory)
 	m_RecordTimeout(10)
 {
 	SN_CORE_ASSERT(std::filesystem::exists(std::filesystem::path(
-		rootDirectory)), "Recorder root directory does not exist.");
+		rootDirectory)), "SensorController root directory does not exist.");
 	SN_CORE_ASSERT(rootDirectory.back() == '/',
-		"Recorder root directory must end with '/'.");
+		"SensorController root directory must end with '/'.");
 	m_RootDirectory = rootDirectory;
 	m_RecordingParameters.filename = rootDirectory 
 		+ m_RecordingParameters.filename;
 }
 
-Recorder::~Recorder()
+SensorController::~SensorController()
 {
 	Shutdown();
 }
 
-void Recorder::Initialize()
+void SensorController::Initialize()
 {
 	StopExecutionThread();
 	JoinExecutionThread();
@@ -46,13 +46,13 @@ void Recorder::Initialize()
 	std::this_thread::sleep_for(m_InitTimeout);
 }
 
-void Recorder::Shutdown()
+void SensorController::Shutdown()
 {
 	StopExecutionThread();
 	JoinExecutionThread();
 }
 
-void Recorder::StartRecord()
+void SensorController::Start()
 {
 	if (m_Running and not m_Recording)
 	{
@@ -60,25 +60,25 @@ void Recorder::StartRecord()
 	}
 }
 
-void Recorder::StopRecord()
+void SensorController::Stop()
 {
 	m_ShouldRecord = false;
 }
 
-bool Recorder::IsCameraOpen()
+bool SensorController::IsCameraOpen()
 {
 	std::lock_guard<std::mutex> lock(m_CameraMutex);	
-	return m_Camera->isOpened();
+	return m_Camera.isOpened();
 }
 
-Ref<Image<uint8_t>> Recorder::GetImage(const View& view)
+Ref<Image<uint8_t>> SensorController::GetImage(const View& view)
 {
 	std::lock_guard<std::mutex> lock(m_CameraMutex);
-	if (m_Camera->isOpened())
+	if (m_Camera.isOpened())
 	{
 		// Retrieve image on CPU.
 		auto mat = CreateRef<sl::Mat>();
-		m_Camera->retrieveImage(*mat, SennetToStereolabs(view));
+		m_Camera.retrieveImage(*mat, SennetToStereolabs(view));
 		return CreateRef<Image<uint8_t>>(mat->getPtr<uint8_t>(),
 			mat->getWidth(), mat->getHeight(), mat->getChannels());
 	}
@@ -90,42 +90,42 @@ Ref<Image<uint8_t>> Recorder::GetImage(const View& view)
 }
 
 std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-	Recorder::GetCurrentCameraParameters()
+	SensorController::GetCurrentCameraParameters()
 {
 	std::scoped_lock lock(m_CameraMutex);
-	auto initParameters = StereolabsToSennet(m_Camera->getInitParameters());
+	auto initParameters = StereolabsToSennet(m_Camera.getInitParameters());
 	auto recordingParameters = StereolabsToSennet(
-		m_Camera->getRecordingParameters());
+		m_Camera.getRecordingParameters());
 	auto runtimeParameters = StereolabsToSennet(
-		m_Camera->getRuntimeParameters());
+		m_Camera.getRuntimeParameters());
 	return { initParameters, recordingParameters, runtimeParameters };
 }
 
-InitParameters Recorder::GetInitParameters()
+InitParameters SensorController::GetInitParameters()
 {
 	std::scoped_lock lock(m_ParametersMutex);
 	return m_InitParameters;
 }
 
-RecordingParameters Recorder::GetRecordingParameters()
+RecordingParameters SensorController::GetRecordingParameters()
 {
 	std::scoped_lock lock(m_ParametersMutex);
 	return m_RecordingParameters;
 }
 
-RuntimeParameters Recorder::GetRuntimeParameters()
+RuntimeParameters SensorController::GetRuntimeParameters()
 {
 	std::scoped_lock lock(m_ParametersMutex);
 	return m_RuntimeParameters;
 }
 
-void Recorder::SetInitParameters(const InitParameters& initParameters)
+void SensorController::SetInitParameters(const InitParameters& initParameters)
 {
 	std::scoped_lock lock(m_ParametersMutex);
 	m_InitParameters = initParameters;
 }
 
-void Recorder::SetRecordingParameters(
+void SensorController::SetRecordingParameters(
 	const RecordingParameters& recordingParameters)
 {
 	std::scoped_lock lock(m_ParametersMutex);
@@ -134,14 +134,14 @@ void Recorder::SetRecordingParameters(
 		+ m_RecordingParameters.filename;
 }
 
-void Recorder::SetRuntimeParameters(
+void SensorController::SetRuntimeParameters(
 	const RuntimeParameters& runtimeParameters)
 {
 	std::scoped_lock lock(m_ParametersMutex);
 	m_RuntimeParameters = runtimeParameters;
 }
 
-void Recorder::ExecutionWorker()
+void SensorController::ExecutionWorker()
 {
 	m_Running = true;
 	while (m_ShouldRun)
@@ -155,7 +155,7 @@ void Recorder::ExecutionWorker()
 	m_Running = false;
 }
 
-void Recorder::RecordLoop()
+void SensorController::RecordLoop()
 {
 	m_Recording = true;
 
@@ -167,7 +167,7 @@ void Recorder::RecordLoop()
 	m_ParametersMutex.unlock();
 
 	m_CameraMutex.lock();
-	auto openError = m_Camera->open(initParameters);
+	auto openError = m_Camera.open(initParameters);
 	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
@@ -179,7 +179,7 @@ void Recorder::RecordLoop()
 	}
 
 	m_CameraMutex.lock();
-	auto recordError = m_Camera->enableRecording(recordingParameters);
+	auto recordError = m_Camera.enableRecording(recordingParameters);
 	m_CameraMutex.unlock();
 	if (recordError != sl::ERROR_CODE::SUCCESS)
 	{
@@ -194,37 +194,40 @@ void Recorder::RecordLoop()
 	while (m_ShouldRecord)
 	{
 		m_CameraMutex.lock();
-		grabError = m_Camera->grab(runtimeParameters);
+		grabError = m_Camera.grab(runtimeParameters);
 		m_CameraMutex.unlock();
 		if (grabError != sl::ERROR_CODE::SUCCESS)
 		{
-			SN_CORE_WARN("Recorder could not grab ZED data!");
+			SN_CORE_WARN("SensorController could not grab ZED data!");
 		}
 
 		std::this_thread::sleep_for(m_RecordTimeout);
 	}
 
 	m_CameraMutex.lock();
-	m_Camera->close();
+	if (m_Camera.isOpened())
+	{
+		m_Camera.close();
+	}
 	m_CameraMutex.unlock();
 
 	m_Recording = false;
 }
 
-void Recorder::StartExecutionThread()
+void SensorController::StartExecutionThread()
 {
 	m_ShouldRun = true;
 	m_ExecutionThread = ::Sennet::CreateScope<std::thread>(
-		&Recorder::ExecutionWorker, this);
+		&SensorController::ExecutionWorker, this);
 }
 
-void Recorder::StopExecutionThread()
+void SensorController::StopExecutionThread()
 {
-	StopRecord();
+	Stop();
 	m_ShouldRun = false;
 }
 
-void Recorder::JoinExecutionThread()
+void SensorController::JoinExecutionThread()
 {
 	if (not m_ExecutionThread)
 	{

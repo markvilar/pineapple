@@ -4,6 +4,7 @@
 
 #include "Sennet/Sennet.hpp"
 
+#include "Sennet/ZED/Client.hpp"
 #include "Sennet/ZED/RecordingParameters.hpp"
 
 namespace Sennet { namespace ZED {
@@ -12,13 +13,15 @@ class RecordingParametersPanel
 {
 public:
 	RecordingParametersPanel() = default;
-	RecordingParametersPanel(const Ref<RecordingParameters>& context);
+	RecordingParametersPanel(const Ref<Client>& client);
 
-	void SetContext(const Ref<RecordingParameters>& context);
+	void SetClient(const Ref<Client>& client);
+
 	void OnImGuiRender();
 
 private:
-	Ref<RecordingParameters> m_Context;
+	Ref<Client> m_Client;
+	RecordingParameters m_Parameters;
 };
 
 }}

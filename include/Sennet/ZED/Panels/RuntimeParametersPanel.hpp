@@ -4,6 +4,7 @@
 
 #include "Sennet/Sennet.hpp"
 
+#include "Sennet/ZED/Client.hpp"
 #include "Sennet/ZED/RuntimeParameters.hpp"
 
 namespace Sennet { namespace ZED {
@@ -12,13 +13,15 @@ class RuntimeParametersPanel
 {
 public:
 	RuntimeParametersPanel() = default;
-	RuntimeParametersPanel(const Ref<RuntimeParameters>& context);
+	RuntimeParametersPanel(const Ref<Client>& client);
 
-	void SetContext(const Ref<RuntimeParameters>& context);
+	void SetClient(const Ref<Client>& client);
+
 	void OnImGuiRender();
 
 private:
-	Ref<RuntimeParameters> m_Context;
+	Ref<Client> m_Client;
+	RuntimeParameters m_Parameters;
 };
 
 }}

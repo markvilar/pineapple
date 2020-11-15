@@ -13,26 +13,15 @@ ControlLayer::~ControlLayer()
 
 void ControlLayer::OnAttach()
 {
-	// Set up client and parameters.
-	m_Client = CreateRef<RecordClient>();
-	m_InitParameters = CreateRef<InitParameters>();
-	m_RecordingParameters = CreateRef<RecordingParameters>();
-	m_RuntimeParameters = CreateRef<RuntimeParameters>();
+	// Set up client.
+	m_Client = CreateRef<Client>();
 
-	// Set up client panel.
-	m_ClientPanel.SetContext(m_Client);
-	m_ClientPanel.SetParameters(m_InitParameters);
-	m_ClientPanel.SetParameters(m_RecordingParameters);
-	m_ClientPanel.SetParameters(m_RuntimeParameters);
-
-	// Set up parameter panels.
-	m_InitParametersPanel.SetContext(m_InitParameters);
-	m_RecordingParametersPanel.SetContext(m_RecordingParameters);
-	m_RuntimeParametersPanel.SetContext(m_RuntimeParameters);
-
-	// Set up texture and image.
-	m_ImageTexture = Texture2D::Create(1, 1);
-	m_Image = CreateRef<Image<uint8_t>>();
+	// Set up panels.
+	m_ClientPanel.SetClient(m_Client);
+	m_InitParametersPanel.SetClient(m_Client);
+	m_RecordingParametersPanel.SetClient(m_Client);
+	m_RuntimeParametersPanel.SetClient(m_Client);
+	m_SensorControllerPanel.SetClient(m_Client);
 }
 
 void ControlLayer::OnDetach()
@@ -53,27 +42,6 @@ void ControlLayer::OnUpdate(Timestep ts)
 	RenderCommand::Clear();
 
 	Renderer2D::BeginScene(m_CameraController.GetCamera());
-
-	if (m_Image->GetSize() > 0 
-		&& m_Image->GetWidth() != m_ImageTexture->GetWidth()
-		&& m_Image->GetHeight() != m_ImageTexture->GetHeight())
-	{
-		m_ImageTexture = Texture2D::Create(m_Image->GetWidth(),
-			m_Image->GetHeight(), 
-			Texture::InternalFormat::RGBA8,
-			Texture::DataFormat::BGRA);
-	}
-	else if (m_Image->GetSize() > 0 && m_Image->GetHeight() > 0 
-		&& m_Image->GetWidth() == m_ImageTexture->GetWidth() 
-		&& m_Image->GetHeight() == m_ImageTexture->GetHeight())
-	{
-		m_ImageTexture->SetData(m_Image->GetPtr(), m_Image->GetSize());
-		float aspectRatio = (float)m_Image->GetWidth() 
-			/ (float)m_Image->GetHeight();
-		Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f },
-			{ aspectRatio, -1.0f }, m_ImageTexture);
-	}
-
 	Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.6f, 0.9f }, 
 		{ 0.8f, 0.2f, 0.3f, 1.0f });
 	Renderer2D::EndScene();
@@ -84,7 +52,7 @@ void ControlLayer::OnImGuiRender()
 	static bool show = true;
 	ImGui::ShowDemoWindow(&show);
 
-	ImGui::SetNextWindowSize(ImVec2(520,600));
+	ImGui::SetNextWindowSize(ImVec2(500,600));
 	if (ImGui::Begin("ZED"))
 	{
 		m_ClientPanel.OnImGuiRender();
@@ -105,24 +73,34 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 {
 	switch (message.Header.ID)
 	{
+		// Server Messages.
 		case MessageTypes::ServerPing:
 			m_ClientPanel.OnServerPing(message);
 			break;
-		case MessageTypes::RecorderActionAccept:
-			SN_CORE_INFO("Recorder Action Accepted!");
+		case MessageTypes::ServerSynchronize:
+			m_ClientPanel.OnServerSynchronize(message);
 			break;
-		case MessageTypes::RecorderActionDeny:
-			SN_CORE_INFO("Recorder Action Denied!");
+		case MessageTypes::ServerAccept:
+			m_ClientPanel.OnServerAccept(message);
+			break;
+		case MessageTypes::ServerDeny:
+			m_ClientPanel.OnServerDeny(message);
+			break;
+		// Sensor Controller Messages.
+		case MessageTypes::SensorControllerAccept:
+			m_SensorControllerPanel.OnSensorControllerAccept(
+				message);
+			break;
+		case MessageTypes::SensorControllerDeny:
+			m_SensorControllerPanel.OnSensorControllerDeny(message);
 			break;
 		case MessageTypes::Image:
 			uint32_t width, height, channels;
 			message >> channels >> height >> width;
-			m_Image = CreateRef<Image<uint8_t>>(width, height, 
+			auto image = CreateRef<Image<uint8_t>>(width, height, 
 				channels);
-			message >> m_Image->GetBuffer();
-			SN_CORE_INFO("Image: {0} ({1},{2},{3})",
-				m_Image->GetSize(), m_Image->GetWidth(),
-				m_Image->GetHeight(), m_Image->GetChannels());
+			message >> image->GetBuffer();
+			m_SensorControllerPanel.SetImage(image);
 			break;
 	}
 }
