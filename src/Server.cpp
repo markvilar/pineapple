@@ -86,6 +86,9 @@ void Server::OnServerSynchronizationRequest(
 	SN_INFO("[{0}] Synchronization Request.", client->GetID());
 	Message<MessageTypes> reply;
 	reply.Header.ID = MessageTypes::ServerSynchronize;
+	Timestamp ts;
+	ts.Grab();
+	reply << ts.GetMilliseconds();
 	client->Send(reply);
 }
 
@@ -174,6 +177,25 @@ void Server::OnInitParametersUpdate(
 	Message<MessageTypes>& message)
 {
 	SN_INFO("[{0}] Initialization Parameters Request.", client->GetID());
+	InitParameters parameters;
+
+	message >> parameters.requireSensors;
+	message >> parameters.enableVerboseSDK;
+	message >> parameters.disableSelfCalibration;
+	message >> parameters.enableImageEnhancement;
+	message >> parameters.cameraFPS;
+	message >> parameters.flipMode;
+	message >> parameters.resolution;
+
+	message >> parameters.enableRightSideDepth;
+	message >> parameters.maxDepth;
+	message >> parameters.minDepth;
+	message >> parameters.enableDepthStabilization;
+	message >> parameters.coordinateSystem;
+	message >> parameters.coordinateUnits;
+	message >> parameters.depthMode;
+
+	m_SensorController.SetInitParameters(parameters);
 }
 
 void Server::OnRecordingParametersUpdate(
@@ -181,6 +203,14 @@ void Server::OnRecordingParametersUpdate(
 	Message<MessageTypes>& message)
 {
 	SN_INFO("[{0}] Recording Parameters Request.", client->GetID());
+	RecordingParameters parameters;
+	
+	message >> parameters.targetFrameRate;
+	message >> parameters.targetBitRate;
+	message >> parameters.compressionMode;
+	message >> parameters.filename;
+
+	m_SensorController.SetRecordingParameters(parameters);
 }
 
 void Server::OnRuntimeParametersUpdate(
@@ -188,6 +218,15 @@ void Server::OnRuntimeParametersUpdate(
 	Message<MessageTypes>& message)
 {
 	SN_INFO("[{0}] Runtime Parameters Request.", client->GetID());
+	RuntimeParameters parameters;
+
+	message >> parameters.textureConfidenceThreshold;
+	message >> parameters.confidenceThreshold;
+	message >> parameters.enableDepth;
+	message >> parameters.referenceFrame;
+	message >> parameters.sensingMode;
+
+	m_SensorController.SetRuntimeParameters(parameters);
 }
 
 void Server::OnSettingsRequest(Ref<Connection<MessageTypes>> client,

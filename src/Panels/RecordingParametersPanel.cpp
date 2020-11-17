@@ -69,6 +69,15 @@ void RecordingParametersPanel::OnImGuiRender()
 			m_Parameters.targetFrameRate = frameRate;
 		}
 
+		if (ImGui::SmallButton("Send Recording Parameters"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestRecordingParametersUpdate(
+					m_Parameters);
+			}
+		}
+
 		if (ImGui::SmallButton("Debug Recording Parameters"))
 		{
 			SN_CORE_INFO("{0}", m_Parameters.ToString());

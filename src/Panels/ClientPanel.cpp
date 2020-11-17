@@ -22,7 +22,7 @@ void ClientPanel::SetClient(const Ref<Client>& client)
 
 void ClientPanel::OnImGuiRender()
 {
-	if (ImGui::CollapsingHeader("Client"))
+	if (ImGui::CollapsingHeader("ZED Client"))
 	{
 		auto windowWidth = ImGui::GetWindowWidth();
 
@@ -97,6 +97,14 @@ void ClientPanel::OnServerPing(Message<MessageTypes>& message)
 void ClientPanel::OnServerSynchronize(Message<MessageTypes>& message)
 {
 	SN_CORE_INFO("Server Synchronize.");
+	Timestamp localTime;
+	localTime.Grab();
+	Timestamp remoteTime;
+	uint64_t ms;
+	message >> ms;
+	remoteTime.SetMilliseconds(ms);
+	Sennet::Synchronizer::Get().WriteEntry("Topside", localTime, 
+		"ZED", remoteTime);
 }
 
 void ClientPanel::OnServerAccept(Message<MessageTypes>& message)

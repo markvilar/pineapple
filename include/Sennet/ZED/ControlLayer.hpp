@@ -12,6 +12,9 @@
 #include "Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
 #include "Sennet/ZED/Panels/SensorControllerPanel.hpp"
 
+// Temporary
+#include "Sennet/ZED/Panels/DefaultClientPanel.hpp"
+
 namespace Sennet { namespace ZED {
 
 class ControlLayer : public Sennet::Layer
@@ -29,6 +32,9 @@ public:
 private:
 	void OnMessage(Message<MessageTypes>& message);
 
+	// Temporary.
+	void OnMessage(Message<DefaultMessageTypes>& message);
+
 private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
@@ -43,6 +49,9 @@ private:
 	RuntimeParametersPanel m_RuntimeParametersPanel;
 	SensorControllerPanel m_SensorControllerPanel;
 
+	// Temporary.
+	Ref<Sennet::Client<DefaultMessageTypes>> m_DefaultClient;
+	DefaultClientPanel m_DefaultClientPanel;
 };
 
 }}

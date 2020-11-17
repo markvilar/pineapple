@@ -58,32 +58,56 @@ void Client::RequestSensorControllerStop()
 }
 
 void Client::RequestInitParametersUpdate(
-	const Ref<InitParameters>& parameters)
+	const InitParameters& parameters)
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::InitParametersUpdate;
 
-	message << *parameters;
+	message << parameters.depthMode;
+	message << parameters.coordinateUnits;
+	message << parameters.coordinateSystem;
+	message << parameters.enableDepthStabilization;
+	message << parameters.minDepth;
+	message << parameters.maxDepth;
+	message << parameters.enableRightSideDepth;
+
+	message << parameters.resolution;
+	message << parameters.flipMode;
+	message << parameters.cameraFPS;
+	message << parameters.enableImageEnhancement;
+	message << parameters.disableSelfCalibration;
+	message << parameters.enableVerboseSDK;
+	message << parameters.requireSensors;
+
 	Send(message);
 }
 
 void Client::RequestRecordingParametersUpdate(
-	const Ref<RecordingParameters>& parameters)
+	const RecordingParameters& parameters)
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::RecordingParametersUpdate;
+	
+	message << parameters.filename;
+	message << parameters.compressionMode;
+	message << parameters.targetBitRate;
+	message << parameters.targetFrameRate;
 
-	message << *parameters;
 	Send(message);
 }
 
 void Client::RequestRuntimeParametersUpdate(
-	const Ref<RuntimeParameters>& parameters)
+	const RuntimeParameters& parameters)
 {
 	Message<MessageTypes> message;
 	message.Header.ID = MessageTypes::RuntimeParametersUpdate;
+	
+	message << parameters.sensingMode;
+	message << parameters.referenceFrame;
+	message << parameters.enableDepth;
+	message << parameters.confidenceThreshold;
+	message << parameters.textureConfidenceThreshold;
 
-	message << *parameters;
 	Send(message);
 }
 

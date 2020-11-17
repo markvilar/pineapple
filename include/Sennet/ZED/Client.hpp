@@ -24,11 +24,11 @@ public:
 	void RequestSensorControllerStop();
 
 	void RequestInitParametersUpdate(
-		const Ref<InitParameters>& parameters);
+		const InitParameters& parameters);
 	void RequestRecordingParametersUpdate(
-		const Ref<RecordingParameters>& parameters);
+		const RecordingParameters& parameters);
 	void RequestRuntimeParametersUpdate(
-		const Ref<RuntimeParameters>& parameters);
+		const RuntimeParameters& parameters);
 
 	void RequestSettings();
 	void RequestImage();

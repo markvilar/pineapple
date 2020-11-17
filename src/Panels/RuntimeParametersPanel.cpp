@@ -97,6 +97,15 @@ void RuntimeParametersPanel::OnImGuiRender()
 			&textConfThreshMax, 
 			"%u");
 
+		if (ImGui::SmallButton("Send Runtime Parameters"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestRuntimeParametersUpdate(
+					m_Parameters);
+			}
+		}
+
 		if (ImGui::SmallButton("Debug Runtime Parameters"))
 		{
 			SN_CORE_INFO("{0}", m_Parameters.ToString());

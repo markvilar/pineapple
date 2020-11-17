@@ -196,6 +196,15 @@ void InitParametersPanel::OnImGuiRender()
 			&m_Parameters.enableDepthStabilization);
 		ImGui::Checkbox("Enable Right Side Depth", 
 			&m_Parameters.enableRightSideDepth);
+
+		if (ImGui::SmallButton("Send Initialization Parameters"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestInitParametersUpdate(
+					m_Parameters);
+			}
+		}
 	
 		if (ImGui::SmallButton("Debug Initialization Parameters"))
 		{
