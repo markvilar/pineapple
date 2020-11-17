@@ -13,6 +13,9 @@ ControlLayer::~ControlLayer()
 
 void ControlLayer::OnAttach()
 {
+
+	Sennet::Synchronizer::Get().BeginSession("Synchronization");
+
 	// Set up client.
 	m_Client = CreateRef<Client>();
 
@@ -22,6 +25,10 @@ void ControlLayer::OnAttach()
 	m_RecordingParametersPanel.SetClient(m_Client);
 	m_RuntimeParametersPanel.SetClient(m_Client);
 	m_SensorControllerPanel.SetClient(m_Client);
+
+	// Temporary
+	m_DefaultClient = CreateRef<Sennet::Client<DefaultMessageTypes>>();
+	m_DefaultClientPanel.SetClient(m_DefaultClient);
 }
 
 void ControlLayer::OnDetach()
@@ -30,6 +37,12 @@ void ControlLayer::OnDetach()
 
 void ControlLayer::OnUpdate(Timestep ts)
 {
+	while (!m_DefaultClient->Incoming().empty())
+	{
+		auto message = m_DefaultClient->Incoming().pop_front().Msg;
+		OnMessage(message);
+	}
+
 	while (!m_Client->Incoming().empty())
 	{
 		auto message = m_Client->Incoming().pop_front().Msg;
@@ -67,9 +80,11 @@ void ControlLayer::OnImGuiRender()
 	ImGui::ShowDemoWindow(&show);
 
 	ImGui::SetNextWindowSize(ImVec2(420,600));
-	if (ImGui::Begin("ZED"))
+	if (ImGui::Begin("Control Layer"))
 	{
 		m_ClientPanel.OnImGuiRender();
+		ImGui::Separator();
+		m_DefaultClientPanel.OnImGuiRender();
 		ImGui::Separator();
 		m_SensorControllerPanel.OnImGuiRender();
 		m_InitParametersPanel.OnImGuiRender();
@@ -114,6 +129,27 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 			break;
 		case MessageTypes::ImageStream:
 			m_SensorControllerPanel.OnImageStream(message);
+			break;
+	}
+}
+
+// Temporary.
+void ControlLayer::OnMessage(Message<DefaultMessageTypes>& message)
+{
+	switch (message.Header.ID)
+	{
+		// Server Messages.
+		case DefaultMessageTypes::ServerPing:
+			m_DefaultClientPanel.OnServerPing(message);
+			break;
+		case DefaultMessageTypes::ServerSynchronize:
+			m_DefaultClientPanel.OnServerSynchronize(message);
+			break;
+		case DefaultMessageTypes::ServerAccept:
+			m_DefaultClientPanel.OnServerAccept(message);
+			break;
+		case DefaultMessageTypes::ServerDeny:
+			m_DefaultClientPanel.OnServerDeny(message);
 			break;
 	}
 }

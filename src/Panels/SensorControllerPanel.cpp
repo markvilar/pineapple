@@ -104,9 +104,6 @@ void SensorControllerPanel::OnImage(Message<MessageTypes>& message)
 		channels);
 	message >> image->GetBuffer();
 	m_Image = image;
-	SN_CORE_INFO("Image: {0}, ({1}, {2}, {3})", m_Image->GetSize(),
-		m_Image->GetWidth(), m_Image->GetHeight(),
-		m_Image->GetChannels());
 }
 
 void SensorControllerPanel::OnImageStream(Message<MessageTypes>& message)
@@ -121,9 +118,6 @@ void SensorControllerPanel::OnImageStream(Message<MessageTypes>& message)
 		channels);
 	message >> image->GetBuffer();
 	m_Image = image;
-	SN_CORE_INFO("Image Stream: {0}, ({1}, {2}, {3})", m_Image->GetSize(),
-		m_Image->GetWidth(), m_Image->GetHeight(),
-		m_Image->GetChannels());
 }
 
 }}
