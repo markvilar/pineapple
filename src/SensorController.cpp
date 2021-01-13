@@ -1,6 +1,6 @@
-#include "Sennet/ZED/SensorController.hpp"
+#include "Sennet-ZED/SensorController.hpp"
 
-#include "Sennet/ZED/Conversion.hpp"
+#include "Sennet-ZED/Conversion.hpp"
 
 namespace Sennet
 {
@@ -9,18 +9,10 @@ namespace ZED
 {
 
 SensorController::SensorController(const std::string& rootDirectory)
-	: m_InitParameters(),
-	m_RecordingParameters(),
-	m_RuntimeParameters(),
-	m_Camera(),
-	m_Running(false),
-	m_Recording(false),
-	m_CameraMutex(),
-	m_ParametersMutex(),
-	m_ExecutionThread(),
-	m_InitTimeout(100),
-	m_WorkerTimeout(100),
-	m_RecordTimeout(10)
+	: m_InitParameters(), m_RecordingParameters(), m_RuntimeParameters(),
+	m_Camera(), m_Running(false), m_Recording(false), m_CameraMutex(),
+	m_ParametersMutex(), m_ExecutionThread(), m_InitTimeout(100), 
+	m_WorkerTimeout(100), m_RecordTimeout(10)
 {
 	SN_CORE_ASSERT(std::filesystem::exists(std::filesystem::path(
 		rootDirectory)), "SensorController root directory does not exist.");

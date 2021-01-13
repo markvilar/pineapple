@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/RuntimeParametersPanel.hpp"
+#include "Sennet-ZED/Panels/RuntimeParametersPanel.hpp"
 
 namespace Sennet { namespace ZED {
 

@@ -5,10 +5,10 @@ namespace Sennet { namespace ZED {
 
 enum class MessageTypes: uint32_t
 {
-	ServerPing			= 0,
-	ServerSynchronize		= 1,
-	ServerAccept			= 2,
-	ServerDeny			= 3,
+	ServerPing					= 0,
+	ServerSynchronize			= 1,
+	ServerAccept				= 2,
+	ServerDeny					= 3,
 
 	SensorControllerInitialize	= 11,
 	SensorControllerShutdown	= 12,
@@ -20,18 +20,19 @@ enum class MessageTypes: uint32_t
 	InitParametersUpdate		= 20,
 	RecordingParametersUpdate	= 21,
 	RuntimeParametersUpdate		= 22,
-	ParametersAccept		= 23,
-	ParametersDeny			= 24,
+	ParametersAccept			= 23,
+	ParametersDeny				= 24,
 
-	SettingsRequest			= 30,
-	Settings			= 31,
-	SettingsDeny			= 32,
+	SettingsRequest				= 30,
+	Settings					= 31,
+	SettingsDeny				= 32,
 
-	ImageRequest			= 40,
-	ImageStreamRequest		= 41,
-	Image				= 42,
-	ImageStream			= 43,
-	ImageDeny			= 44,
+	ImageRequest				= 40,
+	ImageStreamRequest			= 41,
+	Image						= 42,
+	ImageStream					= 43,
+	ImageDeny					= 44,
+	ImageStreamDeny				= 45,
 };
 
 }}

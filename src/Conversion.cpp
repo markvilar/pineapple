@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Conversion.hpp"
+#include "Sennet-ZED/Conversion.hpp"
 
 sl::VIEW SennetToStereolabs(const Sennet::ZED::View& view)
 {

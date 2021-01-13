@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/ClientPanel.hpp"
+#include "Sennet-ZED/Panels/ClientPanel.hpp"
 
 static void Strtrim(char* s)
 { 

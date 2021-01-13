@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/RecordingParametersPanel.hpp"
+#include "Sennet-ZED/Panels/RecordingParametersPanel.hpp"
 
 namespace Sennet { namespace ZED {
 

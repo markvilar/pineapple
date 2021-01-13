@@ -4,8 +4,8 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/SensorController.hpp"
+#include "Sennet-ZED/Messages.hpp"
+#include "Sennet-ZED/SensorController.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -14,7 +14,7 @@ void interrupt_handler(int)
 	stopFlag = 1;
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	// Set up interrupt handler.
 	signal(SIGINT, &interrupt_handler);

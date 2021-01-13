@@ -7,13 +7,14 @@ namespace Sennet { namespace ZED {
 
 enum class SVOCompressionMode : uint8_t
 { 
-	None = 0, Lossless = 1, H264 = 2, H265 = 3
+	None		= 0, 
+	Lossless	= 1, 
+	H264		= 2, 
+	H265		= 3
 };
 
 class RecordingParameters
 {
-	// Wrapper for sl::RecordingParameters. Neglects functionality of the
-	// Stereolabs SDK that is considered unimportant for recording.
 public:
 	RecordingParameters() = default;
 	~RecordingParameters() = default;
@@ -29,8 +30,7 @@ public:
 	uint32_t targetFrameRate = 0;
 };
 
-}
-}
+}}
 
 std::string ToString(const Sennet::ZED::SVOCompressionMode compressionMode);
 
