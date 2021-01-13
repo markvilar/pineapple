@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sl/Camera.hpp>
-
 namespace Sennet { namespace ZED {
 
 template <typename T>
@@ -10,10 +8,9 @@ class Image
 public:
 	Image() = default;
 
-	Image(const uint32_t width, const uint32_t height, 
-		const uint32_t channels)
-		: m_Buffer(width*height*channels), m_Width(width),
-		m_Height(height), m_Channels(channels)
+	Image(const uint32_t width, const uint32_t height, const uint32_t channels)
+		: m_Buffer(width*height*channels), m_Width(width), m_Height(height), 
+		m_Channels(channels)
 	{
 	}
 
@@ -101,7 +98,7 @@ public:
 			<< GetHeight() << "," << GetChannels() << ")";
 		return ss.str();
 	}	
-	
+
 	friend std::ostream& operator<<(std::ostream& os, const Image& image)
 	{
 		return os << image.ToString();

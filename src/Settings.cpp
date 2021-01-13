@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Settings.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 std::string ToString(const Sennet::ZED::VideoSettings videoSettings)
 {

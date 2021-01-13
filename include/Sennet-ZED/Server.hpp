@@ -1,12 +1,12 @@
 #pragma once
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/SensorController.hpp"
+#include "Sennet-ZED/Messages.hpp"
+#include "Sennet-ZED/SensorController.hpp"
 
-#include "Sennet/ZED/InitParameters.hpp"
-#include "Sennet/ZED/RecordingParameters.hpp"
-#include "Sennet/ZED/RuntimeParameters.hpp"
+#include "Sennet-ZED/InitParameters.hpp"
+#include "Sennet-ZED/RecordingParameters.hpp"
+#include "Sennet-ZED/RuntimeParameters.hpp"
 
 namespace Sennet { namespace ZED {
 

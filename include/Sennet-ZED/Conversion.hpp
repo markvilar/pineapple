@@ -4,10 +4,10 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/InitParameters.hpp"
-#include "Sennet/ZED/RecordingParameters.hpp"
-#include "Sennet/ZED/RuntimeParameters.hpp"
-#include "Sennet/ZED/Settings.hpp"
+#include "Sennet-ZED/InitParameters.hpp"
+#include "Sennet-ZED/RecordingParameters.hpp"
+#include "Sennet-ZED/RuntimeParameters.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 // Conversion function from Sennet::ZED types to sl types.
 sl::VIEW SennetToStereolabs(const Sennet::ZED::View& view);

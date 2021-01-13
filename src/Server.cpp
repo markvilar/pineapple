@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Server.hpp"
+#include "Sennet-ZED/Server.hpp"
 
 namespace Sennet { namespace ZED {
 

@@ -3,8 +3,8 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/Server.hpp"
+#include "Sennet-ZED/Messages.hpp"
+#include "Sennet-ZED/Server.hpp"
 
 sig_atomic_t stopFlag = 0;
 

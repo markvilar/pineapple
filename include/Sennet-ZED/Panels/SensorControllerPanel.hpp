@@ -4,9 +4,9 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Client.hpp"
-#include "Sennet/ZED/Image.hpp"
-#include "Sennet/ZED/Settings.hpp"
+#include "Sennet-ZED/Client.hpp"
+#include "Sennet-ZED/Image.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 namespace Sennet { namespace ZED {
 

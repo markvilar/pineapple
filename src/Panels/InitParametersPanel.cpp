@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/InitParametersPanel.hpp"
+#include "Sennet-ZED/Panels/InitParametersPanel.hpp"
 
 namespace Sennet { namespace ZED {
 

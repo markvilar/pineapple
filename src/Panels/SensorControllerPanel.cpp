@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/SensorControllerPanel.hpp"
+#include "Sennet-ZED/Panels/SensorControllerPanel.hpp"
 
 namespace Sennet { namespace ZED {
 
