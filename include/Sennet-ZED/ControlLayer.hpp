@@ -32,6 +32,7 @@ private:
 private:
 	// Rendering
 	OrthographicCameraController m_CameraController;
+	Ref<Framebuffer> m_Framebuffer;
 
 	// Network
 	Ref<Client> m_Client;
@@ -42,6 +43,11 @@ private:
 	RecordingParametersPanel m_RecordingParametersPanel;
 	RuntimeParametersPanel m_RuntimeParametersPanel;
 	SensorControllerPanel m_SensorControllerPanel;
+
+	// Viewport
+	bool m_ViewportFocused = false;
+	bool m_ViewportHovered = false;
+	glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 };
 
 }}
