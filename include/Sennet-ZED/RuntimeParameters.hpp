@@ -37,12 +37,11 @@ public:
 	uint32_t textureConfidenceThreshold = 100;
 };
 
+std::string ToString(const ReferenceFrame& referenceFrame);
+std::string ToString(const SensingMode& sensingMode);
+
+std::ostream& operator<<(std::ostream& os, const SensingMode& sensingMode);
+std::ostream& operator<<(std::ostream& os, 
+	const ReferenceFrame& referenceFrame);
+
 }}
-
-std::string ToString(const Sennet::ZED::ReferenceFrame referenceFrame);
-std::string ToString(const Sennet::ZED::SensingMode sensingMode);
-
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SensingMode sensingMode);
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::ReferenceFrame referenceFrame);

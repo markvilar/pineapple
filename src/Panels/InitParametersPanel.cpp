@@ -2,25 +2,13 @@
 
 namespace Sennet { namespace ZED {
 
-void InitParametersPanel::SetClient(const Ref<Client>& client)
-{
-	m_Client = client;
-}
-
-void InitParametersPanel::SetServerParameters(
-	const Ref<InitParameters>& parameters)
-{
-	m_ServerParameters = parameters;
-}
-
 void InitParametersPanel::OnImGuiRender()
 {
-	if (ImGui::CollapsingHeader("Initialization Parameters"))
+	if (ImGui::Begin("Initialization Parameters"))
 	{
 		ImGui::Text("Generic Parameters");
 
-		const char* resLabels[] = { "None", "HD2K", "HD1080", "HD720",
-			"VGA" };
+		const char* resLabels[] = { "None", "HD2K", "HD1080", "HD720", "VGA" };
 		Resolution resOptions[] = { Resolution::None, Resolution::HD2K,
 			Resolution::HD1080, Resolution::HD720, Resolution::VGA };
 		static_assert(sizeof(resLabels) / sizeof(resLabels[0])
@@ -32,8 +20,8 @@ void InitParametersPanel::OnImGuiRender()
 		{
 			for (int n = 0; n < IM_ARRAYSIZE(resLabels); n++)
 			{
-				const bool isSelected = (m_Parameters.resolution 
-					== resOptions[n]);
+				const bool isSelected = 
+					(m_Parameters.resolution == resOptions[n]);
 				if (ImGui::Selectable(resLabels[n], isSelected))
 				{
 					resIndex = n;
@@ -58,8 +46,8 @@ void InitParametersPanel::OnImGuiRender()
 		{
 			for (int n = 0; n < IM_ARRAYSIZE(fpsLabels); n++)
 			{
-				const bool isSelected = (m_Parameters.cameraFPS
-					== fpsOptions[n]);
+				const bool isSelected = 
+					(m_Parameters.cameraFPS == fpsOptions[n]);
 				if (ImGui::Selectable(fpsLabels[n], isSelected))
 				{
 					fpsIndex = n;
@@ -77,19 +65,15 @@ void InitParametersPanel::OnImGuiRender()
 			&m_Parameters.enableImageEnhancement);
 		ImGui::Checkbox("Disable Self Calibration", 
 			&m_Parameters.disableSelfCalibration);
-		ImGui::Checkbox("Enable Verbose SDK", 
-			&m_Parameters.enableVerboseSDK);
-		ImGui::Checkbox("Require Sensors", 
-			&m_Parameters.requireSensors);
+		ImGui::Checkbox("Enable Verbose SDK", &m_Parameters.enableVerboseSDK);
 
 		ImGui::Dummy(ImVec2(0.0f, 15.0f));
 		ImGui::Text("Depth Parameters");
 
 		const char* depthLabels[] = { "None", "Performance", "Quality", 
 			"Ultra" };
-		DepthMode depthOptions[] = { DepthMode::None,
-			DepthMode::Performance, DepthMode::Quality,
-			DepthMode::Ultra };
+		DepthMode depthOptions[] = { DepthMode::None, DepthMode::Performance, 
+			DepthMode::Quality, DepthMode::Ultra };
 		static_assert(sizeof(depthLabels) / sizeof(depthLabels[0])
 			== sizeof(depthOptions) / sizeof(depthOptions[0]),
 			"FPS labels and options must be of equal size.");
@@ -99,8 +83,8 @@ void InitParametersPanel::OnImGuiRender()
 		{
 			for (int n = 0; n < IM_ARRAYSIZE(depthLabels); n++)
 			{
-				const bool isSelected = (m_Parameters.depthMode
-					== depthOptions[n]);
+				const bool isSelected = 
+					(m_Parameters.depthMode == depthOptions[n]);
 				if (ImGui::Selectable(depthLabels[n], 
 					isSelected))
 				{
@@ -169,15 +153,12 @@ void InitParametersPanel::OnImGuiRender()
 			for (int n = 0; n < IM_ARRAYSIZE(sysLabels); n++)
 			{
 				const bool isSelected = 
-					(m_Parameters.coordinateSystem ==
-					sysOptions[n]);
+					(m_Parameters.coordinateSystem == sysOptions[n]);
 					
-				if (ImGui::Selectable(sysLabels[n], 
-					isSelected))
+				if (ImGui::Selectable(sysLabels[n], isSelected))
 				{
 					sysIndex = n;
-					m_Parameters.coordinateSystem = 
-						sysOptions[n];
+					m_Parameters.coordinateSystem = sysOptions[n];
 				}
 				if (isSelected)
 				{
@@ -187,7 +168,7 @@ void InitParametersPanel::OnImGuiRender()
 			ImGui::EndCombo();
 		}
 
-            	ImGui::SliderFloat("Minimum Depth", &m_Parameters.minDepth, 
+		ImGui::SliderFloat("Minimum Depth", &m_Parameters.minDepth, 
 			-1.0f, m_Parameters.maxDepth, "%.1f");
 		ImGui::SliderFloat("Maximum Depth", &m_Parameters.maxDepth, 
 			m_Parameters.minDepth, 10000.0f, "%.1f");
@@ -197,19 +178,20 @@ void InitParametersPanel::OnImGuiRender()
 		ImGui::Checkbox("Enable Right Side Depth", 
 			&m_Parameters.enableRightSideDepth);
 
-		if (ImGui::SmallButton("Send Initialization Parameters"))
+		if (ImGui::SmallButton("Update Initialization Parameters"))
 		{
 			if (m_Client && m_Client->IsConnected())
 			{
-				m_Client->RequestInitParametersUpdate(
-					m_Parameters);
+				m_Client->RequestInitParametersUpdate(m_Parameters);
 			}
 		}
-	
+
 		if (ImGui::SmallButton("Debug Initialization Parameters"))
 		{
 			SN_CORE_INFO("{0}", m_Parameters.ToString());
 		}
+
+		ImGui::End();
 	}
 }
 

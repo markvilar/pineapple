@@ -5,8 +5,8 @@ namespace Sennet { namespace ZED {
 std::string RuntimeParameters::ToString() const
 {
 	std::stringstream ss;
-	ss << "Sensing Mode: " << ::ToString(sensingMode)
-		<< ", Reference Frame: " << ::ToString(referenceFrame)
+	ss << "Sensing Mode: " << Sennet::ZED::ToString(sensingMode)
+		<< ", Reference Frame: " << Sennet::ZED::ToString(referenceFrame)
 		<< ", Depth Enabled: " << enableDepth;
 	return ss.str();
 }
@@ -16,43 +16,40 @@ std::ostream& operator<<(std::ostream& os, const RuntimeParameters& rp)
 	return os << rp.ToString();
 }
 
-}
-}
-
-std::string ToString(const Sennet::ZED::ReferenceFrame referenceFrame)
+std::string ToString(const ReferenceFrame& referenceFrame)
 {
 	switch (referenceFrame)
 	{
-		case Sennet::ZED::ReferenceFrame::World:
+		case ReferenceFrame::World:
 			return std::string("World");
-		case Sennet::ZED::ReferenceFrame::Camera:
+		case ReferenceFrame::Camera:
 			return std::string("Camera");
 		default:
 			return std::string("None");
 	}
 }
 
-std::string ToString(const Sennet::ZED::SensingMode sensingMode)
+std::string ToString(const SensingMode& sensingMode)
 {
 	switch (sensingMode)
 	{
-		case Sennet::ZED::SensingMode::Standard:
+		case SensingMode::Standard:
 			return std::string("Standard");
-		case Sennet::ZED::SensingMode::Fill:
+		case SensingMode::Fill:
 			return std::string("Fill");
 		default:
 			return std::string("None");
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::ReferenceFrame referenceFrame)
+std::ostream& operator<<(std::ostream& os, const ReferenceFrame& referenceFrame)
 {
 	return os << ToString(referenceFrame);
 }
 
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::SensingMode sensingMode)
+std::ostream& operator<<(std::ostream& os, const SensingMode& sensingMode)
 {
 	return os << ToString(sensingMode);
 }
+
+}}

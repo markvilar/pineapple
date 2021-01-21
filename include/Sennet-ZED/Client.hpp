@@ -6,6 +6,7 @@
 #include "Sennet-ZED/InitParameters.hpp"
 #include "Sennet-ZED/RecordingParameters.hpp"
 #include "Sennet-ZED/RuntimeParameters.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -16,23 +17,18 @@ public:
 	virtual ~Client();
 
 	void RequestServerPing();
-	void RequestServerSynchronization();
 	
 	void RequestSensorControllerInitialization();
 	void RequestSensorControllerShutdown();
 	void RequestSensorControllerStart();
 	void RequestSensorControllerStop();
 
-	void RequestInitParametersUpdate(
-		const InitParameters& parameters);
-	void RequestRecordingParametersUpdate(
-		const RecordingParameters& parameters);
-	void RequestRuntimeParametersUpdate(
-		const RuntimeParameters& parameters);
+	void RequestImage(const View& view);
+	void RequestImageStream(const View& view);
 
-	void RequestSettings();
-	void RequestImage();
-	void RequestImageStream();
+	void RequestInitParametersUpdate(const InitParameters& parameters);
+	void RequestRecordingParametersUpdate(const RecordingParameters& parameters);
+	void RequestRuntimeParametersUpdate(const RuntimeParameters& parameters);
 
 private:
 

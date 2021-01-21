@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	
 	Sennet::Log::Init();
 
-	Sennet::ZED::Server server(60000, "/home/martin/Documents/");
+	Sennet::ZED::Server server(60000, "/home/martin/data/");
 	server.Start(); // Note: Makes program not terminate.
 
 	while (!stopFlag)

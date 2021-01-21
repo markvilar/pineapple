@@ -1,70 +1,73 @@
 #include "Sennet-ZED/Settings.hpp"
 
-std::string ToString(const Sennet::ZED::VideoSettings videoSettings)
+namespace Sennet { namespace ZED {
+
+std::string ToString(const VideoSettings& videoSettings)
 {
 	switch (videoSettings)
 	{
-		case Sennet::ZED::VideoSettings::Brightness:
+		case VideoSettings::Brightness:
 			return std::string("Brightness");
-		case Sennet::ZED::VideoSettings::Contrast:
+		case VideoSettings::Contrast:
 			return std::string("Contrast");
-		case Sennet::ZED::VideoSettings::Hue:
+		case VideoSettings::Hue:
 			return std::string("Hue");
-		case Sennet::ZED::VideoSettings::Saturation:
+		case VideoSettings::Saturation:
 			return std::string("Saturation");
-		case Sennet::ZED::VideoSettings::Sharpness:
+		case VideoSettings::Sharpness:
 			return std::string("Sharpness");
-		case Sennet::ZED::VideoSettings::Gain:
+		case VideoSettings::Gain:
 			return std::string("Gain");
-		case Sennet::ZED::VideoSettings::Exposure:
+		case VideoSettings::Exposure:
 			return std::string("Exposure");
-		case Sennet::ZED::VideoSettings::AECAGC:
+		case VideoSettings::AECAGC:
 			return std::string("AECAGC");
-		case Sennet::ZED::VideoSettings::WhitebalanceTemperature:
+		case VideoSettings::WhitebalanceTemperature:
 			return std::string("WhitebalanceTemperature");
-		case Sennet::ZED::VideoSettings::WhitebalanceAuto:
+		case VideoSettings::WhitebalanceAuto:
 			return std::string("WhitebalanceAuto");
-		case Sennet::ZED::VideoSettings::LEDStatus:
+		case VideoSettings::LEDStatus:
 			return std::string("LEDStatus");
 		default:
 			return std::string("None");
 	}
 }
 
-std::string ToString(const Sennet::ZED::View v)
+std::string ToString(const View& v)
 {
 	switch (v)
 	{
-		case Sennet::ZED::View::Left:
+		case View::Left:
 			return std::string("Left");
-		case Sennet::ZED::View::Right:
+		case View::Right:
 			return std::string("Right");
-		case Sennet::ZED::View::LeftGray:
+		case View::LeftGray:
 			return std::string("LeftGray");
-		case Sennet::ZED::View::RightGray:
+		case View::RightGray:
 			return std::string("RightGray");
-		case Sennet::ZED::View::LeftUnrectified:
+		case View::LeftUnrectified:
 			return std::string("LeftUnrectified");
-		case Sennet::ZED::View::RightUnrectified:
+		case View::RightUnrectified:
 			return std::string("RightUnrectified");
-		case Sennet::ZED::View::LeftUnrectifiedGray:
+		case View::LeftUnrectifiedGray:
 			return std::string("LeftUnrectifiedGray");
-		case Sennet::ZED::View::RightUnrectifiedGray:
+		case View::RightUnrectifiedGray:
 			return std::string("RightUnrectifiedGray");
-		case Sennet::ZED::View::SideBySide:
+		case View::SideBySide:
 			return std::string("SideBySide");
 		default:
 			return std::string("None");
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::VideoSettings videoSettings)
+std::ostream& operator<<(std::ostream& os, const VideoSettings& videoSettings)
 {
 	return os << ToString(videoSettings);
 }
 
-std::ostream& operator<<(std::ostream& os, const Sennet::ZED::View view)
+std::ostream& operator<<(std::ostream& os, const View& view)
 {
 	return os << ToString(view);
 }
+
+}}

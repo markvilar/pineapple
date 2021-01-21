@@ -35,13 +35,11 @@ enum class View : uint8_t
 	SideBySide				= 9,
 };
 
+std::string ToString(const VideoSettings& videoSettings);
+std::string ToString(const View& view);
+
+std::ostream& operator<<(std::ostream& os, const VideoSettings& videoSettings);
+std::ostream& operator<<(std::ostream& os, const View& view);
+
 }
 }
-
-std::string ToString(const Sennet::ZED::VideoSettings videoSettings);
-std::string ToString(const Sennet::ZED::View view);
-
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::VideoSettings videoSettings);
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::View view);

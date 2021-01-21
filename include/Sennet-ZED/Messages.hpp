@@ -7,8 +7,8 @@ enum class MessageTypes: uint32_t
 {
 	ServerPing					= 0,
 	ServerSynchronize			= 1,
-	ServerAccept				= 2,
-	ServerDeny					= 3,
+	ServerAccept					= 2,
+	ServerDeny						= 3,
 
 	SensorControllerInitialize	= 11,
 	SensorControllerShutdown	= 12,
@@ -17,22 +17,27 @@ enum class MessageTypes: uint32_t
 	SensorControllerAccept		= 15,
 	SensorControllerDeny		= 16,
 
-	InitParametersUpdate		= 20,
-	RecordingParametersUpdate	= 21,
-	RuntimeParametersUpdate		= 22,
-	ParametersAccept			= 23,
-	ParametersDeny				= 24,
+	ImageRequest				= 20,
+	Image						= 21,
+	ImageDeny					= 22,
+	ImageStreamRequest			= 23,
+	ImageStream					= 24,
+	ImageStreamDeny				= 25,
 
-	SettingsRequest				= 30,
-	Settings					= 31,
-	SettingsDeny				= 32,
+	InitParametersUpdate		= 30,
+	InitParametersAccept		= 32,
+	InitParametersDeny			= 33,
 
-	ImageRequest				= 40,
-	ImageStreamRequest			= 41,
-	Image						= 42,
-	ImageStream					= 43,
-	ImageDeny					= 44,
-	ImageStreamDeny				= 45,
+	RecordingParametersUpdate	= 40,
+	RecordingParametersAccept	= 43,
+	RecordingParametersDeny		= 44,
+
+	RuntimeParametersUpdate		= 50,
+	RuntimeParametersAccept		= 53,
+	RuntimeParametersDeny		= 54,
+
+	VideoSettingsRequest		= 60,
+	VideoSettings				= 61,
 };
 
 }}
