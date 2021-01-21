@@ -37,7 +37,7 @@ public:
 	Ref<Image<uint8_t>> GetImage(const View& view = View::Left);
 
 	std::tuple<InitParameters, RecordingParameters, RuntimeParameters>
-	GetCurrentCameraParameters();
+		GetCurrentCameraParameters();
 
 	InitParameters GetInitParameters();
 	RecordingParameters GetRecordingParameters();

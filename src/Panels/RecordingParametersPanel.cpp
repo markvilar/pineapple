@@ -15,14 +15,16 @@ void RecordingParametersPanel::SetClient(const Ref<Client>& client)
 
 void RecordingParametersPanel::OnImGuiRender()
 {
-	if (ImGui::CollapsingHeader("Recording Parameters"))
+	if (ImGui::Begin("Recording Parameters"))
 	{
+		/*
 		static char inputBuf[256] = "myRecording.svo";
 		if (ImGui::InputText("SVO Filename", inputBuf, 
 			IM_ARRAYSIZE(inputBuf)))
 		{
 			m_Parameters.filename = std::string(inputBuf);
 		}
+		*/
 
 		const char* svoLabels[] = { "None", "Lossless", "H264", "H265" };
 		SVOCompressionMode svoOptions[] = { SVOCompressionMode::None, 
@@ -69,12 +71,11 @@ void RecordingParametersPanel::OnImGuiRender()
 			m_Parameters.targetFrameRate = frameRate;
 		}
 
-		if (ImGui::SmallButton("Send Recording Parameters"))
+		if (ImGui::SmallButton("Update Recording Parameters"))
 		{
 			if (m_Client && m_Client->IsConnected())
 			{
-				m_Client->RequestRecordingParametersUpdate(
-					m_Parameters);
+				m_Client->RequestRecordingParametersUpdate(m_Parameters);
 			}
 		}
 

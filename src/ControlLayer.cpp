@@ -67,7 +67,7 @@ void ControlLayer::OnUpdate(Timestep ts)
 	{
 		m_SensorControllerPanel.UpdateImageTexture();
 		auto imageTexture = m_SensorControllerPanel.GetImageTexture();
-		float aspectRatio = (float)imageTexture->GetWidth()
+		float aspectRatio = (float)imageTexture->GetWidth() 
 			/ (float)imageTexture->GetHeight();
 		Sennet::Renderer2D::DrawQuad({ 0.0f, 0.0f }, 
 			{ aspectRatio, -1.0f }, imageTexture);
@@ -110,7 +110,7 @@ void ControlLayer::OnImGuiRender()
 		windowFlags |= ImGuiWindowFlags_NoBackground;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("DockSpace Demo", &dockspaceOpen, windowFlags);
+	ImGui::Begin("DockSpace", &dockspaceOpen, windowFlags);
 	ImGui::PopStyleVar();
 	
 	if (optionFullscreen)
@@ -135,17 +135,13 @@ void ControlLayer::OnImGuiRender()
 		ImGui::EndMenuBar();
 	}
 
-	//ImGui::SetNextWindowSize(ImVec2(420,600));
-	if (ImGui::Begin("Control Layer"))
-	{
-		m_ClientPanel.OnImGuiRender();
-		ImGui::Separator();
-		m_SensorControllerPanel.OnImGuiRender();
-		m_InitParametersPanel.OnImGuiRender();
-		m_RecordingParametersPanel.OnImGuiRender();
-		m_RuntimeParametersPanel.OnImGuiRender();
-		ImGui::End();
-	}
+	// Draw panels.
+	m_ClientPanel.OnImGuiRender();
+	m_InitParametersPanel.OnImGuiRender();
+	m_SensorControllerPanel.OnImGuiRender();
+	m_RecordingParametersPanel.OnImGuiRender();
+	m_RuntimeParametersPanel.OnImGuiRender();
+	
 
 	// Viewport window.
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
@@ -177,12 +173,9 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 {
 	switch (message.Header.ID)
 	{
-		// Server Messages.
+		// Server messages.
 		case MessageTypes::ServerPing:
 			m_ClientPanel.OnServerPing(message);
-			break;
-		case MessageTypes::ServerSynchronize:
-			m_ClientPanel.OnServerSynchronize(message);
 			break;
 		case MessageTypes::ServerAccept:
 			m_ClientPanel.OnServerAccept(message);
@@ -190,19 +183,55 @@ void ControlLayer::OnMessage(Message<MessageTypes>& message)
 		case MessageTypes::ServerDeny:
 			m_ClientPanel.OnServerDeny(message);
 			break;
-		// Sensor Controller Messages.
+
+		// Sensor control messages.
 		case MessageTypes::SensorControllerAccept:
-			m_SensorControllerPanel.OnSensorControllerAccept(
-				message);
+			m_SensorControllerPanel.OnSensorControllerAccept(message);
 			break;
 		case MessageTypes::SensorControllerDeny:
 			m_SensorControllerPanel.OnSensorControllerDeny(message);
 			break;
+
+		// Image and image stream messages.
 		case MessageTypes::Image:
 			m_SensorControllerPanel.OnImage(message);
 			break;
+		case MessageTypes::ImageDeny:
+			m_SensorControllerPanel.OnImageDeny(message);
+			break;
 		case MessageTypes::ImageStream:
 			m_SensorControllerPanel.OnImageStream(message);
+			break;
+		case MessageTypes::ImageStreamDeny:
+			m_SensorControllerPanel.OnImageStreamDeny(message);
+			break;
+
+		// TODO: Implement.
+		// Initialization parameter update messages.
+		case MessageTypes::InitParametersAccept:
+			break;
+		case MessageTypes::InitParametersDeny:
+			break;
+
+		// TODO: Implement.
+		// Recording parameter update messages.
+		case MessageTypes::RecordingParametersAccept:
+			break;
+		case MessageTypes::RecordingParametersDeny:
+			break;
+
+		// TODO: Implement.
+		// Runtime parameter update messages.
+		case MessageTypes::RuntimeParametersAccept:
+			break;
+		case MessageTypes::RuntimeParametersDeny:
+			break;
+
+		// TODO: Implement.
+		// Video setting messages.
+		case MessageTypes::VideoSettingsRequest:
+			break;
+		case MessageTypes::VideoSettings:
 			break;
 	}
 }
