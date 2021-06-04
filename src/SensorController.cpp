@@ -1,6 +1,21 @@
-#include "Sennet/ZED/SensorController.hpp"
+#include "Sennet-ZED/SensorController.hpp"
 
-#include "Sennet/ZED/Conversion.hpp"
+#include "Sennet-ZED/Conversion.hpp"
+
+#include <ctime>
+
+const std::string currentDateTime() 
+{
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    return buf;
+}
 
 namespace Sennet
 {
@@ -9,18 +24,10 @@ namespace ZED
 {
 
 SensorController::SensorController(const std::string& rootDirectory)
-	: m_InitParameters(),
-	m_RecordingParameters(),
-	m_RuntimeParameters(),
-	m_Camera(),
-	m_Running(false),
-	m_Recording(false),
-	m_CameraMutex(),
-	m_ParametersMutex(),
-	m_ExecutionThread(),
-	m_InitTimeout(100),
-	m_WorkerTimeout(100),
-	m_RecordTimeout(10)
+	: m_InitParameters(), m_RecordingParameters(), m_RuntimeParameters(),
+	m_Camera(), m_Running(false), m_Recording(false), m_CameraMutex(),
+	m_ParametersMutex(), m_ExecutionThread(), m_InitTimeout(100), 
+	m_WorkerTimeout(100), m_RecordTimeout(10)
 {
 	SN_CORE_ASSERT(std::filesystem::exists(std::filesystem::path(
 		rootDirectory)), "SensorController root directory does not exist.");
@@ -161,6 +168,11 @@ void SensorController::RecordLoop()
 
 	// Get parameters from parameter cache.
 	m_ParametersMutex.lock();
+
+	// Set filename to current date and time.
+	const std::string date = currentDateTime();
+	m_RecordingParameters.filename = m_RootDirectory + date + ".svo";
+	SN_INFO("{0}", m_RecordingParameters.filename);
 	auto initParameters = SennetToStereolabs(m_InitParameters);
 	auto recordingParameters = SennetToStereolabs(m_RecordingParameters);
 	auto runtimeParameters = SennetToStereolabs(m_RuntimeParameters);
@@ -171,8 +183,7 @@ void SensorController::RecordLoop()
 	m_CameraMutex.unlock();
 	if (openError != sl::ERROR_CODE::SUCCESS)
 	{
-		SN_CORE_WARN("ZED Open Error: {0}", 
-			toString(openError).get());
+		SN_CORE_WARN("ZED Open Error: {0}", toString(openError).get());
 		m_ShouldRecord = false;
 		m_Recording = false;
 		return;
@@ -239,5 +250,4 @@ void SensorController::JoinExecutionThread()
 	}
 }
 
-}
-}
+}}

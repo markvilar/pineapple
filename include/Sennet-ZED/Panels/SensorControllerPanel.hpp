@@ -4,9 +4,9 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Client.hpp"
-#include "Sennet/ZED/Image.hpp"
-#include "Sennet/ZED/Settings.hpp"
+#include "Sennet-ZED/Client.hpp"
+#include "Sennet-ZED/Image.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -27,14 +27,18 @@ public:
 	Ref<Texture2D> GetImageTexture() const { return m_ImageTexture; }
 	Ref<Image<uint8_t>> GetImage() const { return m_Image; }
 
+	void OnImage(Message<MessageTypes>& message);
+	void OnImageDeny(Message<MessageTypes>& message);
+
+	void OnImageStream(Message<MessageTypes>& message);
+	void OnImageStreamDeny(Message<MessageTypes>& message);
+
 	void OnSensorControllerAccept(Message<MessageTypes>& message);
 	void OnSensorControllerDeny(Message<MessageTypes>& message);
-
-	void OnImage(Message<MessageTypes>& message);
-	void OnImageStream(Message<MessageTypes>& message);
 	
 private:
 	Ref<Client> m_Client;
+
 	Ref<Texture2D> m_ImageTexture;
 	Ref<Image<uint8_t>> m_Image;
 

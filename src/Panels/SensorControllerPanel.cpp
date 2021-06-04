@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/SensorControllerPanel.hpp"
+#include "Sennet-ZED/Panels/SensorControllerPanel.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -9,56 +9,84 @@ void SensorControllerPanel::SetClient(const Ref<Client>& client)
 
 void SensorControllerPanel::OnImGuiRender()
 {
-	if (ImGui::SmallButton("Initialize"))
+	if (ImGui::Begin("Sensor Controls"))
 	{
-		if (m_Client && m_Client->IsConnected())
+		if (ImGui::SmallButton("Initialize"))
 		{
-			m_Client->RequestSensorControllerInitialization();
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestSensorControllerInitialization();
+			}
 		}
-	}
-	if (ImGui::SmallButton("Shutdown"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerShutdown();
-		}
-	}
-	
-	if (ImGui::SmallButton("Start"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerStart();
-		}
-	}
-	if (ImGui::SmallButton("Stop"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSensorControllerStop();
-		}
-	}
-	if (ImGui::SmallButton("Request Settings"))
-	{
-		if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestSettings();
-		}
-	}
-	if (ImGui::SmallButton("Request Image"))
-	{
-		if (m_Client && m_Client->IsConnected() && m_OptionImageStream)
-		{
-			m_Client->RequestImageStream();
-		}
-		else if (m_Client && m_Client->IsConnected())
-		{
-			m_Client->RequestImage();
-		}
-	}
 
-	ImGui::SameLine();
-	ImGui::Checkbox("Image Stream", &m_OptionImageStream);
+		if (ImGui::SmallButton("Shutdown"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestSensorControllerShutdown();
+			}
+		}
+		
+		if (ImGui::SmallButton("Start"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestSensorControllerStart();
+			}
+		}
+
+		if (ImGui::SmallButton("Stop"))
+		{
+			if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestSensorControllerStop();
+			}
+		}
+
+		const char* viewLabels[] = { "Left", "Right", "Left - Unrectified", 
+			"Right - Unrectified", "Side by side" };
+		View viewOptions[] = { View::Left, View::Right, 
+			View::LeftUnrectified, View::RightUnrectified, View::SideBySide };
+		static_assert(sizeof(viewLabels) / sizeof(viewLabels[0]) == 
+			sizeof(viewOptions) / sizeof(viewOptions[0]),
+			"View labels and options must be of equal size.");
+		static int viewIndex = 1;
+		const char* viewLabel = viewLabels[viewIndex];
+		if (ImGui::BeginCombo("View", viewLabel))
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(viewLabels); n++)
+			{
+				const bool isSelected = (m_OptionView == viewOptions[n]);
+				if (ImGui::Selectable(viewLabels[n], isSelected))
+				{
+					viewIndex = n;
+					m_OptionView = viewOptions[n];
+				}
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::SmallButton("Request Image"))
+		{
+			if (m_Client && m_Client->IsConnected() && m_OptionImageStream)
+			{
+				m_Client->RequestImageStream(m_OptionView);
+			}
+			else if (m_Client && m_Client->IsConnected())
+			{
+				m_Client->RequestImage(m_OptionView);
+			}
+		}
+
+		ImGui::SameLine();
+		ImGui::Checkbox("Image Stream", &m_OptionImageStream);
+
+		ImGui::End();
+	}
 }
 
 void SensorControllerPanel::UpdateImageTexture()
@@ -100,24 +128,33 @@ void SensorControllerPanel::OnImage(Message<MessageTypes>& message)
 {
 	uint32_t width, height, channels;
 	message >> channels >> height >> width;
-	auto image = CreateRef<Image<uint8_t>>(width, height, 
-		channels);
+	auto image = CreateRef<Image<uint8_t>>(width, height, channels);
 	message >> image->GetBuffer();
 	m_Image = image;
+}
+
+void SensorControllerPanel::OnImageDeny(Message<MessageTypes>& message)
+{
+	// TODO: Implement.
 }
 
 void SensorControllerPanel::OnImageStream(Message<MessageTypes>& message)
 {
 	if (m_OptionImageStream && m_Client && m_Client->IsConnected())
 	{
-		m_Client->RequestImageStream();
+		m_Client->RequestImageStream(m_OptionView);
 	}
+
 	uint32_t width, height, channels;
 	message >> channels >> height >> width;
-	auto image = CreateRef<Image<uint8_t>>(width, height, 
-		channels);
+	auto image = CreateRef<Image<uint8_t>>(width, height, channels);
 	message >> image->GetBuffer();
 	m_Image = image;
+}
+
+void SensorControllerPanel::OnImageStreamDeny(Message<MessageTypes>& message)
+{
+	// TODO: Implement.
 }
 
 }}

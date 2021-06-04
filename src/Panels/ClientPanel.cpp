@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Panels/ClientPanel.hpp"
+#include "Sennet-ZED/Panels/ClientPanel.hpp"
 
 static void Strtrim(char* s)
 { 
@@ -22,7 +22,7 @@ void ClientPanel::SetClient(const Ref<Client>& client)
 
 void ClientPanel::OnImGuiRender()
 {
-	if (ImGui::CollapsingHeader("ZED Client"))
+	if (ImGui::Begin("Client"))
 	{
 		auto windowWidth = ImGui::GetWindowWidth();
 
@@ -70,17 +70,10 @@ void ClientPanel::OnImGuiRender()
 			}
 		}
 
-		if (ImGui::Button("Synchronize Server"))
-		{
-			if (m_Client && m_Client->IsConnected())
-			{
-				m_Client->RequestServerSynchronization();
-			}
-		}
-
 		ImGui::NextColumn();
 		
 		ImGui::Columns(1);
+		ImGui::End();
 	}
 }
 
@@ -92,19 +85,6 @@ void ClientPanel::OnServerPing(Message<MessageTypes>& message)
 	message >> timeThen;
 	auto duration = std::chrono::duration<double>(timeNow-timeThen).count();
 	SN_CORE_INFO("Server Ping: {0}", duration);
-}
-
-void ClientPanel::OnServerSynchronize(Message<MessageTypes>& message)
-{
-	SN_CORE_INFO("Server Synchronize.");
-	Timestamp localTime;
-	localTime.Grab();
-	Timestamp remoteTime;
-	uint64_t ms;
-	message >> ms;
-	remoteTime.SetMilliseconds(ms);
-	Sennet::Synchronizer::Get().WriteEntry("Topside", localTime, 
-		"ZED", remoteTime);
 }
 
 void ClientPanel::OnServerAccept(Message<MessageTypes>& message)

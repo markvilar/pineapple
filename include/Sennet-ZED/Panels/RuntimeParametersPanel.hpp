@@ -4,8 +4,8 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Client.hpp"
-#include "Sennet/ZED/RuntimeParameters.hpp"
+#include "Sennet-ZED/Client.hpp"
+#include "Sennet-ZED/RuntimeParameters.hpp"
 
 namespace Sennet { namespace ZED {
 

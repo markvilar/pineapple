@@ -7,34 +7,52 @@ namespace Sennet { namespace ZED {
 
 enum class CoordinateSystem : uint8_t
 {
-	None = 0, Image = 1, LeftHandedYUp = 2, RightHandedYUp = 3, 
-	RightHandedZUp = 4, LeftHandedZUp = 5, RightHandedZUpXForward = 6
+	None					= 0, 
+	Image					= 1, 
+	LeftHandedYUp			= 2, 
+	RightHandedYUp			= 3, 
+	RightHandedZUp			= 4, 
+	LeftHandedZUp			= 5, 
+	RightHandedZUpXForward	= 6
 };
 
 enum class DepthMode : uint8_t
 { 
-	None = 0, Performance = 1, Quality = 2, Ultra = 3
+	None			= 0, 
+	Performance		= 1, 
+	Quality			= 2, 
+	Ultra			= 3
 };
 
 enum class FlipMode : uint8_t
 {
-	None = 0, Off = 1, On = 2, Auto = 3
+	None	= 0, 
+	Off		= 1, 
+	On		= 2, 
+	Auto	= 3
 };
 
 enum class Resolution : uint8_t
 { 
-	None = 0, HD2K = 1, HD1080 = 2, HD720 = 3, VGA = 4
+	None	= 0, 
+	HD2K	= 1, 
+	HD1080	= 2, 
+	HD720	= 3, 
+	VGA		= 4
 };
 
 enum class Unit : uint8_t
 { 
-	None = 0, Millimeter = 1, Centimeter = 2, Meter = 3, Inch = 4, Foot = 5
+	None		= 0, 
+	Millimeter	= 1, 
+	Centimeter	= 2, 
+	Meter		= 3, 
+	Inch		= 4, 
+	Foot		= 5
 };
 
 class InitParameters
 {
-	// Wrapper for sl::InitParameters. Neglects functionality of the
-	// Stereolabs SDK that is considered unimportant for recording.
 public:
 	InitParameters() = default;
 	~InitParameters() = default;
@@ -80,5 +98,4 @@ std::ostream& operator<<(std::ostream& os,
 	const Sennet::ZED::FlipMode flipMode);
 std::ostream& operator<<(std::ostream& os, 
 	const Sennet::ZED::Resolution resolution);
-std::ostream& operator<<(std::ostream& os, 
-	const Sennet::ZED::Unit unit);
+std::ostream& operator<<(std::ostream& os, const Sennet::ZED::Unit unit);

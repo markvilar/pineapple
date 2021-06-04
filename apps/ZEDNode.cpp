@@ -3,8 +3,8 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Messages.hpp"
-#include "Sennet/ZED/Server.hpp"
+#include "Sennet-ZED/Messages.hpp"
+#include "Sennet-ZED/Server.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	
 	Sennet::Log::Init();
 
-	Sennet::ZED::Server server(60000, "/home/martin/Documents/");
+	Sennet::ZED::Server server(60000, "/home/martin/data/");
 	server.Start(); // Note: Makes program not terminate.
 
 	while (!stopFlag)

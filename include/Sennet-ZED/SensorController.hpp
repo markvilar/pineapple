@@ -9,11 +9,11 @@
 
 #include "Sennet/Sennet.hpp"
 
-#include "Sennet/ZED/Image.hpp"
-#include "Sennet/ZED/InitParameters.hpp"
-#include "Sennet/ZED/RecordingParameters.hpp"
-#include "Sennet/ZED/RuntimeParameters.hpp"
-#include "Sennet/ZED/Settings.hpp"
+#include "Sennet-ZED/Image.hpp"
+#include "Sennet-ZED/InitParameters.hpp"
+#include "Sennet-ZED/RecordingParameters.hpp"
+#include "Sennet-ZED/RuntimeParameters.hpp"
+#include "Sennet-ZED/Settings.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -44,8 +44,7 @@ public:
 	RuntimeParameters GetRuntimeParameters();
 
 	void SetInitParameters(const InitParameters& initParameters);
-	void SetRecordingParameters(
-		const RecordingParameters& recordingParameters);
+	void SetRecordingParameters(const RecordingParameters& recordingParameters);
 	void SetRuntimeParameters(const RuntimeParameters& runtimeParameters);
 
 private:

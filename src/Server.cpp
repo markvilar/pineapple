@@ -1,4 +1,4 @@
-#include "Sennet/ZED/Server.hpp"
+#include "Sennet-ZED/Server.hpp"
 
 namespace Sennet { namespace ZED {
 
@@ -35,9 +35,8 @@ void Server::OnMessage(Ref<Connection<MessageTypes>> client,
 	case MessageTypes::ServerPing:
 		OnServerPingRequest(client, message);
 		break;
-	case MessageTypes::ServerSynchronize:
-		OnServerSynchronizationRequest(client, message);
-		break;
+
+	// Sensor controls.
 	case MessageTypes::SensorControllerInitialize:
 		OnSensorControllerInitializationRequest(client, message);
 		break;
@@ -50,6 +49,14 @@ void Server::OnMessage(Ref<Connection<MessageTypes>> client,
 	case MessageTypes::SensorControllerStop:
 		OnSensorControllerStopRequest(client, message);
 		break;
+	case MessageTypes::ImageRequest:
+		OnImageRequest(client, message);
+		break;
+	case MessageTypes::ImageStreamRequest:
+		OnImageStreamRequest(client, message);
+		break;
+
+	// Parameter updates.
 	case MessageTypes::InitParametersUpdate:
 		OnInitParametersUpdate(client, message);
 		break;
@@ -59,15 +66,7 @@ void Server::OnMessage(Ref<Connection<MessageTypes>> client,
 	case MessageTypes::RuntimeParametersUpdate:
 		OnRuntimeParametersUpdate(client, message);
 		break;
-	case MessageTypes::SettingsRequest:
-		OnSettingsRequest(client, message);
-		break;
-	case MessageTypes::ImageRequest:
-		OnImageRequest(client, message);
-		break;
-	case MessageTypes::ImageStreamRequest:
-		OnImageStreamRequest(client, message);
-		break;
+
 	}
 }
 
@@ -77,19 +76,6 @@ void Server::OnServerPingRequest(
 {
 	SN_INFO("[{0}] Ping Request.", client->GetID());
 	client->Send(message);
-}
-
-void Server::OnServerSynchronizationRequest(
-	Ref<Connection<MessageTypes>> client,
-	Message<MessageTypes>& message) const
-{
-	SN_INFO("[{0}] Synchronization Request.", client->GetID());
-	Message<MessageTypes> reply;
-	reply.Header.ID = MessageTypes::ServerSynchronize;
-	Timestamp ts;
-	ts.Grab();
-	reply << ts.GetMilliseconds();
-	client->Send(reply);
 }
 
 void Server::OnSensorControllerInitializationRequest(
@@ -172,6 +158,64 @@ void Server::OnSensorControllerStopRequest(
 	}
 }
 
+void Server::OnImageRequest(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message)
+{
+	SN_INFO("[{0}] Image Request.", client->GetID());
+	if (m_SensorController.IsCameraOpen())
+	{
+		View view = View::Left;
+		message >> view;
+
+		auto image = m_SensorController.GetImage(view);
+		uint32_t width = image->GetWidth();
+		uint32_t height = image->GetHeight();
+		uint32_t channels = image->GetChannels();
+		auto data = image->GetBuffer();
+
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::Image;
+		message << data;
+		message << width << height << channels;
+		client->Send(message);
+	}
+	else
+	{
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::SensorControllerDeny;
+		client->Send(message);
+	}
+}
+
+void Server::OnImageStreamRequest(Ref<Connection<MessageTypes>> client,
+	Message<MessageTypes>& message)
+{
+	SN_INFO("[{0}] Image Stream Request.", client->GetID());
+	if (m_SensorController.IsCameraOpen())
+	{
+		View view = View::Left;
+		message >> view;
+
+		auto image = m_SensorController.GetImage(view);
+		uint32_t width = image->GetWidth();
+		uint32_t height = image->GetHeight();
+		uint32_t channels = image->GetChannels();
+		auto data = image->GetBuffer();
+
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::ImageStream;
+		message << data;
+		message << width << height << channels;
+		client->Send(message);
+	}
+	else
+	{
+		Message<MessageTypes> message;
+		message.Header.ID = MessageTypes::ImageStreamDeny;
+		client->Send(message);
+	}
+}
+
 void Server::OnInitParametersUpdate(
 	Ref<Connection<MessageTypes>> client,
 	Message<MessageTypes>& message)
@@ -208,7 +252,8 @@ void Server::OnRecordingParametersUpdate(
 	message >> parameters.targetFrameRate;
 	message >> parameters.targetBitRate;
 	message >> parameters.compressionMode;
-	message >> parameters.filename;
+	// TODO: Fix filename size in message.
+	//message >> parameters.filename;
 
 	m_SensorController.SetRecordingParameters(parameters);
 }
@@ -227,70 +272,6 @@ void Server::OnRuntimeParametersUpdate(
 	message >> parameters.sensingMode;
 
 	m_SensorController.SetRuntimeParameters(parameters);
-}
-
-void Server::OnSettingsRequest(Ref<Connection<MessageTypes>> client,
-	Message<MessageTypes>& message)
-{
-	SN_INFO("[{0}] Settings Request.", client->GetID());
-}
-
-void Server::OnImageRequest(Ref<Connection<MessageTypes>> client,
-	Message<MessageTypes>& message)
-{
-	SN_INFO("[{0}] Image Request.", client->GetID());
-	if (m_SensorController.IsCameraOpen())
-	{
-		auto image = m_SensorController.GetImage();
-		uint32_t width = image->GetWidth();
-		uint32_t height = image->GetHeight();
-		uint32_t channels = image->GetChannels();
-		auto data = image->GetBuffer();
-
-		SN_CORE_INFO("Image: {0} ({1}, {2}, {3})", image->GetSize(),
-			width, height, channels);
-
-		Message<MessageTypes> message;
-		message.Header.ID = MessageTypes::Image;
-		message << data;
-		message << width << height << channels;
-		client->Send(message);
-	}
-	else
-	{
-		Message<MessageTypes> message;
-		message.Header.ID = MessageTypes::SensorControllerDeny;
-		client->Send(message);
-	}
-}
-
-void Server::OnImageStreamRequest(Ref<Connection<MessageTypes>> client,
-	Message<MessageTypes>& message)
-{
-	SN_INFO("[{0}] Image Stream Request.", client->GetID());
-	if (m_SensorController.IsCameraOpen())
-	{
-		auto image = m_SensorController.GetImage();
-		uint32_t width = image->GetWidth();
-		uint32_t height = image->GetHeight();
-		uint32_t channels = image->GetChannels();
-		auto data = image->GetBuffer();
-
-		SN_CORE_INFO("Image: {0} ({1}, {2}, {3})", image->GetSize(),
-			width, height, channels);
-
-		Message<MessageTypes> message;
-		message.Header.ID = MessageTypes::ImageStream;
-		message << data;
-		message << width << height << channels;
-		client->Send(message);
-	}
-	else
-	{
-		Message<MessageTypes> message;
-		message.Header.ID = MessageTypes::SensorControllerDeny;
-		client->Send(message);
-	}
 }
 
 }}
