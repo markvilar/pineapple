@@ -2,9 +2,14 @@
 find_package(Git QUIET)
 
 # Git submodules
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+if(GIT_FOUND
+   AND EXISTS
+       "${PROJECT_SOURCE_DIR}/.git")
     # Update submodules as needed
-    option(GIT_SUBMODULE "Check submodules during build" ON)
+    option(
+        GIT_SUBMODULE
+        "Check submodules during build"
+        ON)
     if(GIT_SUBMODULE)
         message(STATUS "Submodule update")
         execute_process(
@@ -18,7 +23,8 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
             message(
                 FATAL_ERROR
                     "git submodule update --init failed "
-                    "with ${GIT_SUBMOD_RESULT}, please checkout " "submodules.")
+                    "with ${GIT_SUBMOD_RESULT}, please checkout "
+                    "submodules.")
         endif()
     endif()
 endif()

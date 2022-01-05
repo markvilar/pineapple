@@ -1,0 +1,39 @@
+#include "Pine/Pine.hpp"
+
+#include "Pineapple/ControlLayer.hpp"
+
+class Controller : public Pine::Application
+{
+public:
+    Controller(const Pine::Application::Specification& specs) 
+        : Pine::Application(specs)
+    {
+        PushLayer(new Pineapple::ControlLayer());
+    }
+
+    ~Controller() {}
+};
+
+Pine::Application* Pine::CreateApplication(int argc, char** argv)
+{
+    Pine::Application::Specification specs;
+    specs.WorkingDirectory;
+    specs.Name = "Pine App";
+    specs.WindowWidth = 1600;
+    specs.WindowHeight = 800;
+    specs.StartMaximized = true;
+    specs.VSync = true;
+    specs.Resizable = false;
+    specs.EnableImGui = true;
+    specs.Fullscreen = true;
+
+    return new Controller(specs);
+}
+
+int main(int argc, char** argv)
+{
+    Pine::Log::Init();
+    auto app = Pine::CreateApplication(argc, argv);
+    app->Run();
+    return 0;
+}

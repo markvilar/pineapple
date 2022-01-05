@@ -1,14 +1,33 @@
-# Controller
-add_executable(Controller Controller.cpp)
-target_compile_features(Controller PRIVATE cxx_std_17)
-target_link_libraries(Controller PRIVATE Sennet Sennet-ZED)
+add_executable(controller controller.cpp)
+target_compile_definitions(controller PRIVATE)
+target_compile_features(controller PRIVATE cxx_std_17)
+target_compile_options(controller PUBLIC -std=c++17)
+target_link_libraries(
+    controller
+    PRIVATE 
+        pine::pine
+        pineapple::pineapple)
 
-# ZEDNode
-add_executable(ZEDNode ZEDNode.cpp)
-target_compile_features(ZEDNode PRIVATE cxx_std_17)
-target_link_libraries(ZEDNode PRIVATE Sennet Sennet-ZED)
+set_target_properties(
+    controller
+    PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-# ZEDRecord
-add_executable(ZEDRecord ZEDRecord.cpp)
-target_compile_features(ZEDRecord PRIVATE cxx_std_17)
-target_link_libraries(ZEDRecord PRIVATE Sennet Sennet-ZED)
+add_executable(node node.cpp)
+target_compile_definitions(node PRIVATE)
+target_compile_features(node PRIVATE cxx_std_17)
+target_compile_options(node PUBLIC -std=c++17)
+target_link_libraries(
+    node
+    PRIVATE 
+        pine::pine
+        pineapple::pineapple)
+
+set_target_properties(
+    node
+    PROPERTIES 
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
