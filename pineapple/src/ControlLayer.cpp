@@ -12,13 +12,7 @@ ControlLayer::~ControlLayer() {}
 
 void ControlLayer::OnAttach()
 {
-    m_Client = Pine::CreateRef<Client>();
-
-    m_ClientPanel.SetClient(m_Client);
-    m_InitParametersPanel.SetClient(m_Client);
-    m_RecordingParametersPanel.SetClient(m_Client);
-    m_RuntimeParametersPanel.SetClient(m_Client);
-    m_SensorControllerPanel.SetClient(m_Client);
+    m_Client = std::make_shared<Client>();
 
     Pine::Framebuffer::Specification fbSpec;
     fbSpec.Width = 1280;
@@ -26,6 +20,7 @@ void ControlLayer::OnAttach()
     m_Framebuffer = Pine::Framebuffer::Create(fbSpec);
 
     Pine::Renderer2D::Init();
+    Pine::UI::SetDarkTheme(ImGui::GetStyle());
 }
 
 void ControlLayer::OnDetach() {}
@@ -50,28 +45,15 @@ void ControlLayer::OnUpdate(Pine::Timestep ts)
     if (m_ViewportFocused)
         m_CameraController.OnUpdate(ts);
 
-    m_Framebuffer->Bind();
+    // Clear background color.
     Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     Pine::RenderCommand::Clear();
 
-    Pine::Renderer2D::BeginScene(m_CameraController.GetCamera());
+    m_Framebuffer->Bind();
+    Pine::RenderCommand::SetClearColor({0.2f, 0.1f, 0.1f, 1.0f});
+    Pine::RenderCommand::Clear();
 
-    if (m_SensorControllerPanel.HasImage())
-    {
-        m_SensorControllerPanel.UpdateImageTexture();
-        auto imageTexture = m_SensorControllerPanel.GetImageTexture();
-        auto aspectRatio =
-            (float)imageTexture->GetWidth() / (float)imageTexture->GetHeight();
-        Pine::Renderer2D::DrawQuad({0.0f, 0.0f},
-            {aspectRatio, -1.0f},
-            imageTexture);
-    }
-    else
-    {
-        Pine::Renderer2D::DrawQuad({0.0f, 0.0f},
-            {1.76f, -1.0f},
-            {0.8f, 0.2f, 0.2f, 1.0f});
-    }
+    Pine::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
     Pine::Renderer2D::EndScene();
     m_Framebuffer->Unbind();
@@ -79,87 +61,190 @@ void ControlLayer::OnUpdate(Pine::Timestep ts)
 
 void ControlLayer::OnImGuiRender()
 {
-    /*
-    static bool dockspaceOpen = true;
-    static bool optionFullscreenPersistant = true;
-    bool optionFullscreen = optionFullscreenPersistant;
+    constexpr auto menuBarHeight = 20;
+    const auto windowSize = Pine::Application::Get().GetWindow().GetSize();
 
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar;
-    if (optionFullscreen)
-    {
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-        ImGui::SetNextWindowSize(viewport->GetWorkSize());
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse
-            | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus
-            | ImGuiWindowFlags_NoNavFocus;
-    }
+    const std::pair<uint32_t, uint32_t> uiPosition = {0, menuBarHeight};
+    const std::pair<uint32_t, uint32_t> uiSize = {windowSize.first,
+        windowSize.second - menuBarHeight};
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("DockSpace", &dockspaceOpen, windowFlags);
-    ImGui::PopStyleVar();
+    Pine::UI::AddMainMenuBar([]() {
+        static bool showImGuiDemoWindow = false;
+        static bool showImGuiMetrics = false;
+        static bool showImGuiStackTool = false;
 
-    if (optionFullscreen)
-        ImGui::PopStyleVar(2);
-
-    // DockSpace
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-    {
-        ImGuiID dockspaceID = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockspaceFlags);
-    }
-
-    if (ImGui::BeginMenuBar())
-    {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Exit"))
-                Application::Get().Close();
+            if (ImGui::MenuItem("Open", "Ctrl+O"))
+            {
+            }
+            if (ImGui::MenuItem("Save", "Ctrl+S"))
+            {
+            }
+            if (ImGui::MenuItem("Exit", "Ctrl+W"))
+            {
+                Pine::Application::Get().Close();
+            }
             ImGui::EndMenu();
         }
-        ImGui::EndMenuBar();
-    }
 
-    // Draw panels.
-    m_ClientPanel.OnImGuiRender();
-    m_InitParametersPanel.OnImGuiRender();
-    m_SensorControllerPanel.OnImGuiRender();
-    m_RecordingParametersPanel.OnImGuiRender();
-    m_RuntimeParametersPanel.OnImGuiRender();
+        if (ImGui::BeginMenu("ImGui"))
+        {
+            ImGui::Checkbox("Show ImGui demo window", &showImGuiDemoWindow);
+            ImGui::Checkbox("Show ImGui metrics", &showImGuiMetrics);
+            ImGui::Checkbox("Show ImGui stack tool", &showImGuiStackTool);
+            ImGui::EndMenu();
+        }
 
-    // Viewport window.
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
-    ImGui::Begin("Viewport");
+        if (showImGuiDemoWindow)
+            ImGui::ShowDemoWindow();
+        if (showImGuiMetrics)
+            ImGui::ShowMetricsWindow();
+        if (showImGuiStackTool)
+            ImGui::ShowStackToolWindow();
+    });
 
-    m_ViewportFocused = ImGui::IsWindowFocused();
-    m_ViewportHovered = ImGui::IsWindowHovered();
-    Application::Get().GetImGuiLayer()->BlockEvents(
-        !m_ViewportFocused || !m_ViewportHovered);
+    Pine::UI::AddViewport("Viewport",
+        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
+            uiPosition.second + 0.00 * uiSize.second),
+        Pine::Vec2(0.60 * uiSize.first, 0.70 * uiSize.second),
+        m_Framebuffer,
+        []() {
+            // TODO: Implement functionality.
+        });
 
-    ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-    m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
+    Pine::UI::AddWindow("Left",
+        Pine::Vec2(uiPosition.first + 0.00 * uiSize.first,
+            uiPosition.second + 0.00 * uiSize.second),
+        Pine::Vec2(0.20 * uiSize.first, 1.00 * uiSize.second),
+        [this]() {
+            static auto brightness = 0;
+            static auto contrast = 0;
+            static auto hue = 0;
+            static auto saturation = 0;
+            static auto sharpness = 0;
+            static auto gain = 0;
+            static auto exposure = 0;
+            static auto whitebalanceTemp = 0;
 
-    uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-    ImGui::Image((void*)textureID,
-        ImVec2{viewportPanelSize.x, viewportPanelSize.y},
-        ImVec2{0, 1},
-        ImVec2{1, 0});
-    ImGui::End();
-    ImGui::PopStyleVar();
+            static auto aecagc = false;
+            static auto whitebalanceAuto = false;
+            static auto ledStatus = false;
 
-    ImGui::End();
-    */
+            if (ImGui::Button("Start record"))
+            {
+            }
+            
+            ImGui::SameLine();
+
+            if (ImGui::Button("Stop record"))
+            {
+            }
+
+            if (ImGui::Button("Update parameters"))
+            {
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Update settings"))
+            {
+
+            }
+
+            ImGui::Separator();
+
+            const std::array<std::pair<std::string, ZED::FlipMode>, 3>
+                flipModes = {std::make_pair("Off", ZED::FlipMode::OFF),
+                    std::make_pair("On", ZED::FlipMode::ON),
+                    std::make_pair("Auto", ZED::FlipMode::AUTO)};
+
+            const std::array<std::pair<std::string, ZED::Resolution>, 4>
+                resolutions = {std::make_pair("HD2K", ZED::Resolution::HD2K),
+                    std::make_pair("HD1080", ZED::Resolution::HD1080),
+                    std::make_pair("HD720", ZED::Resolution::HD720),
+                    std::make_pair("VGA", ZED::Resolution::VGA)};
+
+            const std::array<std::pair<std::string, ZED::CompressionMode>, 3>
+                compressionModes = {
+                    std::make_pair("Lossless", ZED::CompressionMode::LOSSLESS),
+                    std::make_pair("H264", ZED::CompressionMode::H264),
+                    std::make_pair("H265", ZED::CompressionMode::H265)};
+
+            AddCombo("Flip mode", flipModes, []() {});
+            AddCombo("Resolution", resolutions, []() {});
+            AddCombo("Compression", compressionModes, []() {});
+
+            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+            SliderScalar("Target FPS", &m_CameraParameters.CameraFPS, 0, 100);
+            SliderScalar("Timeout", &m_CameraParameters.OpenTimeout,
+                -1.0f,
+                10.0f);
+
+            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+            ImGui::Checkbox("Image enhancement",
+                &m_CameraParameters.EnableImageEnhancement);
+            ImGui::Checkbox("Disable self calib.",
+                &m_CameraParameters.DisableSelfCalibration);
+            ImGui::Checkbox("Require sensors",
+                &m_CameraParameters.RequireSensors);
+            ImGui::Checkbox("Enable depth", &m_CameraParameters.EnableDepth);
+
+            ImGui::Separator();
+
+            SliderScalar("Brightness", 
+                &m_CameraSettings.Brightness, 0, 8);
+            SliderScalar("Contrast", 
+                &m_CameraSettings.Contrast, 0, 8);
+            SliderScalar("Hue", 
+                &m_CameraSettings.Hue, 0, 11);
+            SliderScalar("Saturation", 
+                &m_CameraSettings.Saturation, 0, 8);
+            SliderScalar("Sharpness", 
+                &m_CameraSettings.Sharpness, 0, 8);
+            SliderScalar("Gain", 
+                &m_CameraSettings.Gain, 0, 100);
+            SliderScalar("Exposure", 
+                &m_CameraSettings.Exposure, 0, 100);
+            SliderScalar("Whitebalance temp.",
+                &m_CameraSettings.Whitebalance,
+                2800,
+                6500);
+
+            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+            ImGui::Checkbox("Auto exposure", 
+                &m_CameraSettings.AutoExposure);
+            ImGui::Checkbox("Auto whitebalance",
+                &m_CameraSettings.AutoWhitebalance);
+            ImGui::Checkbox("Enable LED ", 
+                &m_CameraSettings.EnableLED);
+        });
+
+    Pine::UI::AddWindow("Right",
+        Pine::Vec2(uiPosition.first + 0.80 * uiSize.first,
+            uiPosition.second + 0.00 * uiSize.second),
+        Pine::Vec2(0.60 * uiSize.first, 1.00 * uiSize.second),
+        []() {
+            // TODO: Implement functionality.
+        });
+
+    Pine::UI::AddWindow("Bottom",
+        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
+            uiPosition.second + 0.70 * uiSize.second),
+        Pine::Vec2(0.60 * uiSize.first, 0.30 * uiSize.second),
+        []() {
+            // TODO: Implement functionality.
+        });
 }
 
 void ControlLayer::OnEvent(Pine::Event& e) { m_CameraController.OnEvent(e); }
 
 void ControlLayer::OnMessage(Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     switch (message.Header.ID)
     {
     // Server messages.
@@ -223,6 +308,7 @@ void ControlLayer::OnMessage(Pine::TCP::Message<MessageTypes>& message)
     case MessageTypes::VideoSettings:
         break;
     }
+    */
 }
 
 } // namespace Pineapple

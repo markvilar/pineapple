@@ -3,8 +3,8 @@
 namespace Pineapple
 {
 
-Server::Server(const uint16_t& port, const std::string& root)
-    : Pine::TCP::Server<MessageTypes>(port), m_SensorController(root)
+Server::Server(const uint16_t& port, const std::filesystem::path& dataDirectory)
+    : Pine::TCP::Server<MessageTypes>(port), m_CameraInterface(dataDirectory)
 {
 }
 
@@ -80,10 +80,11 @@ void Server::OnSensorControllerInitializationRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Initialization Request.", client->GetID());
-    if (!m_SensorController.IsRunning())
+    if (!m_CameraInterface.IsRunning())
     {
-        m_SensorController.Initialize();
+        m_CameraInterface.Initialize();
         Pine::TCP::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
@@ -94,16 +95,18 @@ void Server::OnSensorControllerInitializationRequest(
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnSensorControllerShutdownRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Shutdown Request.", client->GetID());
-    if (m_SensorController.IsRunning())
+    if (m_CameraInterface.IsRunning())
     {
-        m_SensorController.Shutdown();
+        m_CameraInterface.Shutdown();
         Pine::TCP::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
@@ -114,16 +117,18 @@ void Server::OnSensorControllerShutdownRequest(
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnSensorControllerStartRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Start Record Request.", client->GetID());
-    if (!m_SensorController.IsRecording())
+    if (!m_CameraInterface.IsRecording())
     {
-        m_SensorController.Start();
+        m_CameraInterface.Start();
         Pine::TCP::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
@@ -134,16 +139,18 @@ void Server::OnSensorControllerStartRequest(
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnSensorControllerStopRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Stop Record Request.", client->GetID());
-    if (m_SensorController.IsRecording())
+    if (m_CameraInterface.IsRecording())
     {
-        m_SensorController.Stop();
+        m_CameraInterface.Stop();
         Pine::TCP::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
@@ -154,19 +161,21 @@ void Server::OnSensorControllerStopRequest(
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnImageRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Image Request.", client->GetID());
-    if (m_SensorController.IsCameraOpen())
+    if (m_CameraInterface.IsCameraOpen())
     {
-        View view = View::Left;
+        auto view = ZED::View::Left;
         message >> view;
 
-        auto image = m_SensorController.GetImage(view);
+        auto image = m_CameraInterface.GetImage(view);
         uint32_t width = image->GetWidth();
         uint32_t height = image->GetHeight();
         uint32_t channels = image->GetChannels();
@@ -184,19 +193,21 @@ void Server::OnImageRequest(
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnImageStreamRequest(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Image Stream Request.", client->GetID());
-    if (m_SensorController.IsCameraOpen())
+    if (m_CameraInterface.IsCameraOpen())
     {
-        View view = View::Left;
+        ZED::View view = ZED::View::Left;
         message >> view;
 
-        auto image = m_SensorController.GetImage(view);
+        auto image = m_CameraInterface.GetImage(view);
         uint32_t width = image->GetWidth();
         uint32_t height = image->GetHeight();
         uint32_t channels = image->GetChannels();
@@ -214,12 +225,14 @@ void Server::OnImageStreamRequest(
         message.Header.ID = MessageTypes::ImageStreamDeny;
         client->Send(message);
     }
+    */
 }
 
 void Server::OnInitParametersUpdate(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Initialization Parameters Request.", client->GetID());
     InitParameters parameters;
 
@@ -239,13 +252,15 @@ void Server::OnInitParametersUpdate(
     message >> parameters.coordinateUnits;
     message >> parameters.depthMode;
 
-    m_SensorController.SetInitParameters(parameters);
+    m_CameraInterface.SetInitParameters(parameters);
+    */
 }
 
 void Server::OnRecordingParametersUpdate(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Recording Parameters Request.", client->GetID());
     RecordingParameters parameters;
 
@@ -255,13 +270,15 @@ void Server::OnRecordingParametersUpdate(
     // TODO: Fix filename size in message.
     // message >> parameters.filename;
 
-    m_SensorController.SetRecordingParameters(parameters);
+    m_CameraInterface.SetRecordingParameters(parameters);
+    */
 }
 
 void Server::OnRuntimeParametersUpdate(
     Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
     Pine::TCP::Message<MessageTypes>& message)
 {
+    /*
     PINE_INFO("[{0}] Runtime Parameters Request.", client->GetID());
     RuntimeParameters parameters;
 
@@ -271,7 +288,8 @@ void Server::OnRuntimeParametersUpdate(
     message >> parameters.referenceFrame;
     message >> parameters.sensingMode;
 
-    m_SensorController.SetRuntimeParameters(parameters);
+    m_CameraInterface.SetRuntimeParameters(parameters);
+    */
 }
 
 } // namespace Pineapple
