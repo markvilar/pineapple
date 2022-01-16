@@ -10,20 +10,17 @@
 namespace Pineapple
 {
 
-class ControlLayer : public Pine::Layer
+class LocalControlLayer : public Pine::Layer
 {
 public:
-    ControlLayer();
-    ~ControlLayer();
+    LocalControlLayer();
+    ~LocalControlLayer();
 
     virtual void OnAttach() override;
     virtual void OnDetach() override;
     virtual void OnUpdate(Pine::Timestep ts) override;
     virtual void OnImGuiRender() override;
     virtual void OnEvent(Pine::Event& e) override;
-
-private:
-    void OnMessage(Pine::TCP::Message<MessageTypes>& message);
 
 private:
     Pine::OrthographicCameraController m_CameraController;

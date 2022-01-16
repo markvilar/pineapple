@@ -22,58 +22,17 @@ public:
 
     Image(const T* ptr, const uint32_t width, const uint32_t height,
         const uint32_t channels)
+        : m_Width(width), m_Height(height), m_Channels(channels)
     {
         m_Buffer.assign(ptr, ptr + width * height * channels);
-        m_Width = width;
-        m_Height = height;
-        m_Channels = channels;
     }
 
-    Image(const Image<T>& other)
-    {
-        m_Buffer = std::copy(other.m_Buffer);
-        m_Width = other.m_Width;
-        m_Height = other.m_Height;
-        m_Channels = other.m_Channels;
-    }
-
-    Image(Image<T>&& other) noexcept
-    {
-        m_Buffer = std::move(other.m_Buffer);
-        m_Width = other.m_Width;
-        m_Height = other.m_Height;
-        m_Channels = other.m_Channels;
-
-        other.m_Buffer = nullptr;
-        other.m_Width = 0;
-        other.m_Height = 0;
-        other.m_Channels = 0;
-    }
-
+    Image(const Image<T>& other) = default;
+    Image(Image<T>&& other) = default;
     ~Image() = default;
 
-    Image<T>& operator=(const Image<T>& other) = delete;
-
-    Image<T>& operator=(Image<T>&& other) noexcept
-    {
-        if (this != &other)
-        {
-            m_Buffer.erase();
-
-            m_Buffer = std::move(other.m_Buffer);
-            m_Width = other.m_Width;
-            m_Height = other.m_Height;
-            m_Channels = other.m_Channels;
-
-            other.m_Buffer = nullptr;
-            other.m_Width = 0;
-            other.m_Height = 0;
-            other.m_Channels = 0;
-        }
-        return *this;
-    }
-
-    Image<T>& operator=(T*&& data) { return *this; }
+    Image<T>& operator=(const Image<T>& other) = default;
+    Image<T>& operator=(Image<T>&& other) = default;
 
     inline std::vector<T>& GetBuffer() { return m_Buffer; }
     inline const std::vector<T>& GetBuffer() const { return m_Buffer; }

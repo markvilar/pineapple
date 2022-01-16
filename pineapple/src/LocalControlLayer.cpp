@@ -1,16 +1,16 @@
-#include "Pineapple/ControlLayer.hpp"
+#include "Pineapple/LocalControlLayer.hpp"
 
 namespace Pineapple
 {
 
-ControlLayer::ControlLayer()
-    : Layer("ControlLayer"), m_CameraController(1280.0f / 720.0f, false)
+LocalControlLayer::LocalControlLayer()
+    : Layer("LocalControlLayer"), m_CameraController(1.0f)
 {
 }
 
-ControlLayer::~ControlLayer() {}
+LocalControlLayer::~LocalControlLayer() {}
 
-void ControlLayer::OnAttach()
+void LocalControlLayer::OnAttach()
 {
     m_Client = std::make_shared<Client>();
 
@@ -23,16 +23,10 @@ void ControlLayer::OnAttach()
     Pine::UI::SetDarkTheme(ImGui::GetStyle());
 }
 
-void ControlLayer::OnDetach() {}
+void LocalControlLayer::OnDetach() {}
 
-void ControlLayer::OnUpdate(Pine::Timestep ts)
+void LocalControlLayer::OnUpdate(Pine::Timestep ts)
 {
-    while (!m_Client->Incoming().empty())
-    {
-        auto message = m_Client->Incoming().pop_front().Msg;
-        OnMessage(message);
-    }
-
     auto spec = m_Framebuffer->GetSpecification();
     if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
         && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
@@ -59,7 +53,7 @@ void ControlLayer::OnUpdate(Pine::Timestep ts)
     m_Framebuffer->Unbind();
 }
 
-void ControlLayer::OnImGuiRender()
+void LocalControlLayer::OnImGuiRender()
 {
     constexpr auto menuBarHeight = 20;
     const auto windowSize = Pine::Application::Get().GetWindow().GetSize();
@@ -134,7 +128,7 @@ void ControlLayer::OnImGuiRender()
             if (ImGui::Button("Start record"))
             {
             }
-            
+
             ImGui::SameLine();
 
             if (ImGui::Button("Stop record"))
@@ -149,7 +143,6 @@ void ControlLayer::OnImGuiRender()
 
             if (ImGui::Button("Update settings"))
             {
-
             }
 
             ImGui::Separator();
@@ -178,7 +171,8 @@ void ControlLayer::OnImGuiRender()
             ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
             SliderScalar("Target FPS", &m_CameraParameters.CameraFPS, 0, 100);
-            SliderScalar("Timeout", &m_CameraParameters.OpenTimeout,
+            SliderScalar("Timeout",
+                &m_CameraParameters.OpenTimeout,
                 -1.0f,
                 10.0f);
 
@@ -194,20 +188,13 @@ void ControlLayer::OnImGuiRender()
 
             ImGui::Separator();
 
-            SliderScalar("Brightness", 
-                &m_CameraSettings.Brightness, 0, 8);
-            SliderScalar("Contrast", 
-                &m_CameraSettings.Contrast, 0, 8);
-            SliderScalar("Hue", 
-                &m_CameraSettings.Hue, 0, 11);
-            SliderScalar("Saturation", 
-                &m_CameraSettings.Saturation, 0, 8);
-            SliderScalar("Sharpness", 
-                &m_CameraSettings.Sharpness, 0, 8);
-            SliderScalar("Gain", 
-                &m_CameraSettings.Gain, 0, 100);
-            SliderScalar("Exposure", 
-                &m_CameraSettings.Exposure, 0, 100);
+            SliderScalar("Brightness", &m_CameraSettings.Brightness, 0, 8);
+            SliderScalar("Contrast", &m_CameraSettings.Contrast, 0, 8);
+            SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
+            SliderScalar("Saturation", &m_CameraSettings.Saturation, 0, 8);
+            SliderScalar("Sharpness", &m_CameraSettings.Sharpness, 0, 8);
+            SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
+            SliderScalar("Exposure", &m_CameraSettings.Exposure, 0, 100);
             SliderScalar("Whitebalance temp.",
                 &m_CameraSettings.Whitebalance,
                 2800,
@@ -215,12 +202,10 @@ void ControlLayer::OnImGuiRender()
 
             ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-            ImGui::Checkbox("Auto exposure", 
-                &m_CameraSettings.AutoExposure);
+            ImGui::Checkbox("Auto exposure", &m_CameraSettings.AutoExposure);
             ImGui::Checkbox("Auto whitebalance",
                 &m_CameraSettings.AutoWhitebalance);
-            ImGui::Checkbox("Enable LED ", 
-                &m_CameraSettings.EnableLED);
+            ImGui::Checkbox("Enable LED ", &m_CameraSettings.EnableLED);
         });
 
     Pine::UI::AddWindow("Right",
@@ -240,75 +225,9 @@ void ControlLayer::OnImGuiRender()
         });
 }
 
-void ControlLayer::OnEvent(Pine::Event& e) { m_CameraController.OnEvent(e); }
-
-void ControlLayer::OnMessage(Pine::TCP::Message<MessageTypes>& message)
+void LocalControlLayer::OnEvent(Pine::Event& e)
 {
-    /*
-    switch (message.Header.ID)
-    {
-    // Server messages.
-    case MessageTypes::ServerPing:
-        m_ClientPanel.OnServerPing(message);
-        break;
-    case MessageTypes::ServerAccept:
-        m_ClientPanel.OnServerAccept(message);
-        break;
-    case MessageTypes::ServerDeny:
-        m_ClientPanel.OnServerDeny(message);
-        break;
-
-    // Sensor control messages.
-    case MessageTypes::SensorControllerAccept:
-        m_SensorControllerPanel.OnSensorControllerAccept(message);
-        break;
-    case MessageTypes::SensorControllerDeny:
-        m_SensorControllerPanel.OnSensorControllerDeny(message);
-        break;
-
-    // Image and image stream messages.
-    case MessageTypes::Image:
-        m_SensorControllerPanel.OnImage(message);
-        break;
-    case MessageTypes::ImageDeny:
-        m_SensorControllerPanel.OnImageDeny(message);
-        break;
-    case MessageTypes::ImageStream:
-        m_SensorControllerPanel.OnImageStream(message);
-        break;
-    case MessageTypes::ImageStreamDeny:
-        m_SensorControllerPanel.OnImageStreamDeny(message);
-        break;
-
-    // TODO: Implement.
-    // Initialization parameter update messages.
-    case MessageTypes::InitParametersAccept:
-        break;
-    case MessageTypes::InitParametersDeny:
-        break;
-
-    // TODO: Implement.
-    // Recording parameter update messages.
-    case MessageTypes::RecordingParametersAccept:
-        break;
-    case MessageTypes::RecordingParametersDeny:
-        break;
-
-    // TODO: Implement.
-    // Runtime parameter update messages.
-    case MessageTypes::RuntimeParametersAccept:
-        break;
-    case MessageTypes::RuntimeParametersDeny:
-        break;
-
-    // TODO: Implement.
-    // Video setting messages.
-    case MessageTypes::VideoSettingsRequest:
-        break;
-    case MessageTypes::VideoSettings:
-        break;
-    }
-    */
+    m_CameraController.OnEvent(e);
 }
 
 } // namespace Pineapple

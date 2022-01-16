@@ -2,8 +2,8 @@
 
 #include <array>
 #include <ctime>
-#include <utility>
 #include <string>
+#include <utility>
 
 #include <imgui.h>
 
@@ -36,54 +36,34 @@ void AddCombo(const std::string& name,
     }
 }
 
-bool SliderScalar(const std::string& name, 
-    int8_t* value, 
-    const int8_t minValue,
+bool SliderScalar(const std::string& name, int8_t* value, const int8_t minValue,
     const int8_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    uint8_t* value, 
-    const uint8_t minValue,
-    const uint8_t maxValue);
+bool SliderScalar(const std::string& name, uint8_t* value,
+    const uint8_t minValue, const uint8_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    int16_t* value, 
-    const int16_t minValue,
-    const int16_t maxValue);
+bool SliderScalar(const std::string& name, int16_t* value,
+    const int16_t minValue, const int16_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    uint16_t* value, 
-    const uint16_t minValue,
-    const uint16_t maxValue);
+bool SliderScalar(const std::string& name, uint16_t* value,
+    const uint16_t minValue, const uint16_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    int32_t* value, 
-    const int32_t minValue,
-    const int32_t maxValue);
+bool SliderScalar(const std::string& name, int32_t* value,
+    const int32_t minValue, const int32_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    uint32_t* value, 
-    const uint32_t minValue,
-    const uint32_t maxValue);
+bool SliderScalar(const std::string& name, uint32_t* value,
+    const uint32_t minValue, const uint32_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    int64_t* value, 
-    const int64_t minValue,
-    const int64_t maxValue);
+bool SliderScalar(const std::string& name, int64_t* value,
+    const int64_t minValue, const int64_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    uint64_t* value, 
-    const uint64_t minValue,
-    const uint64_t maxValue);
+bool SliderScalar(const std::string& name, uint64_t* value,
+    const uint64_t minValue, const uint64_t maxValue);
 
-bool SliderScalar(const std::string& name, 
-    float* value, 
-    const float minValue,
+bool SliderScalar(const std::string& name, float* value, const float minValue,
     const float maxValue);
 
-bool SliderScalar(const std::string& name, 
-    double* value, 
-    const double minValue,
+bool SliderScalar(const std::string& name, double* value, const double minValue,
     const double maxValue);
 
 }; // namespace Pineapple
