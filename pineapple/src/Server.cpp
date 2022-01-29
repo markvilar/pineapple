@@ -4,29 +4,28 @@ namespace Pineapple
 {
 
 Server::Server(const uint16_t& port, const std::filesystem::path& dataDirectory)
-    : Pine::TCP::Server<MessageTypes>(port), m_CameraInterface(dataDirectory)
+    : Pine::TCPServer<MessageTypes>(port), m_CameraInterface(dataDirectory)
 {
 }
 
 Server::~Server() { Stop(); }
 
-bool Server::OnClientConnect(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client)
+bool Server::OnClientConnect(Pine::Ref<Pine::Connection<MessageTypes>> client)
 {
     m_Clients++;
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ServerAccept;
     client->Send(message);
     return true;
 }
 
-void Server::OnClientDisconnect(Pine::Ref<Pine::TCP::Connection<MessageTypes>>)
+void Server::OnClientDisconnect(Pine::Ref<Pine::Connection<MessageTypes>>)
 {
     m_Clients--;
 }
 
-void Server::OnMessage(Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+void Server::OnMessage(Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     // Dispatch the message to the right function based on the header ID.
     switch (message.Header.ID)
@@ -69,29 +68,29 @@ void Server::OnMessage(Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
 }
 
 void Server::OnServerPingRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message) const
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message) const
 {
     PINE_INFO("[{0}] Ping Request.", client->GetID());
     client->Send(message);
 }
 
 void Server::OnSensorControllerInitializationRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Initialization Request.", client->GetID());
     if (!m_CameraInterface.IsRunning())
     {
         m_CameraInterface.Initialize();
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
@@ -99,21 +98,21 @@ void Server::OnSensorControllerInitializationRequest(
 }
 
 void Server::OnSensorControllerShutdownRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Shutdown Request.", client->GetID());
     if (m_CameraInterface.IsRunning())
     {
         m_CameraInterface.Shutdown();
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
@@ -121,21 +120,21 @@ void Server::OnSensorControllerShutdownRequest(
 }
 
 void Server::OnSensorControllerStartRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Start Record Request.", client->GetID());
     if (!m_CameraInterface.IsRecording())
     {
         m_CameraInterface.Start();
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
@@ -143,30 +142,29 @@ void Server::OnSensorControllerStartRequest(
 }
 
 void Server::OnSensorControllerStopRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Stop Record Request.", client->GetID());
     if (m_CameraInterface.IsRecording())
     {
         m_CameraInterface.Stop();
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerAccept;
         client->Send(message);
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
     */
 }
 
-void Server::OnImageRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+void Server::OnImageRequest(Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Image Request.", client->GetID());
@@ -181,7 +179,7 @@ void Server::OnImageRequest(
         uint32_t channels = image->GetChannels();
         auto data = image->GetBuffer();
 
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::Image;
         message << data;
         message << width << height << channels;
@@ -189,7 +187,7 @@ void Server::OnImageRequest(
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::SensorControllerDeny;
         client->Send(message);
     }
@@ -197,8 +195,8 @@ void Server::OnImageRequest(
 }
 
 void Server::OnImageStreamRequest(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Image Stream Request.", client->GetID());
@@ -213,7 +211,7 @@ void Server::OnImageStreamRequest(
         uint32_t channels = image->GetChannels();
         auto data = image->GetBuffer();
 
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::ImageStream;
         message << data;
         message << width << height << channels;
@@ -221,7 +219,7 @@ void Server::OnImageStreamRequest(
     }
     else
     {
-        Pine::TCP::Message<MessageTypes> message;
+        Pine::Message<MessageTypes> message;
         message.Header.ID = MessageTypes::ImageStreamDeny;
         client->Send(message);
     }
@@ -229,8 +227,8 @@ void Server::OnImageStreamRequest(
 }
 
 void Server::OnInitParametersUpdate(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Initialization Parameters Request.", client->GetID());
@@ -257,8 +255,8 @@ void Server::OnInitParametersUpdate(
 }
 
 void Server::OnRecordingParametersUpdate(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Recording Parameters Request.", client->GetID());
@@ -275,8 +273,8 @@ void Server::OnRecordingParametersUpdate(
 }
 
 void Server::OnRuntimeParametersUpdate(
-    Pine::Ref<Pine::TCP::Connection<MessageTypes>> client,
-    Pine::TCP::Message<MessageTypes>& message)
+    Pine::Ref<Pine::Connection<MessageTypes>> client,
+    Pine::Message<MessageTypes>& message)
 {
     /*
     PINE_INFO("[{0}] Runtime Parameters Request.", client->GetID());

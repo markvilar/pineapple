@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pine/Pine.hpp"
+#include <Pine/Pine.hpp>
 
 #include "Pineapple/CameraParameters.hpp"
 #include "Pineapple/CameraSettings.hpp"
@@ -9,7 +9,7 @@
 namespace Pineapple
 {
 
-class Client : public Pine::TCP::Client<MessageTypes>
+class Client : public Pine::TCPClient<MessageTypes>
 {
 public:
     Client();

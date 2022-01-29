@@ -3,13 +3,13 @@
 namespace Pineapple
 {
 
-Client::Client() : Pine::TCP::Client<MessageTypes>() {}
+Client::Client() : Pine::TCPClient<MessageTypes>() {}
 
 Client::~Client() {}
 
 void Client::RequestServerPing()
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ServerPing;
     std::chrono::system_clock::time_point time =
         std::chrono::system_clock::now();
@@ -20,35 +20,35 @@ void Client::RequestServerPing()
 
 void Client::RequestSensorControllerInitialization()
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::SensorControllerInitialize;
     Send(message);
 }
 
 void Client::RequestSensorControllerShutdown()
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::SensorControllerShutdown;
     Send(message);
 }
 
 void Client::RequestSensorControllerStart()
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::SensorControllerStart;
     Send(message);
 }
 
 void Client::RequestSensorControllerStop()
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::SensorControllerStop;
     Send(message);
 }
 
 void Client::RequestImage(const ZED::View& view)
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ImageRequest;
 
     message << view;
@@ -58,7 +58,7 @@ void Client::RequestImage(const ZED::View& view)
 
 void Client::RequestImageStream(const ZED::View& view)
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ImageStreamRequest;
 
     message << view;
@@ -69,7 +69,7 @@ void Client::RequestImageStream(const ZED::View& view)
 /*
 void Client::RequestInitParametersUpdate(const InitParameters& parameters)
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::InitParametersUpdate;
 
     message << parameters.depthMode;
@@ -94,7 +94,7 @@ void Client::RequestInitParametersUpdate(const InitParameters& parameters)
 void Client::RequestRecordingParametersUpdate(
     const RecordingParameters& parameters)
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::RecordingParametersUpdate;
 
     // TODO: Filename size.
@@ -108,7 +108,7 @@ void Client::RequestRecordingParametersUpdate(
 
 void Client::RequestRuntimeParametersUpdate(const RuntimeParameters& parameters)
 {
-    Pine::TCP::Message<MessageTypes> message;
+    Pine::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::RuntimeParametersUpdate;
 
     message << parameters.sensingMode;

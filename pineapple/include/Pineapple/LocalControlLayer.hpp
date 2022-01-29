@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Pine/Pine.hpp"
+#include <Pine/Pine.hpp>
 
+#include "Pineapple/CameraInterface.hpp"
 #include "Pineapple/CameraParameters.hpp"
 #include "Pineapple/CameraSettings.hpp"
 #include "Pineapple/Client.hpp"
@@ -26,8 +27,7 @@ private:
     Pine::OrthographicCameraController m_CameraController;
     std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
 
-    std::shared_ptr<Client> m_Client;
-
+    ZED::CameraInterface m_CameraInterface = {};
     ZED::CameraParameters m_CameraParameters = {};
     ZED::CameraSettings m_CameraSettings = {};
 

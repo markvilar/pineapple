@@ -3,7 +3,8 @@
 namespace Pineapple
 {
 
-template <typename T> class Image
+template <typename T>
+class Image
 {
 public:
     Image() = default;

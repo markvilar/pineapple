@@ -19,35 +19,44 @@
 namespace Pineapple::ZED
 {
 
+struct RecordJob
+{
+    std::filesystem::path OutputDirectory = "";
+    CameraParameters Parameters = {};
+};
+
 class CameraInterface
 {
+    using Image = Pine::Image;
 
 public:
-    CameraInterface(const std::filesystem::path& dataDirectory = ".");
+    CameraInterface(const std::filesystem::path& outputDirectory = ".");
     ~CameraInterface();
 
-    void StartRecord();
+    void StartRecord(const CameraParameters& parameters = {});
+    void StartRecord(const CameraParameters& parameters,
+        const std::filesystem::path& outputDirectory);
+
     void StopRecord();
 
     std::optional<CameraSettings> GetCameraSettings();
     std::optional<IMUData> GetIMUData();
-    std::optional<Pine::Image> GetImage(const uint32_t width,
-        const uint32_t height, const View& view = View::LEFT);
+    std::optional<Image> GetImage(const uint32_t width, const uint32_t height,
+        const View& view = View::LEFT);
 
 private:
-    void RecordWorker();
+    void RecordWorker(const RecordJob job);
 
 private:
-    std::filesystem::path m_DataDirectory = "";
-    CameraParameters m_CameraParameters = {};
+    std::filesystem::path m_OutputDirectory = ".";
     CameraSettings m_CameraSettings = {};
 
     sl::Camera m_Camera = {};
 
     std::unique_ptr<std::thread> m_WorkerThread = {};
     std::mutex m_CameraMutex = {};
-    std::atomic<bool> m_StopFlag = false;
-    std::atomic<bool> m_IsRecording = false;
+    std::atomic<bool> m_Stop = false;
+    std::atomic<bool> m_Busy = false;
 };
 
 } // namespace Pineapple::ZED

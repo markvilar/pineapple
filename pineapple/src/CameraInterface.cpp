@@ -68,30 +68,39 @@ ToStereolabs(const CameraParameters& parameters)
 }
 
 CameraInterface::CameraInterface(const std::filesystem::path& dataDirectory)
-    : m_DataDirectory(dataDirectory)
+    : m_OutputDirectory(dataDirectory)
 {
 }
 
 CameraInterface::~CameraInterface() { StopRecord(); }
 
-void CameraInterface::StartRecord()
+void CameraInterface::StartRecord(const CameraParameters& parameters)
 {
-    if (m_IsRecording)
+    StartRecord(parameters, m_OutputDirectory);
+}
+
+void CameraInterface::StartRecord(const CameraParameters& parameters,
+    const std::filesystem::path& outputDirectory)
+{
+    if (!m_Busy.exchange(true))
     {
         PINE_WARN("ZED camera is already recording.");
         return;
     }
 
-    m_IsRecording = true;
-    m_StopFlag = false;
+    RecordJob job;
+    job.OutputDirectory = outputDirectory;
+    job.Parameters = parameters;
 
     m_WorkerThread =
-        std::make_unique<std::thread>(&CameraInterface::RecordWorker, this);
+        std::make_unique<std::thread>(&CameraInterface::RecordWorker,
+            this,
+            job);
 }
 
 void CameraInterface::StopRecord()
 {
-    m_StopFlag = true;
+    m_Stop = true;
     if (m_WorkerThread->joinable())
     {
         m_WorkerThread->join();
@@ -215,15 +224,14 @@ std::optional<Pine::Image> CameraInterface::GetImage(
     return image;
 }
 
-void CameraInterface::RecordWorker()
+void CameraInterface::RecordWorker(const RecordJob job)
 {
     auto [initParameters, recordingParameters, runtimeParameters] =
-        ToStereolabs(m_CameraParameters);
+        ToStereolabs(job.Parameters);
 
-    const auto directory = m_DataDirectory;
     const auto dateString = CurrentDateTime() + ".svo";
-    const auto filepath = directory / dateString;
-    PINE_INFO("Recording: {0}", filepath);
+    const auto filepath = job.OutputDirectory / dateString;
+    PINE_INFO("Starting record job: {0}", filepath);
     recordingParameters.video_filename = filepath.string().c_str();
 
     const auto openState = m_Camera.open(initParameters);
@@ -231,7 +239,7 @@ void CameraInterface::RecordWorker()
     {
         PINE_WARN("Error while opening ZED: {0}",
             sl::toString(openState).get());
-        m_IsRecording = false;
+        m_Busy = false;
         return;
     }
 
@@ -240,11 +248,11 @@ void CameraInterface::RecordWorker()
     {
         PINE_WARN("Error while enabling ZED recording: {0}",
             sl::toString(enableState).get());
-        m_IsRecording = false;
+        m_Busy = false;
         return;
     }
 
-    while (!m_StopFlag)
+    while (!m_Stop)
     {
         const auto grabState = m_Camera.grab(runtimeParameters);
         if (grabState != sl::ERROR_CODE::SUCCESS)
@@ -255,7 +263,8 @@ void CameraInterface::RecordWorker()
     }
 
     m_Camera.close();
-    m_IsRecording = false;
+    m_Busy = false;
+    m_Stop = false;
 }
 
 } // namespace Pineapple::ZED

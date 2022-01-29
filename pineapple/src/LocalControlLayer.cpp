@@ -12,8 +12,6 @@ LocalControlLayer::~LocalControlLayer() {}
 
 void LocalControlLayer::OnAttach()
 {
-    m_Client = std::make_shared<Client>();
-
     Pine::Framebuffer::Specification fbSpec;
     fbSpec.Width = 1280;
     fbSpec.Height = 720;
@@ -31,8 +29,8 @@ void LocalControlLayer::OnUpdate(Pine::Timestep ts)
     if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
         && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
     {
-        m_Framebuffer->Resize((uint32_t)m_ViewportSize.x,
-            (uint32_t)m_ViewportSize.y);
+        m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x),
+            static_cast<uint32_t>(m_ViewportSize.y));
         m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
     }
 
@@ -58,8 +56,8 @@ void LocalControlLayer::OnImGuiRender()
     constexpr auto menuBarHeight = 20;
     const auto windowSize = Pine::Application::Get().GetWindow().GetSize();
 
-    const std::pair<uint32_t, uint32_t> uiPosition = {0, menuBarHeight};
-    const std::pair<uint32_t, uint32_t> uiSize = {windowSize.first,
+    const std::pair<uint32_t, uint32_t> interfaceOrigin = {0, menuBarHeight};
+    const std::pair<uint32_t, uint32_t> interfaceSize = {windowSize.first,
         windowSize.second - menuBarHeight};
 
     Pine::UI::AddMainMenuBar([]() {
@@ -99,32 +97,19 @@ void LocalControlLayer::OnImGuiRender()
     });
 
     Pine::UI::AddViewport("Viewport",
-        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 0.70 * uiSize.second),
+        Pine::Vec2(interfaceOrigin.first + 0.20 * interfaceSize.first,
+            interfaceOrigin.second + 0.00 * interfaceSize.second),
+        Pine::Vec2(0.60 * interfaceSize.first, 0.70 * interfaceSize.second),
         m_Framebuffer,
         []() {
             // TODO: Implement functionality.
         });
 
     Pine::UI::AddWindow("Left",
-        Pine::Vec2(uiPosition.first + 0.00 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.20 * uiSize.first, 1.00 * uiSize.second),
+        Pine::Vec2(interfaceOrigin.first + 0.00 * interfaceSize.first,
+            interfaceOrigin.second + 0.00 * interfaceSize.second),
+        Pine::Vec2(0.20 * interfaceSize.first, 1.00 * interfaceSize.second),
         [this]() {
-            static auto brightness = 0;
-            static auto contrast = 0;
-            static auto hue = 0;
-            static auto saturation = 0;
-            static auto sharpness = 0;
-            static auto gain = 0;
-            static auto exposure = 0;
-            static auto whitebalanceTemp = 0;
-
-            static auto aecagc = false;
-            static auto whitebalanceAuto = false;
-            static auto ledStatus = false;
-
             if (ImGui::Button("Start record"))
             {
             }
@@ -132,10 +117,6 @@ void LocalControlLayer::OnImGuiRender()
             ImGui::SameLine();
 
             if (ImGui::Button("Stop record"))
-            {
-            }
-
-            if (ImGui::Button("Update parameters"))
             {
             }
 
@@ -148,35 +129,45 @@ void LocalControlLayer::OnImGuiRender()
             ImGui::Separator();
 
             const std::array<std::pair<std::string, ZED::FlipMode>, 3>
-                flipModes = {std::make_pair("Off", ZED::FlipMode::OFF),
+                cameraFlipOptions = {std::make_pair("Off", ZED::FlipMode::OFF),
                     std::make_pair("On", ZED::FlipMode::ON),
                     std::make_pair("Auto", ZED::FlipMode::AUTO)};
 
             const std::array<std::pair<std::string, ZED::Resolution>, 4>
-                resolutions = {std::make_pair("HD2K", ZED::Resolution::HD2K),
+                resolutionOptions = {
+                    std::make_pair("HD2K", ZED::Resolution::HD2K),
                     std::make_pair("HD1080", ZED::Resolution::HD1080),
                     std::make_pair("HD720", ZED::Resolution::HD720),
                     std::make_pair("VGA", ZED::Resolution::VGA)};
 
             const std::array<std::pair<std::string, ZED::CompressionMode>, 3>
-                compressionModes = {
+                compressionOptions = {
                     std::make_pair("Lossless", ZED::CompressionMode::LOSSLESS),
                     std::make_pair("H264", ZED::CompressionMode::H264),
                     std::make_pair("H265", ZED::CompressionMode::H265)};
 
-            AddCombo("Flip mode", flipModes, []() {});
-            AddCombo("Resolution", resolutions, []() {});
-            AddCombo("Compression", compressionModes, []() {});
+            Pine::UI::AddCombo("Flip mode",
+                &m_CameraParameters.CameraFlip,
+                cameraFlipOptions);
+            Pine::UI::AddCombo("Resolution",
+                &m_CameraParameters.CameraResolution,
+                resolutionOptions);
+            Pine::UI::AddCombo("Compression",
+                &m_CameraParameters.Compression,
+                compressionOptions);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
-            SliderScalar("Target FPS", &m_CameraParameters.CameraFPS, 0, 100);
-            SliderScalar("Timeout",
+            Pine::UI::SliderScalar("Target FPS",
+                &m_CameraParameters.CameraFPS,
+                0,
+                100);
+            Pine::UI::SliderScalar("Timeout",
                 &m_CameraParameters.OpenTimeout,
                 -1.0f,
                 10.0f);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
             ImGui::Checkbox("Image enhancement",
                 &m_CameraParameters.EnableImageEnhancement);
@@ -188,19 +179,34 @@ void LocalControlLayer::OnImGuiRender()
 
             ImGui::Separator();
 
-            SliderScalar("Brightness", &m_CameraSettings.Brightness, 0, 8);
-            SliderScalar("Contrast", &m_CameraSettings.Contrast, 0, 8);
-            SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
-            SliderScalar("Saturation", &m_CameraSettings.Saturation, 0, 8);
-            SliderScalar("Sharpness", &m_CameraSettings.Sharpness, 0, 8);
-            SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
-            SliderScalar("Exposure", &m_CameraSettings.Exposure, 0, 100);
-            SliderScalar("Whitebalance temp.",
+            Pine::UI::SliderScalar("Brightness",
+                &m_CameraSettings.Brightness,
+                0,
+                8);
+            Pine::UI::SliderScalar("Contrast",
+                &m_CameraSettings.Contrast,
+                0,
+                8);
+            Pine::UI::SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
+            Pine::UI::SliderScalar("Saturation",
+                &m_CameraSettings.Saturation,
+                0,
+                8);
+            Pine::UI::SliderScalar("Sharpness",
+                &m_CameraSettings.Sharpness,
+                0,
+                8);
+            Pine::UI::SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
+            Pine::UI::SliderScalar("Exposure",
+                &m_CameraSettings.Exposure,
+                0,
+                100);
+            Pine::UI::SliderScalar("Whitebalance temp.",
                 &m_CameraSettings.Whitebalance,
                 2800,
                 6500);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
             ImGui::Checkbox("Auto exposure", &m_CameraSettings.AutoExposure);
             ImGui::Checkbox("Auto whitebalance",
@@ -209,17 +215,17 @@ void LocalControlLayer::OnImGuiRender()
         });
 
     Pine::UI::AddWindow("Right",
-        Pine::Vec2(uiPosition.first + 0.80 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 1.00 * uiSize.second),
+        Pine::Vec2(interfaceOrigin.first + 0.80 * interfaceSize.first,
+            interfaceOrigin.second + 0.00 * interfaceSize.second),
+        Pine::Vec2(0.60 * interfaceSize.first, 1.00 * interfaceSize.second),
         []() {
             // TODO: Implement functionality.
         });
 
     Pine::UI::AddWindow("Bottom",
-        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
-            uiPosition.second + 0.70 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 0.30 * uiSize.second),
+        Pine::Vec2(interfaceOrigin.first + 0.20 * interfaceSize.first,
+            interfaceOrigin.second + 0.70 * interfaceSize.second),
+        Pine::Vec2(0.60 * interfaceSize.first, 0.30 * interfaceSize.second),
         []() {
             // TODO: Implement functionality.
         });
