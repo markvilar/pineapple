@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pine/Pine.hpp"
+#include <Pine/Pine.hpp>
 
 #include "Pineapple/CameraParameters.hpp"
 #include "Pineapple/CameraSettings.hpp"
@@ -23,7 +23,7 @@ public:
     virtual void OnEvent(Pine::Event& e) override;
 
 private:
-    void OnMessage(Pine::TCP::Message<MessageTypes>& message);
+    void OnMessage(Pine::Message<MessageTypes>& message);
 
 private:
     Pine::OrthographicCameraController m_CameraController;

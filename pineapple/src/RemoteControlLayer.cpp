@@ -170,19 +170,28 @@ void RemoteControlLayer::OnImGuiRender()
                     std::make_pair("H264", ZED::CompressionMode::H264),
                     std::make_pair("H265", ZED::CompressionMode::H265)};
 
-            AddCombo("Flip mode", flipModes, []() {});
-            AddCombo("Resolution", resolutions, []() {});
-            AddCombo("Compression", compressionModes, []() {});
+            Pine::UI::AddCombo("Flip mode",
+                &m_CameraParameters.CameraFlip,
+                flipModes);
+            Pine::UI::AddCombo("Resolution",
+                &m_CameraParameters.CameraResolution,
+                resolutions);
+            Pine::UI::AddCombo("Compression",
+                &m_CameraParameters.Compression,
+                compressionModes);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
-            SliderScalar("Target FPS", &m_CameraParameters.CameraFPS, 0, 100);
-            SliderScalar("Timeout",
+            Pine::UI::SliderScalar("Target FPS",
+                &m_CameraParameters.CameraFPS,
+                0,
+                100);
+            Pine::UI::SliderScalar("Timeout",
                 &m_CameraParameters.OpenTimeout,
                 -1.0f,
                 10.0f);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
             ImGui::Checkbox("Image enhancement",
                 &m_CameraParameters.EnableImageEnhancement);
@@ -194,19 +203,34 @@ void RemoteControlLayer::OnImGuiRender()
 
             ImGui::Separator();
 
-            SliderScalar("Brightness", &m_CameraSettings.Brightness, 0, 8);
-            SliderScalar("Contrast", &m_CameraSettings.Contrast, 0, 8);
-            SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
-            SliderScalar("Saturation", &m_CameraSettings.Saturation, 0, 8);
-            SliderScalar("Sharpness", &m_CameraSettings.Sharpness, 0, 8);
-            SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
-            SliderScalar("Exposure", &m_CameraSettings.Exposure, 0, 100);
-            SliderScalar("Whitebalance temp.",
+            Pine::UI::SliderScalar("Brightness",
+                &m_CameraSettings.Brightness,
+                0,
+                8);
+            Pine::UI::SliderScalar("Contrast",
+                &m_CameraSettings.Contrast,
+                0,
+                8);
+            Pine::UI::SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
+            Pine::UI::SliderScalar("Saturation",
+                &m_CameraSettings.Saturation,
+                0,
+                8);
+            Pine::UI::SliderScalar("Sharpness",
+                &m_CameraSettings.Sharpness,
+                0,
+                8);
+            Pine::UI::SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
+            Pine::UI::SliderScalar("Exposure",
+                &m_CameraSettings.Exposure,
+                0,
+                100);
+            Pine::UI::SliderScalar("Whitebalance temp.",
                 &m_CameraSettings.Whitebalance,
                 2800,
                 6500);
 
-            ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
             ImGui::Checkbox("Auto exposure", &m_CameraSettings.AutoExposure);
             ImGui::Checkbox("Auto whitebalance",
@@ -236,7 +260,7 @@ void RemoteControlLayer::OnEvent(Pine::Event& e)
     m_CameraController.OnEvent(e);
 }
 
-void RemoteControlLayer::OnMessage(Pine::TCP::Message<MessageTypes>& message)
+void RemoteControlLayer::OnMessage(Pine::Message<MessageTypes>& message)
 {
     /*
     switch (message.Header.ID)
