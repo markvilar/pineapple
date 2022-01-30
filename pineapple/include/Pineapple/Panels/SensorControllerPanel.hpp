@@ -2,9 +2,9 @@
 
 #include "Pine/Pine.hpp"
 
+#include "Pineapple/CameraSettings.hpp"
 #include "Pineapple/Client.hpp"
 #include "Pineapple/Image.hpp"
-#include "Pineapple/Settings.hpp"
 
 namespace Pineapple
 {
@@ -27,6 +27,7 @@ public:
     {
         return m_ImageTexture;
     }
+
     Pine::Ref<Image<uint8_t>> GetImage() const { return m_Image; }
 
     void OnImage(Pine::TCP::Message<MessageTypes>& message);
@@ -39,12 +40,11 @@ public:
     void OnSensorControllerDeny(Pine::TCP::Message<MessageTypes>& message);
 
 private:
-    Pine::Ref<Client> m_Client;
+    Pine::Ref<Client> m_Client = nullptr;
+    Pine::Ref<Pine::Texture2D> m_ImageTexture = nullptr;
+    Pine::Ref<Image<uint8_t>> m_Image = nullptr;
 
-    Pine::Ref<Pine::Texture2D> m_ImageTexture;
-    Pine::Ref<Image<uint8_t>> m_Image;
-
-    View m_OptionView = View::Left;
+    ZED::View m_OptionView = ZED::View::Left;
     bool m_OptionImageStream = false;
 };
 

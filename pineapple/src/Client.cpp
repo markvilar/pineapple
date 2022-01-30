@@ -46,7 +46,7 @@ void Client::RequestSensorControllerStop()
     Send(message);
 }
 
-void Client::RequestImage(const View& view)
+void Client::RequestImage(const ZED::View& view)
 {
     Pine::TCP::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ImageRequest;
@@ -56,7 +56,7 @@ void Client::RequestImage(const View& view)
     Send(message);
 }
 
-void Client::RequestImageStream(const View& view)
+void Client::RequestImageStream(const ZED::View& view)
 {
     Pine::TCP::Message<MessageTypes> message;
     message.Header.ID = MessageTypes::ImageStreamRequest;
@@ -66,6 +66,7 @@ void Client::RequestImageStream(const View& view)
     Send(message);
 }
 
+/*
 void Client::RequestInitParametersUpdate(const InitParameters& parameters)
 {
     Pine::TCP::Message<MessageTypes> message;
@@ -118,5 +119,6 @@ void Client::RequestRuntimeParametersUpdate(const RuntimeParameters& parameters)
 
     Send(message);
 }
+*/
 
 } // namespace Pineapple

@@ -2,11 +2,9 @@
 
 #include "Pine/Pine.hpp"
 
-#include "Pineapple/InitParameters.hpp"
+#include "Pineapple/CameraParameters.hpp"
+#include "Pineapple/CameraSettings.hpp"
 #include "Pineapple/Messages.hpp"
-#include "Pineapple/RecordingParameters.hpp"
-#include "Pineapple/RuntimeParameters.hpp"
-#include "Pineapple/Settings.hpp"
 
 namespace Pineapple
 {
@@ -24,13 +22,8 @@ public:
     void RequestSensorControllerStart();
     void RequestSensorControllerStop();
 
-    void RequestImage(const View& view);
-    void RequestImageStream(const View& view);
-
-    void RequestInitParametersUpdate(const InitParameters& parameters);
-    void RequestRecordingParametersUpdate(
-        const RecordingParameters& parameters);
-    void RequestRuntimeParametersUpdate(const RuntimeParameters& parameters);
+    void RequestImage(const ZED::View& view);
+    void RequestImageStream(const ZED::View& view);
 
 private:
 };

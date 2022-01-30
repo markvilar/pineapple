@@ -1,14 +1,10 @@
 #pragma once
 
-#include <iostream>
-#include <sstream>
-
-namespace Pineapple
+namespace Pineapple::ZED
 {
 
-enum class VideoSettings : uint8_t
+enum class Settings : uint8_t
 {
-    None = 0,
     Brightness = 1,
     Contrast = 2,
     Hue = 3,
@@ -24,7 +20,6 @@ enum class VideoSettings : uint8_t
 
 enum class View : uint8_t
 {
-    None = 0,
     Left = 1,
     Right = 2,
     LeftGray = 3,
@@ -36,10 +31,19 @@ enum class View : uint8_t
     SideBySide = 9,
 };
 
-std::string ToString(const VideoSettings& videoSettings);
-std::string ToString(const View& view);
+struct CameraSettings
+{
+    int Brightness = 4;
+    int Contrast = 4;
+    int Hue = 4;
+    int Saturation = 4;
+    int Sharpness = 4;
+    int Gain = 50;
+    int Exposure = 50;
+    int Whitebalance = 4000;
+    bool AutoExposure = true;
+    bool AutoWhitebalance = true;
+    bool EnableLED = true;
+};
 
-std::ostream& operator<<(std::ostream& os, const VideoSettings& videoSettings);
-std::ostream& operator<<(std::ostream& os, const View& view);
-
-} // namespace Pineapple
+} // namespace Pineapple::ZED

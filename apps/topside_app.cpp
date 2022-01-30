@@ -5,7 +5,7 @@
 class Controller : public Pine::Application
 {
 public:
-    Controller(const Pine::Application::Specification& specs) 
+    Controller(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
         PushLayer(new Pineapple::ControlLayer());
@@ -18,12 +18,12 @@ Pine::Application* Pine::CreateApplication(int argc, char** argv)
 {
     Pine::Application::Specification specs;
     specs.WorkingDirectory;
-    specs.Name = "Pine App";
+    specs.Name = "Pineapple";
     specs.WindowWidth = 1600;
     specs.WindowHeight = 800;
     specs.StartMaximized = true;
     specs.VSync = true;
-    specs.Resizable = false;
+    specs.Resizable = true;
     specs.EnableImGui = true;
     specs.Fullscreen = true;
 

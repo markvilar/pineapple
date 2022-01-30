@@ -31,35 +31,24 @@ endif()
 target_sources(
     pineapple
     PUBLIC include/Pineapple/Panels/ClientPanel.hpp
-           include/Pineapple/Panels/InitParametersPanel.hpp
-           include/Pineapple/Panels/RecordingParametersPanel.hpp
-           include/Pineapple/Panels/RuntimeParametersPanel.hpp
            include/Pineapple/Panels/SensorControllerPanel.hpp
+           include/Pineapple/CameraInterface.hpp
+           include/Pineapple/CameraParameters.hpp
+           include/Pineapple/CameraSettings.hpp
            include/Pineapple/Client.hpp
            include/Pineapple/ControlLayer.hpp
-           include/Pineapple/Conversion.hpp
            include/Pineapple/Image.hpp
-           include/Pineapple/InitParameters.hpp
+           include/Pineapple/IMU.hpp
            include/Pineapple/Messages.hpp
-           include/Pineapple/RecordingParameters.hpp
-           include/Pineapple/RuntimeParameters.hpp
-           include/Pineapple/SensorController.hpp
            include/Pineapple/Server.hpp
-           include/Pineapple/Settings.hpp
+           include/Pineapple/Utils.hpp
     PRIVATE src/Panels/ClientPanel.cpp
-            src/Panels/InitParametersPanel.cpp
-            src/Panels/RecordingParametersPanel.cpp
-            src/Panels/RuntimeParametersPanel.cpp
             src/Panels/SensorControllerPanel.cpp
+            src/CameraInterface.cpp
             src/Client.cpp
             src/ControlLayer.cpp
-            src/Conversion.cpp
-            src/InitParameters.cpp
-            src/RecordingParameters.cpp
-            src/RuntimeParameters.cpp
-            src/SensorController.cpp
             src/Server.cpp
-            src/Settings.cpp)
+            src/Utils.cpp)
 
 # Library include directory
 target_include_directories(

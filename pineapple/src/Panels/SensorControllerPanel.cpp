@@ -49,11 +49,11 @@ void SensorControllerPanel::OnImGuiRender()
             "Left - Unrectified",
             "Right - Unrectified",
             "Side by side"};
-        View viewOptions[] = {View::Left,
-            View::Right,
-            View::LeftUnrectified,
-            View::RightUnrectified,
-            View::SideBySide};
+        ZED::View viewOptions[] = {ZED::View::Left,
+            ZED::View::Right,
+            ZED::View::LeftUnrectified,
+            ZED::View::RightUnrectified,
+            ZED::View::SideBySide};
         static_assert(sizeof(viewLabels) / sizeof(viewLabels[0])
                 == sizeof(viewOptions) / sizeof(viewOptions[0]),
             "View labels and options must be of equal size.");

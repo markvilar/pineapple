@@ -1,12 +1,10 @@
 #pragma once
 #include "Pine/Pine.hpp"
 
-#include "Pineapple/Messages.hpp"
-#include "Pineapple/SensorController.hpp"
+#include <filesystem>
 
-#include "Pineapple/InitParameters.hpp"
-#include "Pineapple/RecordingParameters.hpp"
-#include "Pineapple/RuntimeParameters.hpp"
+#include "Pineapple/CameraInterface.hpp"
+#include "Pineapple/Messages.hpp"
 
 namespace Pineapple
 {
@@ -14,7 +12,7 @@ namespace Pineapple
 class Server : public Pine::TCP::Server<MessageTypes>
 {
 public:
-    Server(const uint16_t& port, const std::string& root);
+    Server(const uint16_t& port, const std::filesystem::path& dataDirectory);
     virtual ~Server();
 
 protected:
@@ -66,7 +64,7 @@ private:
         Pine::TCP::Message<MessageTypes>& message);
 
 private:
-    SensorController m_SensorController;
+    ZED::CameraInterface m_CameraInterface;
     uint8_t m_Clients = 0;
 };
 

@@ -5,7 +5,7 @@ BUILD_DIR="${SOURCE_DIR}/build/"
 PACKAGE_DIR="${SOURCE_DIR}/../pine-packages/"
 
 GENERATOR="Ninja"
-BUILD_TYPE="Debug"
+BUILD_TYPE="Release"
 CXX_COMPILER="clang++-12"
 
 if [ ! -d ${BUILD_DIR} ]; then
