@@ -1,23 +1,23 @@
 #include "Pine/Pine.hpp"
 
-#include "Pineapple/ControlLayer.hpp"
+#include "Pineapple/RemoteControlLayer.hpp"
 
-class Controller : public Pine::Application
+class RemoteController : public Pine::Application
 {
 public:
-    Controller(const Pine::Application::Specification& specs)
+    RemoteController(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
-        PushLayer(new Pineapple::ControlLayer());
+        PushLayer(new Pineapple::RemoteControlLayer());
     }
 
-    ~Controller() {}
+    ~RemoteController() {}
 };
 
 Pine::Application* Pine::CreateApplication(int argc, char** argv)
 {
     Pine::Application::Specification specs;
-    specs.WorkingDirectory;
+    specs.WorkingDirectory = ".";
     specs.Name = "Pineapple";
     specs.WindowWidth = 1600;
     specs.WindowHeight = 800;
@@ -27,7 +27,7 @@ Pine::Application* Pine::CreateApplication(int argc, char** argv)
     specs.EnableImGui = true;
     specs.Fullscreen = true;
 
-    return new Controller(specs);
+    return new RemoteController(specs);
 }
 
 int main(int argc, char** argv)
