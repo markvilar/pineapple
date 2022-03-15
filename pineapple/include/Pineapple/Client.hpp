@@ -8,24 +8,4 @@
 
 namespace Pineapple
 {
-
-class Client : public Pine::TCPClient<MessageTypes>
-{
-public:
-    Client();
-    virtual ~Client();
-
-    void RequestServerPing();
-
-    void RequestSensorControllerInitialization();
-    void RequestSensorControllerShutdown();
-    void RequestSensorControllerStart();
-    void RequestSensorControllerStop();
-
-    void RequestImage(const ZED::View& view);
-    void RequestImageStream(const ZED::View& view);
-
-private:
-};
-
 } // namespace Pineapple

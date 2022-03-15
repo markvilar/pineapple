@@ -1,7 +1,7 @@
 #include <chrono>
 #include <signal.h>
 
-#include "Pine/Pine.hpp"
+#include <Pine/Pine.hpp>
 
 #include "Pineapple/Messages.hpp"
 #include "Pineapple/Server.hpp"
@@ -17,6 +17,7 @@ int main(int argc, char** argv)
 
     Pine::Log::Init();
 
+    /*
     Pineapple::Server server(60000, "/home/martin/data/");
     server.Start(); // Note: Makes program not terminate.
 
@@ -25,6 +26,7 @@ int main(int argc, char** argv)
         server.Update();
         std::this_thread::sleep_for(std::chrono::seconds(1 / nodeRate));
     }
+    */
 
     return 0;
 }

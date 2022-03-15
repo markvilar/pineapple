@@ -82,7 +82,7 @@ void CameraInterface::StartRecord(const CameraParameters& parameters)
 void CameraInterface::StartRecord(const CameraParameters& parameters,
     const std::filesystem::path& outputDirectory)
 {
-    if (!m_Busy.exchange(true))
+    if (m_Busy.exchange(true))
     {
         PINE_WARN("ZED camera is already recording.");
         return;
@@ -101,7 +101,7 @@ void CameraInterface::StartRecord(const CameraParameters& parameters,
 void CameraInterface::StopRecord()
 {
     m_Stop = true;
-    if (m_WorkerThread->joinable())
+    if (m_WorkerThread && m_WorkerThread->joinable())
     {
         m_WorkerThread->join();
     }

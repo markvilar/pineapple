@@ -6,6 +6,7 @@
 #include "Pineapple/CameraParameters.hpp"
 #include "Pineapple/CameraSettings.hpp"
 #include "Pineapple/Client.hpp"
+#include "Pineapple/UserInterface.hpp"
 #include "Pineapple/Utils.hpp"
 
 namespace Pineapple
@@ -24,7 +25,12 @@ public:
     virtual void OnEvent(Pine::Event& e) override;
 
 private:
+    void UpdatePanelLayouts();
+
+private:
+    Pine::Renderer2D::RendererData m_RendererData2D{};
     Pine::OrthographicCameraController m_CameraController;
+
     std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
 
     ZED::CameraInterface m_CameraInterface = {};
@@ -34,6 +40,8 @@ private:
     bool m_ViewportFocused = false;
     bool m_ViewportHovered = false;
     Pine::Vec2 m_ViewportSize = {0.0f, 0.0f};
+
+    std::unordered_map<std::string, PanelLayout> m_PanelLayouts{};
 };
 
 } // namespace Pineapple
