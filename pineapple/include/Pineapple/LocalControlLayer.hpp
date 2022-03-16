@@ -2,10 +2,9 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraInterface.hpp"
-#include "Pineapple/CameraParameters.hpp"
-#include "Pineapple/CameraSettings.hpp"
+#include "Pineapple/CameraControls.hpp"
 #include "Pineapple/Client.hpp"
+#include "Pineapple/RecordManager.hpp"
 #include "Pineapple/UserInterface.hpp"
 #include "Pineapple/Utils.hpp"
 
@@ -32,14 +31,15 @@ private:
     Pine::OrthographicCameraController m_CameraController;
 
     std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
+    std::shared_ptr<Pine::Texture2D> m_ImageTexture;
 
-    ZED::CameraInterface m_CameraInterface = {};
-    ZED::CameraParameters m_CameraParameters = {};
-    ZED::CameraSettings m_CameraSettings = {};
+    ZED::RecordManager m_RecordManager{};
+    ZED::CameraParameters m_CameraParameters{};
+    ZED::CameraSettings m_CameraSettings{};
+    ZED::ImageConfiguration m_ImageConfig{};
 
     bool m_ViewportFocused = false;
     bool m_ViewportHovered = false;
-    Pine::Vec2 m_ViewportSize = {0.0f, 0.0f};
 
     std::unordered_map<std::string, PanelLayout> m_PanelLayouts{};
 };

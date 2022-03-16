@@ -1,4 +1,4 @@
-#include "Pineapple/CameraInterface.hpp"
+#include "Pineapple/RecordManager.hpp"
 
 #include <tuple>
 
@@ -11,19 +11,6 @@ std::tuple<sl::InitParameters, sl::RecordingParameters, sl::RuntimeParameters>
 ToStereolabs(const CameraParameters& parameters)
 {
     sl::InitParameters initParameters;
-    initParameters.camera_image_flip = [parameters]() {
-        switch (parameters.CameraFlip)
-        {
-        case FlipMode::OFF:
-            return sl::FLIP_MODE::OFF;
-        case FlipMode::ON:
-            return sl::FLIP_MODE::ON;
-        case FlipMode::AUTO:
-            return sl::FLIP_MODE::AUTO;
-        default:
-            return sl::FLIP_MODE::OFF;
-        }
-    }();
     initParameters.camera_resolution = [parameters]() {
         switch (parameters.CameraResolution)
         {
@@ -67,51 +54,61 @@ ToStereolabs(const CameraParameters& parameters)
     return {initParameters, recordingParameters, runtimeParameters};
 }
 
-CameraInterface::CameraInterface(const std::filesystem::path& dataDirectory)
+RecordManager::RecordManager(const std::filesystem::path& dataDirectory)
     : m_OutputDirectory(dataDirectory)
 {
 }
 
-CameraInterface::~CameraInterface() { StopRecord(); }
+RecordManager::~RecordManager() { StopRecord(); }
 
-void CameraInterface::StartRecord(const CameraParameters& parameters)
+void RecordManager::StartRecord(const CameraParameters& parameters)
 {
     StartRecord(parameters, m_OutputDirectory);
 }
 
-void CameraInterface::StartRecord(const CameraParameters& parameters,
+void RecordManager::StartRecord(const CameraParameters& parameters,
     const std::filesystem::path& outputDirectory)
 {
     if (m_Busy.exchange(true))
     {
-        PINE_WARN("ZED camera is already recording.");
+        PINE_WARN("ZED camera busy.");
         return;
+    }
+
+    if (m_WorkerThread && m_WorkerThread->joinable())
+    {
+        m_WorkerThread->join();
     }
 
     RecordJob job;
     job.OutputDirectory = outputDirectory;
     job.Parameters = parameters;
+    
+    m_Stop = false;
 
     m_WorkerThread =
-        std::make_unique<std::thread>(&CameraInterface::RecordWorker,
+        std::make_unique<std::thread>(&RecordManager::RecordWorker,
             this,
             job);
 }
 
-void CameraInterface::StopRecord()
+void RecordManager::StopRecord()
 {
-    m_Stop = true;
+    if (m_Stop.exchange(true))
+    {
+        return;
+    }
+
     if (m_WorkerThread && m_WorkerThread->joinable())
     {
         m_WorkerThread->join();
     }
 }
 
-std::optional<CameraSettings> CameraInterface::GetCameraSettings()
+std::optional<CameraSettings> RecordManager::RequestCameraSettings()
 {
     if (!m_Camera.isOpened())
     {
-        PINE_WARN("ZED is not opened - cannot get settings.");
         return {};
     }
 
@@ -140,11 +137,10 @@ std::optional<CameraSettings> CameraInterface::GetCameraSettings()
     return settings;
 }
 
-std::optional<IMUData> CameraInterface::GetIMUData()
+std::optional<IMUData> RecordManager::RequestIMUData()
 {
     if (!m_Camera.isOpened())
     {
-        PINE_WARN("ZED is not opened - cannot get IMU data.");
         return {};
     }
 
@@ -165,12 +161,11 @@ std::optional<IMUData> CameraInterface::GetIMUData()
     return data;
 }
 
-std::optional<Pine::Image> CameraInterface::GetImage(
+std::optional<Pine::Image> RecordManager::RequestImage(
     const uint32_t width, const uint32_t height, const View& view)
 {
     if (!m_Camera.isOpened())
     {
-        PINE_WARN("ZED is not opened - cannot get image.");
         return {};
     }
 
@@ -224,14 +219,47 @@ std::optional<Pine::Image> CameraInterface::GetImage(
     return image;
 }
 
-void CameraInterface::RecordWorker(const RecordJob job)
+bool RecordManager::UpdateCameraSettings(const CameraSettings& settings)
+{
+    if (!m_Camera.isOpened())
+    {
+        return false;
+    }
+
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::BRIGHTNESS,
+        settings.Brightness);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::CONTRAST,
+        settings.Contrast);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::HUE,
+        settings.Hue);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::SATURATION,
+        settings.Saturation);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::SHARPNESS,
+        settings.Sharpness);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::GAMMA,
+        settings.Gamma);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::GAIN,
+        settings.Gain);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::EXPOSURE,
+        settings.Exposure);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_TEMPERATURE,
+        settings.Whitebalance);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::AEC_AGC,
+        settings.AutoExposure);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO,
+        settings.AutoWhitebalance);
+    m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS,
+        settings.EnableLED);
+    return true;
+}
+
+void RecordManager::RecordWorker(const RecordJob job)
 {
     auto [initParameters, recordingParameters, runtimeParameters] =
         ToStereolabs(job.Parameters);
 
     const auto dateString = CurrentDateTime() + ".svo";
     const auto filepath = job.OutputDirectory / dateString;
-    PINE_INFO("Starting record job: {0}", filepath);
     recordingParameters.video_filename = filepath.string().c_str();
 
     const auto openState = m_Camera.open(initParameters);
@@ -264,7 +292,6 @@ void CameraInterface::RecordWorker(const RecordJob job)
 
     m_Camera.close();
     m_Busy = false;
-    m_Stop = false;
 }
 
 } // namespace Pineapple::ZED

@@ -147,90 +147,9 @@ void RemoteControlLayer::OnImGuiRender()
             }
 
             ImGui::Separator();
-
-            const std::array<std::pair<std::string, ZED::FlipMode>, 3>
-                flipModes = {std::make_pair("Off", ZED::FlipMode::OFF),
-                    std::make_pair("On", ZED::FlipMode::ON),
-                    std::make_pair("Auto", ZED::FlipMode::AUTO)};
-
-            const std::array<std::pair<std::string, ZED::Resolution>, 4>
-                resolutions = {std::make_pair("HD2K", ZED::Resolution::HD2K),
-                    std::make_pair("HD1080", ZED::Resolution::HD1080),
-                    std::make_pair("HD720", ZED::Resolution::HD720),
-                    std::make_pair("VGA", ZED::Resolution::VGA)};
-
-            const std::array<std::pair<std::string, ZED::CompressionMode>, 3>
-                compressionModes = {
-                    std::make_pair("Lossless", ZED::CompressionMode::LOSSLESS),
-                    std::make_pair("H264", ZED::CompressionMode::H264),
-                    std::make_pair("H265", ZED::CompressionMode::H265)};
-
-            Pine::UI::AddCombo("Flip mode",
-                &m_CameraParameters.CameraFlip,
-                flipModes);
-            Pine::UI::AddCombo("Resolution",
-                &m_CameraParameters.CameraResolution,
-                resolutions);
-            Pine::UI::AddCombo("Compression",
-                &m_CameraParameters.Compression,
-                compressionModes);
-
-            Pine::UI::AddEmptySpace(0.0f, 20.0f);
-
-            Pine::UI::SliderScalar("Target FPS",
-                &m_CameraParameters.CameraFPS,
-                0,
-                100);
-            Pine::UI::SliderScalar("Timeout",
-                &m_CameraParameters.OpenTimeout,
-                -1.0f,
-                10.0f);
-
-            Pine::UI::AddEmptySpace(0.0f, 20.0f);
-
-            ImGui::Checkbox("Image enhancement",
-                &m_CameraParameters.EnableImageEnhancement);
-            ImGui::Checkbox("Disable self calib.",
-                &m_CameraParameters.DisableSelfCalibration);
-            ImGui::Checkbox("Require sensors",
-                &m_CameraParameters.RequireSensors);
-            ImGui::Checkbox("Enable depth", &m_CameraParameters.EnableDepth);
-
+            DrawCameraParameters(m_CameraParameters);
             ImGui::Separator();
-
-            Pine::UI::SliderScalar("Brightness",
-                &m_CameraSettings.Brightness,
-                0,
-                8);
-            Pine::UI::SliderScalar("Contrast",
-                &m_CameraSettings.Contrast,
-                0,
-                8);
-            Pine::UI::SliderScalar("Hue", &m_CameraSettings.Hue, 0, 11);
-            Pine::UI::SliderScalar("Saturation",
-                &m_CameraSettings.Saturation,
-                0,
-                8);
-            Pine::UI::SliderScalar("Sharpness",
-                &m_CameraSettings.Sharpness,
-                0,
-                8);
-            Pine::UI::SliderScalar("Gain", &m_CameraSettings.Gain, 0, 100);
-            Pine::UI::SliderScalar("Exposure",
-                &m_CameraSettings.Exposure,
-                0,
-                100);
-            Pine::UI::SliderScalar("Whitebalance temp.",
-                &m_CameraSettings.Whitebalance,
-                2800,
-                6500);
-
-            Pine::UI::AddEmptySpace(0.0f, 20.0f);
-
-            ImGui::Checkbox("Auto exposure", &m_CameraSettings.AutoExposure);
-            ImGui::Checkbox("Auto whitebalance",
-                &m_CameraSettings.AutoWhitebalance);
-            ImGui::Checkbox("Enable LED ", &m_CameraSettings.EnableLED);
+            DrawCameraSettings(m_CameraSettings);
         });
 
     Pine::UI::AddWindow("Right",

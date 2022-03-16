@@ -31,24 +31,19 @@ endif()
 target_sources(
     pineapple
     PUBLIC 
-        include/Pineapple/CameraInterface.hpp
         include/Pineapple/CameraParameters.hpp
         include/Pineapple/CameraSettings.hpp
-        include/Pineapple/Client.hpp
-        include/Pineapple/Image.hpp
-        include/Pineapple/IMU.hpp
         include/Pineapple/LocalControlLayer.hpp
         include/Pineapple/Messages.hpp
+        include/Pineapple/RecordManager.hpp
         include/Pineapple/RemoteControlLayer.hpp
-        include/Pineapple/Server.hpp
+        include/Pineapple/SensorData.hpp
         include/Pineapple/UserInterface.hpp
         include/Pineapple/Utils.hpp
     PRIVATE 
-        src/CameraInterface.cpp
-        src/Client.cpp
         src/LocalControlLayer.cpp
+        src/RecordManager.cpp
         src/RemoteControlLayer.cpp
-        src/Server.cpp
         src/UserInterface.cpp
         src/Utils.cpp)
 

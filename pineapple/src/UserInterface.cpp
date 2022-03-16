@@ -5,11 +5,6 @@ namespace Pineapple
 
 void DrawCameraParameters(ZED::CameraParameters& parameters)
 {
-    const std::array<std::pair<std::string, ZED::FlipMode>, 3>
-        cameraFlipOptions = {std::make_pair("Off", ZED::FlipMode::OFF),
-            std::make_pair("On", ZED::FlipMode::ON),
-            std::make_pair("Auto", ZED::FlipMode::AUTO)};
-
     const std::array<std::pair<std::string, ZED::Resolution>, 4>
         resolutionOptions = {
             std::make_pair("HD2K", ZED::Resolution::HD2K),
@@ -23,17 +18,12 @@ void DrawCameraParameters(ZED::CameraParameters& parameters)
             std::make_pair("H264", ZED::CompressionMode::H264),
             std::make_pair("H265", ZED::CompressionMode::H265)};
 
-    Pine::UI::AddCombo("Flip mode",
-        &parameters.CameraFlip,
-        cameraFlipOptions);
     Pine::UI::AddCombo("Resolution",
         &parameters.CameraResolution,
         resolutionOptions);
     Pine::UI::AddCombo("Compression",
         &parameters.Compression,
         compressionOptions);
-
-    Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
     Pine::UI::SliderScalar("Target FPS",
         &parameters.CameraFPS,
@@ -43,8 +33,6 @@ void DrawCameraParameters(ZED::CameraParameters& parameters)
         &parameters.OpenTimeout,
         -1.0f,
         10.0f);
-
-    Pine::UI::AddEmptySpace(0.0f, 20.0f);
 
     ImGui::Checkbox("Image enhancement",
         &parameters.EnableImageEnhancement);
@@ -74,6 +62,10 @@ void DrawCameraSettings(ZED::CameraSettings& settings)
         &settings.Sharpness,
         0,
         8);
+    Pine::UI::SliderScalar("Gamma",
+        &settings.Sharpness,
+        1,
+        9);
     Pine::UI::SliderScalar("Gain", &settings.Gain, 0, 100);
     Pine::UI::SliderScalar("Exposure",
         &settings.Exposure,
@@ -84,12 +76,31 @@ void DrawCameraSettings(ZED::CameraSettings& settings)
         2800,
         6500);
 
-    Pine::UI::AddEmptySpace(0.0f, 20.0f);
-
     ImGui::Checkbox("Auto exposure", &settings.AutoExposure);
     ImGui::Checkbox("Auto whitebalance",
         &settings.AutoWhitebalance);
     ImGui::Checkbox("Enable LED ", &settings.EnableLED);
 }
+
+void DrawImageConfiguration(ZED::ImageConfiguration& config)
+{
+    const std::array<std::pair<std::string, ZED::View>, 5> viewOptions = 
+        {
+            std::make_pair("Left", ZED::View::LEFT),
+            std::make_pair("Right", ZED::View::RIGHT),
+            std::make_pair("Left, gray", ZED::View::LEFT_GRAY),
+            std::make_pair("Right, gray", ZED::View::RIGHT_GRAY),
+            std::make_pair("Side by side", ZED::View::SIDE_BY_SIDE)
+        };
+
+    ImGui::InputScalar("Image width", ImGuiDataType_U32, 
+        &config.Width, NULL, NULL);
+    ImGui::InputScalar("Image height", ImGuiDataType_U32, 
+        &config.Height, NULL, NULL);
+    Pine::UI::AddCombo("View",
+        &config.Type,
+        viewOptions);
+}
+
     
 }; // namespace Pineapple

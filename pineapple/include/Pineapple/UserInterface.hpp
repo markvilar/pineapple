@@ -2,8 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraParameters.hpp"
-#include "Pineapple/CameraSettings.hpp"
+#include "Pineapple/CameraControls.hpp"
 
 namespace Pineapple
 {
@@ -29,5 +28,6 @@ public:
 
 void DrawCameraParameters(ZED::CameraParameters& parameters);
 void DrawCameraSettings(ZED::CameraSettings& settings);
+void DrawImageConfiguration(ZED::ImageConfiguration& config);
 
 }; // namespace Pineapple

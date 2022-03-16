@@ -5,7 +5,7 @@ namespace Pineapple
 
 LocalControlLayer::LocalControlLayer()
     : Layer("LocalControlLayer"), m_CameraController(1.0f),
-    m_CameraInterface(Pine::FileSystem::GetWorkingDirectory())
+    m_RecordManager(Pine::FileSystem::GetWorkingDirectory())
 {
 }
 
@@ -13,6 +13,8 @@ LocalControlLayer::~LocalControlLayer() {}
 
 void LocalControlLayer::OnAttach()
 {
+    UpdatePanelLayouts();
+
     auto& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Regular.ttf",
         15.0f,
@@ -20,8 +22,8 @@ void LocalControlLayer::OnAttach()
         io.Fonts->GetGlyphRangesCyrillic());
 
     Pine::Framebuffer::Specification framebufferSpecs;
-    framebufferSpecs.Width = 1280;
-    framebufferSpecs.Height = 720;
+    framebufferSpecs.Width = m_PanelLayouts["Viewport"].Size.x;
+    framebufferSpecs.Height = m_PanelLayouts["Viewport"].Size.y;
     m_Framebuffer = Pine::Framebuffer::Create(framebufferSpecs);
 
     m_RendererData2D = Pine::Renderer2D::Init();
@@ -33,27 +35,49 @@ void LocalControlLayer::OnDetach() {}
 
 void LocalControlLayer::OnUpdate(Pine::Timestep ts)
 {
-    auto spec = m_Framebuffer->GetSpecification();
-    if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
-        && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+    const auto imageRequest = m_RecordManager.RequestImage(
+        m_ImageConfig.Width, 
+        m_ImageConfig.Height, 
+        m_ImageConfig.Type);
+
+    if (imageRequest.has_value())
     {
-        m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x),
-            static_cast<uint32_t>(m_ViewportSize.y));
-        m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+        m_ImageTexture = Pine::Texture2D::Create(imageRequest.value());
+    }
+
+    const auto specs = m_Framebuffer->GetSpecification();
+    const auto viewport = m_PanelLayouts["Viewport"];
+
+    if (viewport.Size.x > 0.0f && viewport.Size.y > 0.0f
+        && (specs.Width != viewport.Size.x 
+        || specs.Height != viewport.Size.y))
+    {
+        m_Framebuffer->Resize(viewport.Size.x, viewport.Size.y);
+        m_CameraController.OnResize(viewport.Size.x, viewport.Size.y);
     }
 
     if (m_ViewportFocused)
         m_CameraController.OnUpdate(ts);
 
-    Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+    Pine::RenderCommand::SetClearColor({0.10f, 0.10f, 0.10f, 1.00f});
     Pine::RenderCommand::Clear();
 
     m_Framebuffer->Bind();
-    Pine::RenderCommand::SetClearColor({0.2f, 0.1f, 0.1f, 1.0f});
+    Pine::RenderCommand::SetClearColor({0.15f, 0.15f, 0.15f, 1.00f});
     Pine::RenderCommand::Clear();
  
     Pine::Renderer2D::BeginScene(m_RendererData2D, 
         m_CameraController.GetCamera());
+
+    if (m_ImageTexture)
+    {
+        Pine::Renderer2D::DrawQuad(m_RendererData2D,
+            {0.0f, 0.0f, 0.0f},
+            { (m_ImageConfig.Width / 1000.0f), -(m_ImageConfig.Height / 1000.0f)},
+            m_ImageTexture,
+            1.0f,
+            Pine::Vec4{1.0f, 1.0f, 1.0f, 1.0f});
+    }
 
     Pine::Renderer2D::EndScene(m_RendererData2D);
 
@@ -104,8 +128,11 @@ void LocalControlLayer::OnImGuiRender()
         m_PanelLayouts["Viewport"].Position,
         m_PanelLayouts["Viewport"].Size,
         *m_Framebuffer.get(),
-        []() {
-            // TODO: Implement functionality.
+        [this]() {
+            m_ViewportFocused = ImGui::IsWindowFocused();
+            m_ViewportHovered = ImGui::IsWindowHovered();
+            Pine::Application::Get().GetImGuiLayer()->BlockEvents(
+                !m_ViewportFocused || !m_ViewportHovered);
         });
 
     Pine::UI::AddWindow("Camera Controls",
@@ -114,26 +141,53 @@ void LocalControlLayer::OnImGuiRender()
         [this]() {
             if (ImGui::Button("Start record"))
             {
-                m_CameraInterface.StartRecord(m_CameraParameters);
+                m_RecordManager.StartRecord(m_CameraParameters);
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Stop record"))
             {
-                m_CameraInterface.StopRecord();
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Update settings"))
-            {
+                m_RecordManager.StopRecord();
             }
 
             ImGui::Separator();
             DrawCameraParameters(m_CameraParameters);
             ImGui::Separator();
             DrawCameraSettings(m_CameraSettings);
+
+            if (ImGui::Button("Request settings"))
+            {
+                const auto settingsRequest
+                    = m_RecordManager.RequestCameraSettings();
+                if (settingsRequest.has_value())
+                {
+                    const auto settings = settingsRequest.value();
+                    PINE_INFO("Camera settings:");
+                    PINE_INFO(" - Brightness:  {0}", settings.Brightness);
+                    PINE_INFO(" - Contrast:    {0}", settings.Contrast);
+                    PINE_INFO(" - Hue:         {0}", settings.Hue);
+                    PINE_INFO(" - Saturation:  {0}", settings.Saturation);
+                    PINE_INFO(" - Sharpness:   {0}", settings.Sharpness);
+                    PINE_INFO(" - Gain:        {0}", settings.Gain);
+                    PINE_INFO(" - Exposure:    {0}", settings.Exposure);
+                    PINE_INFO(" - Whiteb.:     {0}", settings.Whitebalance);
+                    PINE_INFO(" - Auto expos.: {0}", settings.AutoExposure);
+                    PINE_INFO(" - Auto w.b.:   {0}", settings.AutoWhitebalance);
+                    PINE_INFO(" - Enable LED:  {0}", settings.EnableLED);
+                }
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Update settings"))
+            {
+                m_RecordManager.UpdateCameraSettings(m_CameraSettings);
+            }
+
+            ImGui::Separator();
+        
+            DrawImageConfiguration(m_ImageConfig);
         });
 
     Pine::UI::AddWindow("Sensor Data",
@@ -141,9 +195,11 @@ void LocalControlLayer::OnImGuiRender()
         m_PanelLayouts["RightPanel"].Size,
         []() {
             // TODO: Implement functionality.
+            // TODO: Plotting of accelerometer.
+            // TODO: Plotting of gyroscope.
         });
 
-    Pine::UI::AddWindow("Bottom",
+    Pine::UI::AddWindow("Console",
         m_PanelLayouts["BottomPanel"].Position,
         m_PanelLayouts["BottomPanel"].Size,
         []() {

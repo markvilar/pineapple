@@ -2,8 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraParameters.hpp"
-#include "Pineapple/CameraSettings.hpp"
+#include "Pineapple/CameraControls.hpp"
 #include "Pineapple/Client.hpp"
 #include "Pineapple/UserInterface.hpp"
 #include "Pineapple/Utils.hpp"
