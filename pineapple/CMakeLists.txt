@@ -31,8 +31,7 @@ endif()
 target_sources(
     pineapple
     PUBLIC 
-        include/Pineapple/CameraParameters.hpp
-        include/Pineapple/CameraSettings.hpp
+        include/Pineapple/CameraControls.hpp
         include/Pineapple/LocalControlLayer.hpp
         include/Pineapple/Messages.hpp
         include/Pineapple/RecordManager.hpp
@@ -54,7 +53,8 @@ target_include_directories(
         include
         ${ZED_INCLUDE_DIRS}
         ${CUDA_INCLUDE_DIRS}
-    PRIVATE src)
+    PRIVATE 
+        src)
 
 # Library linking
 target_link_libraries(

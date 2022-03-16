@@ -1,20 +1,3 @@
-add_executable(camera_server camera_server.cpp)
-target_compile_definitions(camera_server PRIVATE)
-target_compile_features(camera_server PRIVATE cxx_std_17)
-target_compile_options(camera_server PUBLIC -std=c++17)
-target_link_libraries(
-    camera_server
-    PRIVATE 
-        pine::pine
-        pineapple::pineapple)
-
-set_target_properties(
-    camera_server
-    PROPERTIES 
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
 add_executable(local_controller local_controller.cpp)
 target_compile_definitions(local_controller PRIVATE)
 target_compile_features(local_controller PRIVATE cxx_std_17)

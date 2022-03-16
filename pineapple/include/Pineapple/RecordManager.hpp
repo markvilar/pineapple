@@ -52,13 +52,10 @@ private:
 
 private:
     std::filesystem::path m_OutputDirectory = ".";
-    CameraSettings m_CameraSettings = {};
 
     sl::Camera m_Camera = {};
 
     std::unique_ptr<std::thread> m_WorkerThread = {};
-    std::mutex m_CameraMutex = {}; // Not used.
-
     std::atomic<bool> m_Stop = false;
     std::atomic<bool> m_Busy = false;
 };
