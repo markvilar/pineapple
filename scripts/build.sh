@@ -6,7 +6,7 @@ PACKAGE_DIR="${SOURCE_DIR}/../pine-packages/"
 
 GENERATOR="Ninja"
 BUILD_TYPE="Release"
-CXX_COMPILER="clang++-12"
+CXX_COMPILER="clang-12"
 
 mkdir -p ${BUILD_DIR}
 
