@@ -4,9 +4,9 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraInterface.hpp"
-#include "Pineapple/CameraSettings.hpp"
+#include "Pineapple/CameraControls.hpp"
 #include "Pineapple/Messages.hpp"
+#include "Pineapple/RecordManager.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -18,20 +18,20 @@ int main(int argc, char** argv)
 
     Pine::Log::Init();
 
-    Pineapple::ZED::CameraInterface interface("/home/martin/data/debug");
+    Pineapple::ZED::RecordManager manager(".");
 
-    interface.StartRecord();
+    manager.StartRecord();
 
     while (!stopFlag)
     {
-        auto settingsState = interface.GetCameraSettings();
-        auto imuState = interface.GetIMUData();
-        auto imageState =
-            interface.GetImage(1280, 720, Pineapple::ZED::View::LEFT);
+        auto settingsRequest = manager.RequestCameraSettings();
+        auto imuRequest = manager.RequestIMUData();
+        auto imageRequest =
+            manager.RequestImage(1280, 720, Pineapple::ZED::View::LEFT);
 
-        if (settingsState.has_value())
+        if (settingsRequest.has_value())
         {
-            const auto settings = settingsState.value();
+            const auto settings = settingsRequest.value();
             PINE_INFO("");
             PINE_INFO("Brightness:        {0}", settings.Brightness);
             PINE_INFO("Contrast:          {0}", settings.Contrast);
@@ -46,9 +46,9 @@ int main(int argc, char** argv)
             PINE_INFO("LED status:        {0}", settings.EnableLED);
         }
 
-        if (imuState.has_value())
+        if (imuRequest.has_value())
         {
-            const auto imu = imuState.value();
+            const auto imu = imuRequest.value();
             PINE_INFO("");
             PINE_INFO("IMU acceleration:  {0}, {1}, {2}",
                 imu.Acceleration.x,
@@ -60,9 +60,9 @@ int main(int argc, char** argv)
                 imu.AngularVelocity.z);
         }
 
-        if (imageState.has_value())
+        if (imageRequest.has_value())
         {
-            const auto image = imageState.value();
+            const auto image = imageRequest.value();
             PINE_INFO("");
             PINE_INFO("Image: {0}, {1}, {2}",
                 image.Width,
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    interface.StopRecord();
+    manager.StopRecord();
 
     return 0;
 }

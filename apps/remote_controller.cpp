@@ -1,4 +1,6 @@
-#include "Pine/Pine.hpp"
+#include <memory>
+
+#include <Pine/Pine.hpp>
 
 #include "Pineapple/RemoteControlLayer.hpp"
 
@@ -14,11 +16,11 @@ public:
     ~RemoteController() {}
 };
 
-Pine::Application* Pine::CreateApplication(int argc, char** argv)
+std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc, char** argv)
 {
     Pine::Application::Specification specs;
     specs.WorkingDirectory = ".";
-    specs.Name = "Pineapple";
+    specs.Name = "Remote Controller";
     specs.WindowWidth = 1600;
     specs.WindowHeight = 800;
     specs.StartMaximized = true;
@@ -27,7 +29,7 @@ Pine::Application* Pine::CreateApplication(int argc, char** argv)
     specs.EnableImGui = true;
     specs.Fullscreen = true;
 
-    return new RemoteController(specs);
+    return std::make_unique<RemoteController>(specs);
 }
 
 int main(int argc, char** argv)
