@@ -31,7 +31,7 @@ public:
 
     float seconds() const
     {
-        return float(m_Nanoseconds) / 1000000000.0f;
+        return float(m_Nanoseconds) / 1e9;
     }
 
     float milliseconds() const
@@ -45,48 +45,51 @@ public:
     }
 
 private:
-    uint64_t m_Nanoseconds;
+    uint64_t m_Nanoseconds{};
 };
 
-struct IMUData
+struct SensorData
 {
-    uint64_t Timestamp;
-    Pine::Vec3 Acceleration;
-    Pine::Vec3 AngularVelocity;
+    float Pressure; // [Pa]
+    float TemperatureLeft; // [degC]
+    float TemperatureRight; // [degC]
+    Pine::Vec3 Acceleration{0.0f}; // [m/s^2]
+    Pine::Vec3 AngularVelocity{0.0f}; // [deg/s]
 };
 
-template <typename T>
-class Timeseries
+template <typename T, size_t N>
+class StaticSeries
 {
-    using Pair = std::pair<Timestamp, T>;
 public:
-    void pop_front()
+    void push_back(const T& t)
     {
-        m_Data.pop_front();
+        m_Buffer[m_Offset] = t;
+        m_Offset = (m_Offset + 1) % N;
     }
 
-    void pop_back()
+    T* data()
     {
-        m_Data.pop_back();
+        return m_Buffer.data();
     }
 
-    void push_front(const Pair& pair)
+    T* data() const
     {
-        m_Data.push_front(pair);
-    }
-
-    void push_back(const Pair& pair)
-    {
-        m_Data.push_back(pair);
+        return m_Buffer.data();
     }
 
     size_t size() const
     {
-        return m_Data.size();
+        return m_Buffer.size();
+    }
+
+    size_t offset() const
+    {
+        return m_Offset;
     }
 
 private:
-    std::deque<Pair> m_Data;
+    std::array<T, N> m_Buffer;
+    size_t m_Offset{0};
 };
 
 } // namespace Pineapple

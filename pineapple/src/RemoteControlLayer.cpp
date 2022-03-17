@@ -12,7 +12,13 @@ RemoteControlLayer::~RemoteControlLayer() {}
 
 void RemoteControlLayer::OnAttach()
 {
-    //m_Client = std::make_shared<Client>();
+    UpdatePanelLayouts();
+
+    auto& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Regular.ttf",
+        15.0f,
+        nullptr,
+        io.Fonts->GetGlyphRangesCyrillic());
 
     Pine::Framebuffer::Specification framebufferSpecs;
     framebufferSpecs.Width = 1280;
@@ -28,13 +34,15 @@ void RemoteControlLayer::OnDetach() {}
 
 void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
 {
-    auto spec = m_Framebuffer->GetSpecification();
-    if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
-        && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+    const auto specs = m_Framebuffer->GetSpecification();
+    const auto viewport = m_PanelLayouts["Viewport"];
+
+    if (viewport.Size.x > 0.0f && viewport.Size.y > 0.0f
+        && (specs.Width != viewport.Size.x 
+        || specs.Height != viewport.Size.y))
     {
-        m_Framebuffer->Resize((uint32_t)m_ViewportSize.x,
-            (uint32_t)m_ViewportSize.y);
-        m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+        m_Framebuffer->Resize(viewport.Size.x, viewport.Size.y);
+        m_CameraController.OnResize(viewport.Size.x, viewport.Size.y);
     }
 
     if (m_ViewportFocused)
@@ -100,32 +108,20 @@ void RemoteControlLayer::OnImGuiRender()
     });
 
     Pine::UI::AddViewport("Viewport",
-        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 0.70 * uiSize.second),
+        m_PanelLayouts["Viewport"].Position,
+        m_PanelLayouts["Viewport"].Size,
         *m_Framebuffer.get(),
-        []() {
-            // TODO: Implement functionality.
+        [this]() {
+            m_ViewportFocused = ImGui::IsWindowFocused();
+            m_ViewportHovered = ImGui::IsWindowHovered();
+            Pine::Application::Get().GetImGuiLayer()->BlockEvents(
+                !m_ViewportFocused || !m_ViewportHovered);
         });
 
     Pine::UI::AddWindow("Left",
-        Pine::Vec2(uiPosition.first + 0.00 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.20 * uiSize.first, 1.00 * uiSize.second),
+        m_PanelLayouts["LeftPanel"].Position,
+        m_PanelLayouts["LeftPanel"].Size,
         [this]() {
-            static auto brightness = 0;
-            static auto contrast = 0;
-            static auto hue = 0;
-            static auto saturation = 0;
-            static auto sharpness = 0;
-            static auto gain = 0;
-            static auto exposure = 0;
-            static auto whitebalanceTemp = 0;
-
-            static auto aecagc = false;
-            static auto whitebalanceAuto = false;
-            static auto ledStatus = false;
-
             if (ImGui::Button("Start record"))
             {
             }
@@ -136,26 +132,17 @@ void RemoteControlLayer::OnImGuiRender()
             {
             }
 
-            if (ImGui::Button("Update parameters"))
-            {
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Update settings"))
-            {
-            }
-
             ImGui::Separator();
             DrawCameraParameters(m_CameraParameters);
             ImGui::Separator();
             DrawCameraSettings(m_CameraSettings);
+            ImGui::Separator();
+            DrawImageConfiguration(m_ImageConfig);
         });
 
     Pine::UI::AddWindow("Right",
-        Pine::Vec2(uiPosition.first + 0.80 * uiSize.first,
-            uiPosition.second + 0.00 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 1.00 * uiSize.second),
+        m_PanelLayouts["BottomPanel"].Position,
+        m_PanelLayouts["BottomPanel"].Size,
         []() {
             // TODO: Implement functionality.
         });
@@ -176,6 +163,32 @@ void RemoteControlLayer::OnEvent(Pine::Event& e)
 
 void RemoteControlLayer::OnMessage(const Pine::Message& message)
 {
+}
+
+void RemoteControlLayer::UpdatePanelLayouts()
+{
+    const auto& [windowWidth, windowHeight] =
+        Pine::Application::Get().GetWindow().GetSize();
+
+    static constexpr auto menuHeight = 20.0f;
+
+    const auto& mainMenuLayout = m_PanelLayouts["MainMenu"];
+
+    m_PanelLayouts["LeftPanel"] = PanelLayout(
+        Pine::Vec2(0.0f * windowWidth, 0.0f * windowHeight + menuHeight),
+        Pine::Vec2(0.2f * windowWidth, 1.0f * windowHeight - menuHeight));
+
+    m_PanelLayouts["Viewport"] = PanelLayout(
+        Pine::Vec2(0.2f * windowWidth, 0.0f * windowHeight + menuHeight),
+        Pine::Vec2(0.6f * windowWidth, 0.8f * windowHeight));
+
+    m_PanelLayouts["RightPanel"] = PanelLayout(
+        Pine::Vec2(0.8f * windowWidth, 0.0f * windowHeight + menuHeight),
+        Pine::Vec2(0.2f * windowWidth, 1.0f * windowHeight - menuHeight));
+
+    m_PanelLayouts["BottomPanel"] = PanelLayout(
+        Pine::Vec2(0.2f * windowWidth, 0.8f * windowHeight + menuHeight),
+        Pine::Vec2(0.6f * windowWidth, 0.2f * windowHeight - menuHeight));
 }
 
 }; // namespace Pineapple

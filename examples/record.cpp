@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     while (!stopFlag)
     {
         auto settingsRequest = manager.RequestCameraSettings();
-        auto imuRequest = manager.RequestIMUData();
+        auto imuRequest = manager.RequestSensorData();
         auto imageRequest =
             manager.RequestImage(1280, 720, Pineapple::ZED::View::LEFT);
 

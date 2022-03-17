@@ -41,7 +41,9 @@ public:
     void StopRecord();
 
     std::optional<CameraSettings> RequestCameraSettings();
-    std::optional<IMUData> RequestIMUData();
+
+    std::optional<SensorData> RequestSensorData();
+
     std::optional<Image> RequestImage(const uint32_t width, 
         const uint32_t height, const View& view = View::LEFT);
 

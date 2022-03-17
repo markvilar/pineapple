@@ -137,7 +137,7 @@ std::optional<CameraSettings> RecordManager::RequestCameraSettings()
     return settings;
 }
 
-std::optional<IMUData> RecordManager::RequestIMUData()
+std::optional<SensorData> RecordManager::RequestSensorData()
 {
     if (!m_Camera.isOpened())
     {
@@ -147,12 +147,14 @@ std::optional<IMUData> RecordManager::RequestIMUData()
     sl::SensorsData nativeData;
     m_Camera.getSensorsData(nativeData, sl::TIME_REFERENCE::CURRENT);
 
-    auto timestamp = nativeData.imu.timestamp.getNanoseconds();
-    auto acceleration = nativeData.imu.linear_acceleration;
-    auto angularVelocity = nativeData.imu.angular_velocity;
+    auto& acceleration = nativeData.imu.linear_acceleration;
+    auto& angularVelocity = nativeData.imu.angular_velocity;
+    auto& temperatures = nativeData.temperature.temperature_map;
 
-    Pineapple::IMUData data;
-    data.Timestamp = timestamp;
+    Pineapple::SensorData data;
+    data.Pressure = nativeData.barometer.pressure * 100.0f;
+    data.TemperatureLeft = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_LEFT];
+    data.TemperatureRight = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
     data.Acceleration =
         Pine::Vec3(acceleration[0], acceleration[1], acceleration[2]);
     data.AngularVelocity =
