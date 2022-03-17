@@ -35,14 +35,29 @@ void LocalControlLayer::OnDetach() {}
 
 void LocalControlLayer::OnUpdate(Pine::Timestep ts)
 {
-    const auto imageRequest = m_RecordManager.RequestImage(
-        m_ImageConfig.Width, 
-        m_ImageConfig.Height, 
-        m_ImageConfig.Type);
-
+    const auto imageRequest = m_RecordManager.RequestImage(m_ImageConfig.Width, 
+        m_ImageConfig.Height, m_ImageConfig.Type);
     if (imageRequest.has_value())
     {
         m_ImageTexture = Pine::Texture2D::Create(imageRequest.value());
+    }
+
+    const auto sensorDataRequest = m_RecordManager.RequestSensorData();
+    if (sensorDataRequest.has_value())
+    {
+        const auto& data = sensorDataRequest.value();
+
+        m_Pressure.push_back(data.Pressure);
+        m_TemperatureLeft.push_back(data.TemperatureLeft);
+        m_TemperatureRight.push_back(data.TemperatureRight);
+
+        m_AccX.push_back(data.Acceleration.x);
+        m_AccY.push_back(data.Acceleration.y);
+        m_AccZ.push_back(data.Acceleration.z);
+
+        m_AngX.push_back(data.AngularVelocity.x);
+        m_AngY.push_back(data.AngularVelocity.y);
+        m_AngZ.push_back(data.AngularVelocity.z);
     }
 
     const auto specs = m_Framebuffer->GetSpecification();
@@ -193,10 +208,58 @@ void LocalControlLayer::OnImGuiRender()
     Pine::UI::AddWindow("Sensor Data",
         m_PanelLayouts["RightPanel"].Position,
         m_PanelLayouts["RightPanel"].Size,
-        []() {
-            // TODO: Implement functionality.
-            // TODO: Plotting of accelerometer.
-            // TODO: Plotting of gyroscope.
+        [this]() {
+            const auto panelWidth = m_PanelLayouts["RightPanel"].Size.x;
+            const auto panelHeight = m_PanelLayouts["RightPanel"].Size.y;
+
+            ImGui::PlotLines("Acc. X", m_AccX.data(), m_AccX.size(), 
+                m_AccX.offset(), "Acceleration X", 
+                -10.0f, 10.0f, ImVec2(panelWidth, 80.0f));
+            ImGui::PlotLines("Acc. Y", m_AccY.data(), m_AccY.size(), 
+                m_AccY.offset(), "Acceleration Y", 
+                -10.0f, 10.0f, ImVec2(panelWidth, 80.0f));
+            ImGui::PlotLines("Acc. Z", m_AccZ.data(), m_AccZ.size(), 
+                m_AccZ.offset(), "Acceleration Z", 
+                -10.0f, 10.0f, ImVec2(panelWidth, 80.0f));
+
+            Pine::UI::AddEmptySpace(0.0f, 10.0f);
+
+            ImGui::Separator();
+
+            ImGui::PlotLines("Ang. vel. X", m_AngX.data(), m_AngX.size(), 
+                m_AngX.offset(), "Angular velocity X", 
+                -30.0f, 30.0f, ImVec2(panelWidth, 80.0f));
+            ImGui::PlotLines("Ang. vel. Y", m_AngY.data(), m_AngY.size(), 
+                m_AngY.offset(), "Angular velocity Y", 
+                -30.0f, 30.0f, ImVec2(panelWidth, 80.0f));
+            ImGui::PlotLines("Ang. vel. Z", m_AngZ.data(), m_AngZ.size(), 
+                m_AngZ.offset(), "Angular velocity Z", 
+                -30.0f, 30.0f, ImVec2(panelWidth, 80.0f));
+
+            Pine::UI::AddEmptySpace(0.0f, 10.0f);
+
+            ImGui::Separator();
+
+            ImGui::PlotLines("Pressure", 
+                m_Pressure.data(), 
+                m_Pressure.size(), 
+                m_Pressure.offset(), 
+                "Pressure", 
+                0.0f, 100000.0f, ImVec2(panelWidth, 80.0f));
+
+            ImGui::PlotLines("Temp. left", 
+                m_TemperatureLeft.data(), 
+                m_TemperatureLeft.size(), 
+                m_TemperatureLeft.offset(), 
+                "Temp. left", 
+                0.0f, 40.0f, ImVec2(panelWidth, 80.0f));
+
+            ImGui::PlotLines("Temp. right", 
+                m_TemperatureRight.data(), 
+                m_TemperatureRight.size(), 
+                m_TemperatureRight.offset(), 
+                "Temp. right", 
+                0.0f, 40.0f, ImVec2(panelWidth, 80.0f));
         });
 
     Pine::UI::AddWindow("Console",

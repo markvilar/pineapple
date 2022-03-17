@@ -63,7 +63,7 @@ void DrawCameraSettings(ZED::CameraSettings& settings)
         0,
         8);
     Pine::UI::SliderScalar("Gamma",
-        &settings.Sharpness,
+        &settings.Gamma,
         1,
         9);
     Pine::UI::SliderScalar("Gain", &settings.Gain, 0, 100);
