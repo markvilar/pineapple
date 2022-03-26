@@ -34,6 +34,11 @@ void RemoteControlLayer::OnDetach() {}
 
 void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
 {
+    while (!m_Client.MessageQueue.empty())
+    {
+        OnMessage(m_Client.MessageQueue.pop_front());
+    }
+
     const auto specs = m_Framebuffer->GetSpecification();
     const auto viewport = m_PanelLayouts["Viewport"];
 
@@ -48,12 +53,11 @@ void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
     if (m_ViewportFocused)
         m_CameraController.OnUpdate(ts);
 
-    // Clear background color.
     Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     Pine::RenderCommand::Clear();
 
     m_Framebuffer->Bind();
-    Pine::RenderCommand::SetClearColor({0.2f, 0.1f, 0.1f, 1.0f});
+    Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     Pine::RenderCommand::Clear();
 
     Pine::Renderer2D::BeginScene(m_RendererData, m_CameraController.GetCamera());
@@ -64,12 +68,7 @@ void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
 
 void RemoteControlLayer::OnImGuiRender()
 {
-    constexpr auto menuBarHeight = 20;
-    const auto windowSize = Pine::Application::Get().GetWindow().GetSize();
-
-    const std::pair<uint32_t, uint32_t> uiPosition = {0, menuBarHeight};
-    const std::pair<uint32_t, uint32_t> uiSize = {windowSize.first,
-        windowSize.second - menuBarHeight};
+    UpdatePanelLayouts();
 
     Pine::UI::AddMainMenuBar([]() {
         static bool showImGuiDemoWindow = false;
@@ -118,18 +117,41 @@ void RemoteControlLayer::OnImGuiRender()
                 !m_ViewportFocused || !m_ViewportHovered);
         });
 
-    Pine::UI::AddWindow("Left",
+    Pine::UI::AddWindow("Camera Controls",
         m_PanelLayouts["LeftPanel"].Position,
         m_PanelLayouts["LeftPanel"].Size,
         [this]() {
+            
+            static char address[256] = "";
+            static uint16_t port = 0;
+            ImGui::InputText("Address", address, IM_ARRAYSIZE(address));
+            ImGui::InputInt("Port", (int*)&port);
+            ImGui::Text("Client connected: %d", IsConnected(m_Client));
+
+            if (ImGui::Button("Connect"))
+            {
+                Pine::Connect(m_Client, std::string(address), port);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Disconnect"))
+            {
+                Pine::Disconnect(m_Client);
+            }
+
+            ImGui::Separator();
+
             if (ImGui::Button("Start record"))
             {
+                // TODO: Format message
+                // TODO: Send message
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Stop record"))
             {
+                // TODO: Format message
+                // TODO: Send message
             }
 
             ImGui::Separator();
@@ -140,17 +162,16 @@ void RemoteControlLayer::OnImGuiRender()
             DrawImageConfiguration(m_ImageConfig);
         });
 
-    Pine::UI::AddWindow("Right",
-        m_PanelLayouts["BottomPanel"].Position,
-        m_PanelLayouts["BottomPanel"].Size,
+    Pine::UI::AddWindow("Sensor Data",
+        m_PanelLayouts["RightPanel"].Position,
+        m_PanelLayouts["RightPanel"].Size,
         []() {
             // TODO: Implement functionality.
         });
 
-    Pine::UI::AddWindow("Bottom",
-        Pine::Vec2(uiPosition.first + 0.20 * uiSize.first,
-            uiPosition.second + 0.70 * uiSize.second),
-        Pine::Vec2(0.60 * uiSize.first, 0.30 * uiSize.second),
+    Pine::UI::AddWindow("Console",
+        m_PanelLayouts["BottomPanel"].Position,
+        m_PanelLayouts["BottomPanel"].Size,
         []() {
             // TODO: Implement functionality.
         });
@@ -163,6 +184,7 @@ void RemoteControlLayer::OnEvent(Pine::Event& e)
 
 void RemoteControlLayer::OnMessage(const Pine::Message& message)
 {
+    PINE_INFO("Got message.");
 }
 
 void RemoteControlLayer::UpdatePanelLayouts()

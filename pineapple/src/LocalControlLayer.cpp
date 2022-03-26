@@ -167,6 +167,19 @@ void LocalControlLayer::OnImGuiRender()
             }
 
             ImGui::Separator();
+
+            ImGui::Text("Opened:          %d", m_RecordManager.IsOpened());
+            ImGui::Text("Recording:       %d", m_RecordManager.IsRecording());
+            ImGui::Text("Stopped:         %d", m_RecordManager.IsStopped());
+
+            ImGui::Text("Space total:     %.2f GB", 
+                m_RecordManager.GetTotalSpace() / 1e9);
+            ImGui::Text("Space free:      %.2f GB", 
+                m_RecordManager.GetFreeSpace() / 1e9);
+            ImGui::Text("Space available: %.2f GB", 
+                m_RecordManager.GetAvailableSpace() / 1e9);
+
+            ImGui::Separator();
             DrawCameraParameters(m_CameraParameters);
             ImGui::Separator();
             DrawCameraSettings(m_CameraSettings);

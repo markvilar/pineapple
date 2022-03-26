@@ -36,12 +36,12 @@ public:
 
     float milliseconds() const
     {
-        return float(m_Nanoseconds) / 1000000.0f;
+        return float(m_Nanoseconds) / 1e6;
     }
 
     float microseconds() const
     {
-        return float(m_Nanoseconds) / 1000.0f;
+        return float(m_Nanoseconds) / 1e3;
     }
 
 private:

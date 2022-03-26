@@ -5,16 +5,15 @@
 #include <Pine/Pine.hpp>
 
 #include "Pineapple/CameraControls.hpp"
-#include "Pineapple/Messages.hpp"
 #include "Pineapple/RecordManager.hpp"
 
 sig_atomic_t stopFlag = 0;
 
-void interrupt_handler(int) { stopFlag = 1; }
+void InterruptHandler(int) { stopFlag = 1; }
 
 int main(int argc, char** argv)
 {
-    signal(SIGINT, &interrupt_handler);
+    signal(SIGINT, &InterruptHandler);
 
     Pine::Log::Init();
 

@@ -3,6 +3,8 @@ add_library(pineapple::pineapple ALIAS pineapple)
 
 option(ZED_LINK_SHARED "Link with the ZED SDK shared executable" ON)
 
+find_package(pine REQUIRED)
+find_package(Protobuf REQUIRED)
 find_package(ZED 3 REQUIRED)
 find_package(CUDA REQUIRED)
 
@@ -28,10 +30,10 @@ else()
         ${CUDA_LIBRARY})
 endif()
 
-target_sources(
-    pineapple
+target_sources(pineapple
     PUBLIC 
         include/Pineapple/CameraControls.hpp
+        include/Pineapple/CameraNode.hpp
         include/Pineapple/LocalControlLayer.hpp
         include/Pineapple/Messages.hpp
         include/Pineapple/RecordManager.hpp
@@ -40,6 +42,7 @@ target_sources(
         include/Pineapple/UserInterface.hpp
         include/Pineapple/Utils.hpp
     PRIVATE 
+        src/CameraNode.cpp
         src/LocalControlLayer.cpp
         src/RecordManager.cpp
         src/RemoteControlLayer.cpp
@@ -47,8 +50,7 @@ target_sources(
         src/Utils.cpp)
 
 # Library include directory
-target_include_directories(
-    pineapple
+target_include_directories(pineapple
     PUBLIC 
         include
         ${ZED_INCLUDE_DIRS}
@@ -57,11 +59,11 @@ target_include_directories(
         src)
 
 # Library linking
-target_link_libraries(
-    pineapple
+target_link_libraries(pineapple
     PUBLIC
-    PRIVATE 
         pine::pine
+        protobuf::protobuf
+    PRIVATE 
         ${ZED_LIBS})
 
 if(MSVC)
@@ -70,16 +72,11 @@ elseif(UNIX)
     target_compile_definitions(pineapple PUBLIC)
 endif()
 
-target_compile_definitions(
-    pineapple
-    PUBLIC
-    PRIVATE)
+target_compile_definitions(pineapple PUBLIC PRIVATE)
 target_compile_features(pineapple PUBLIC cxx_std_17)
 target_compile_options(pineapple PUBLIC -std=c++17)
 
-set_target_properties(
-    pineapple
-    PROPERTIES 
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(pineapple PROPERTIES 
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

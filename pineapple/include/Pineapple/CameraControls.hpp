@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Pineapple::ZED
 {
 
@@ -67,4 +69,14 @@ struct ImageConfiguration
     View Type = View::LEFT;
 };
 
-} // namespace Pineapple::ZED
+struct CameraState
+{
+    bool Opened;
+    bool Recording;
+    bool Stopped;
+    uint64_t TotalSpace;
+    uint64_t FreeSpace;
+    uint64_t AvailableSpace;
+};
+
+}; // namespace Pineapple::ZED

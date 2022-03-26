@@ -1,5 +1,6 @@
 #include "Pineapple/RecordManager.hpp"
 
+#include <filesystem>
 #include <tuple>
 
 #include "Pineapple/Utils.hpp"
@@ -103,6 +104,46 @@ void RecordManager::StopRecord()
     {
         m_WorkerThread->join();
     }
+}
+
+bool RecordManager::IsOpened()
+{
+    return m_Camera.isOpened();
+}
+
+bool RecordManager::IsRecording()
+{
+    if (!IsOpened())
+    {
+        return false;
+    }
+    return m_Camera.getRecordingStatus().is_recording;
+}
+
+bool RecordManager::IsStopped()
+{
+    return m_Stop.load();
+}
+
+uint64_t RecordManager::GetTotalSpace()
+{
+    std::error_code error;
+    const auto si = std::filesystem::space(m_OutputDirectory, error);
+    return si.capacity;
+}
+
+uint64_t RecordManager::GetFreeSpace()
+{
+    std::error_code error;
+    const auto si = std::filesystem::space(m_OutputDirectory, error);
+    return si.free;
+}
+
+uint64_t RecordManager::GetAvailableSpace()
+{
+    std::error_code error;
+    const auto si = std::filesystem::space(m_OutputDirectory, error);
+    return si.available;
 }
 
 std::optional<CameraSettings> RecordManager::RequestCameraSettings()
