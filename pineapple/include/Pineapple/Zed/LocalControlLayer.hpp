@@ -2,11 +2,10 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraControls.hpp"
-#include "Pineapple/RecordManager.hpp"
-#include "Pineapple/SensorData.hpp"
-#include "Pineapple/UserInterface.hpp"
+#include "Pineapple/UiHelpers.hpp"
 #include "Pineapple/Utils.hpp"
+#include "Pineapple/Zed/RecordManager.hpp"
+#include "Pineapple/Zed/Types.hpp"
 
 namespace Pineapple
 {
@@ -33,10 +32,10 @@ private:
     std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
     std::shared_ptr<Pine::Texture2D> m_ImageTexture;
 
-    ZED::RecordManager m_RecordManager{};
-    ZED::CameraParameters m_CameraParameters{};
-    ZED::CameraSettings m_CameraSettings{};
-    ZED::ImageConfiguration m_ImageConfig{};
+    Zed::RecordManager m_RecordManager{};
+    Zed::CameraParameters m_CameraParameters{};
+    Zed::CameraSettings m_CameraSettings{};
+    Zed::ImageSpecification m_ImageSpecs{};
 
     StaticSeries<float, 400> m_Pressure;
     StaticSeries<float, 400> m_TemperatureLeft;
@@ -53,7 +52,7 @@ private:
     bool m_ViewportFocused = false;
     bool m_ViewportHovered = false;
 
-    std::unordered_map<std::string, PanelLayout> m_PanelLayouts{};
+    std::unordered_map<const char*, PanelLayout> m_PanelLayouts{};
 };
 
 } // namespace Pineapple

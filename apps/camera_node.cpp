@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraNode.hpp"
+#include "Pineapple/Zed/CameraNode.hpp"
 
 int main(int argc, char** argv)
 {

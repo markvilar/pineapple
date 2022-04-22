@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/RemoteControlLayer.hpp"
+#include "Pineapple/Zed/RemoteControlLayer.hpp"
 
 class RemoteController : public Pine::Application
 {

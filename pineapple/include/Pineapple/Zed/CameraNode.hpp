@@ -5,7 +5,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/RecordManager.hpp"
+#include "Pineapple/Zed/RecordManager.hpp"
 
 namespace Pineapple
 {
@@ -28,7 +28,7 @@ private:
 
     Pine::ServerState m_Server;
     
-    ZED::RecordManager m_RecordManager;
+    Zed::RecordManager m_RecordManager;
 };
 
 }; // namespace Pineapple

@@ -14,29 +14,26 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraControls.hpp"
-#include "Pineapple/SensorData.hpp"
+#include "Pineapple/Zed/Types.hpp"
 
-namespace Pineapple::ZED
+namespace Pineapple::Zed
 {
 
 struct RecordJob
 {
-    std::filesystem::path OutputDirectory = "";
-    CameraParameters Parameters = {};
+    std::filesystem::path output_directory = "";
+    CameraParameters parameters = {};
 };
 
 class RecordManager
 {
-    using Image = Pine::Image;
-
 public:
-    RecordManager(const std::filesystem::path& outputDirectory = ".");
+    RecordManager(const std::filesystem::path& output_directory = ".");
     ~RecordManager();
 
     void StartRecord(const CameraParameters& parameters = {});
     void StartRecord(const CameraParameters& parameters,
-        const std::filesystem::path& outputDirectory);
+        const std::filesystem::path& output_directory);
 
     void StopRecord();
 
@@ -51,7 +48,7 @@ public:
     std::optional<CameraSettings> RequestCameraSettings();
     std::optional<SensorData> RequestSensorData();
     std::optional<Image> RequestImage(const uint32_t width, 
-        const uint32_t height, const View& view = View::LEFT);
+        const uint32_t height, const View view = View::LEFT);
 
     bool UpdateCameraSettings(const CameraSettings& settings);
 
@@ -68,4 +65,4 @@ private:
     std::atomic<bool> m_Busy = false;
 };
 
-} // namespace Pineapple::ZED
+} // namespace Pineapple::Zed

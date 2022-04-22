@@ -14,4 +14,29 @@ std::string CurrentDateTime()
     return buf;
 }
 
+Pine::Image ConvertImage(const Zed::Image& image)
+{
+    const auto& view = image.specification.view;
+    const auto image_format = [view]()
+    {
+        switch (view)
+        {
+        case Zed::View::LEFT:
+            return Pine::ImageFormat::BGRA;
+        case Zed::View::RIGHT:
+            return Pine::ImageFormat::BGRA;
+        case Zed::View::LEFT_GRAY:
+            return Pine::ImageFormat::GRAY;
+        case Zed::View::RIGHT_GRAY:
+            return Pine::ImageFormat::GRAY;
+        case Zed::View::SIDE_BY_SIDE:
+            return Pine::ImageFormat::BGRA;
+        default:
+            return Pine::ImageFormat::UNKNOWN;
+        }
+    }();
+    return Pine::Image(image.buffer.data(), image.specification.width,
+        image.specification.height, image_format);
+}
+
 } // namespace Pineapple

@@ -4,8 +4,8 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraControls.hpp"
-#include "Pineapple/RecordManager.hpp"
+#include "Pineapple/Zed/Types.hpp"
+#include "Pineapple/Zed/RecordManager.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -17,56 +17,56 @@ int main(int argc, char** argv)
 
     Pine::Log::Init();
 
-    Pineapple::ZED::RecordManager manager(".");
+    Pineapple::Zed::RecordManager manager(".");
 
     manager.StartRecord();
 
     while (!stopFlag)
     {
-        auto settingsRequest = manager.RequestCameraSettings();
-        auto imuRequest = manager.RequestSensorData();
-        auto imageRequest =
-            manager.RequestImage(1280, 720, Pineapple::ZED::View::LEFT);
+        auto settings_request = manager.RequestCameraSettings();
+        auto sensor_request = manager.RequestSensorData();
+        auto image_request =
+            manager.RequestImage(1280, 720, Pineapple::Zed::View::LEFT);
 
-        if (settingsRequest.has_value())
+        if (settings_request.has_value())
         {
-            const auto settings = settingsRequest.value();
+            const auto settings = settings_request.value();
             PINE_INFO("");
-            PINE_INFO("Brightness:        {0}", settings.Brightness);
-            PINE_INFO("Contrast:          {0}", settings.Contrast);
-            PINE_INFO("Hue:               {0}", settings.Hue);
-            PINE_INFO("Saturation:        {0}", settings.Saturation);
-            PINE_INFO("Sharpness:         {0}", settings.Sharpness);
-            PINE_INFO("Gain:              {0}", settings.Gain);
-            PINE_INFO("Exposure:          {0}", settings.Exposure);
-            PINE_INFO("Whitebalance:      {0}", settings.Whitebalance);
-            PINE_INFO("Auto exposure:     {0}", settings.AutoExposure);
-            PINE_INFO("Auto whitebalance: {0}", settings.AutoWhitebalance);
-            PINE_INFO("LED status:        {0}", settings.EnableLED);
+            PINE_INFO("Brightness:        {0}", settings.brightness);
+            PINE_INFO("Contrast:          {0}", settings.contrast);
+            PINE_INFO("Hue:               {0}", settings.hue);
+            PINE_INFO("Saturation:        {0}", settings.saturation);
+            PINE_INFO("Sharpness:         {0}", settings.sharpness);
+            PINE_INFO("Gain:              {0}", settings.gain);
+            PINE_INFO("Exposure:          {0}", settings.exposure);
+            PINE_INFO("Whitebalance:      {0}", settings.whitebalance);
+            PINE_INFO("Auto exposure:     {0}", settings.auto_exposure);
+            PINE_INFO("Auto whitebalance: {0}", settings.auto_whitebalance);
+            PINE_INFO("LED status:        {0}", settings.enable_led);
         }
 
-        if (imuRequest.has_value())
+        if (sensor_request.has_value())
         {
-            const auto imu = imuRequest.value();
+            const auto sensor = sensor_request.value();
             PINE_INFO("");
             PINE_INFO("IMU acceleration:  {0}, {1}, {2}",
-                imu.Acceleration.x,
-                imu.Acceleration.y,
-                imu.Acceleration.z);
+                sensor.acceleration.x,
+                sensor.acceleration.y,
+                sensor.acceleration.z);
             PINE_INFO("IMU ang. velocity: {0}, {1}, {2}",
-                imu.AngularVelocity.x,
-                imu.AngularVelocity.y,
-                imu.AngularVelocity.z);
+                sensor.angular_velocity.x,
+                sensor.angular_velocity.y,
+                sensor.angular_velocity.z);
         }
 
-        if (imageRequest.has_value())
+        if (image_request.has_value())
         {
-            const auto image = imageRequest.value();
+            const auto image = image_request.value();
             PINE_INFO("");
             PINE_INFO("Image: {0}, {1}, {2}",
-                image.Width,
-                image.Height,
-                image.Format);
+                image.specification.width,
+                image.specification.height,
+                image.specification.view);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));

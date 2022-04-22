@@ -4,7 +4,6 @@ add_library(pineapple::pineapple ALIAS pineapple)
 option(ZED_LINK_SHARED "Link with the ZED SDK shared executable" ON)
 
 find_package(pine REQUIRED)
-find_package(Protobuf REQUIRED)
 find_package(ZED 3 REQUIRED)
 find_package(CUDA REQUIRED)
 
@@ -32,29 +31,30 @@ endif()
 
 target_sources(pineapple
     PUBLIC 
-        include/Pineapple/CameraControls.hpp
-        include/Pineapple/CameraNode.hpp
-        include/Pineapple/LocalControlLayer.hpp
-        include/Pineapple/Messages.hpp
-        include/Pineapple/RecordManager.hpp
-        include/Pineapple/RemoteControlLayer.hpp
-        include/Pineapple/SensorData.hpp
-        include/Pineapple/UserInterface.hpp
+        include/Pineapple/Zed/CameraNode.hpp
+        include/Pineapple/Zed/LocalControlLayer.hpp
+        include/Pineapple/Zed/Protocol.hpp
+        include/Pineapple/Zed/RecordManager.hpp
+        include/Pineapple/Zed/RemoteControlLayer.hpp
+        include/Pineapple/Zed/Types.hpp
+        include/Pineapple/Message.hpp
+        include/Pineapple/Serialization.hpp
+        include/Pineapple/UiHelpers.hpp
         include/Pineapple/Utils.hpp
     PRIVATE 
-        src/CameraNode.cpp
-        src/LocalControlLayer.cpp
-        src/RecordManager.cpp
-        src/RemoteControlLayer.cpp
-        src/UserInterface.cpp
+        src/Zed/CameraNode.cpp
+        src/Zed/LocalControlLayer.cpp
+        src/Zed/RecordManager.cpp
+        src/Zed/RemoteControlLayer.cpp
+        src/UiHelpers.cpp
         src/Utils.cpp)
 
 # Library include directory
 target_include_directories(pineapple
     PUBLIC 
         include
-        ${ZED_INCLUDE_DIRS}
         ${CUDA_INCLUDE_DIRS}
+        ${ZED_INCLUDE_DIRS}
     PRIVATE 
         src)
 
@@ -62,7 +62,6 @@ target_include_directories(pineapple
 target_link_libraries(pineapple
     PUBLIC
         pine::pine
-        protobuf::protobuf
     PRIVATE 
         ${ZED_LIBS})
 
@@ -71,6 +70,10 @@ if(MSVC)
 elseif(UNIX)
     target_compile_definitions(pineapple PUBLIC)
 endif()
+
+message(STATUS "Pineapple compiler")
+message(STATUS "${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "${CMAKE_CXX_COMPILER_VERSION}")
 
 target_compile_definitions(pineapple PUBLIC PRIVATE)
 target_compile_features(pineapple PUBLIC cxx_std_17)

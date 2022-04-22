@@ -1,19 +1,19 @@
-#include "Pineapple/RecordManager.hpp"
+#include "Pineapple/Zed/RecordManager.hpp"
 
 #include <filesystem>
 #include <tuple>
 
 #include "Pineapple/Utils.hpp"
 
-namespace Pineapple::ZED
+namespace Pineapple::Zed
 {
 
 std::tuple<sl::InitParameters, sl::RecordingParameters, sl::RuntimeParameters>
 ToStereolabs(const CameraParameters& parameters)
 {
-    sl::InitParameters initParameters;
-    initParameters.camera_resolution = [parameters]() {
-        switch (parameters.CameraResolution)
+    sl::InitParameters init_parameters;
+    init_parameters.camera_resolution = [parameters]() {
+        switch (parameters.resolution)
         {
         case Resolution::HD2K:
             return sl::RESOLUTION::HD2K;
@@ -27,36 +27,41 @@ ToStereolabs(const CameraParameters& parameters)
             return sl::RESOLUTION::HD720;
         }
     }();
-    initParameters.camera_fps = parameters.CameraFPS;
-    initParameters.open_timeout_sec = parameters.OpenTimeout;
-    initParameters.enable_image_enhancement = parameters.EnableImageEnhancement;
-    initParameters.camera_disable_self_calib =
-        parameters.DisableSelfCalibration;
-    initParameters.sensors_required = parameters.RequireSensors;
+    init_parameters.camera_fps = parameters.fps;
+    init_parameters.open_timeout_sec = parameters.timeout;
+    init_parameters.enable_image_enhancement = 
+        parameters.enable_image_enhancement;
+    init_parameters.camera_disable_self_calib =
+        parameters.disable_self_calibration;
+    init_parameters.sensors_required = parameters.require_sensors;
 
-    sl::RecordingParameters recordingParameters;
-    recordingParameters.compression_mode = [parameters]() {
-        switch (parameters.Compression)
+    sl::RecordingParameters recording_parameters;
+    recording_parameters.compression_mode = [parameters]() {
+        switch (parameters.compression)
         {
-        case CompressionMode::LOSSLESS:
+        case Compression::LOSSLESS:
             return sl::SVO_COMPRESSION_MODE::LOSSLESS;
-        case CompressionMode::H264:
+        case Compression::H264:
             return sl::SVO_COMPRESSION_MODE::H264;
-        case CompressionMode::H265:
+        case Compression::H265:
             return sl::SVO_COMPRESSION_MODE::H265;
+        case Compression::H264_LOSSLESS:
+            return sl::SVO_COMPRESSION_MODE::H264_LOSSLESS;
+        case Compression::H265_LOSSLESS:
+            return sl::SVO_COMPRESSION_MODE::H265_LOSSLESS;
         default:
             return sl::SVO_COMPRESSION_MODE::H264;
         }
     }();
 
-    sl::RuntimeParameters runtimeParameters;
-    runtimeParameters.enable_depth = parameters.EnableDepth;
+    sl::RuntimeParameters runtime_parameters;
+    runtime_parameters.enable_depth = parameters.enable_depth;
 
-    return {initParameters, recordingParameters, runtimeParameters};
+    return {init_parameters, recording_parameters, runtime_parameters};
 }
 
-RecordManager::RecordManager(const std::filesystem::path& dataDirectory)
-    : m_OutputDirectory(dataDirectory)
+RecordManager::RecordManager(const std::filesystem::path& output_directory)
+    : m_OutputDirectory(output_directory)
 {
 }
 
@@ -68,11 +73,11 @@ void RecordManager::StartRecord(const CameraParameters& parameters)
 }
 
 void RecordManager::StartRecord(const CameraParameters& parameters,
-    const std::filesystem::path& outputDirectory)
+    const std::filesystem::path& output_directory)
 {
     if (m_Busy.exchange(true))
     {
-        PINE_WARN("ZED camera busy.");
+        PINE_WARN("Zed camera busy.");
         return;
     }
 
@@ -82,8 +87,8 @@ void RecordManager::StartRecord(const CameraParameters& parameters,
     }
 
     RecordJob job;
-    job.OutputDirectory = outputDirectory;
-    job.Parameters = parameters;
+    job.output_directory = output_directory;
+    job.parameters = parameters;
     
     m_Stop = false;
 
@@ -154,25 +159,25 @@ std::optional<CameraSettings> RecordManager::RequestCameraSettings()
     }
 
     CameraSettings settings;
-    settings.Brightness =
+    settings.brightness =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::BRIGHTNESS);
-    settings.Contrast =
+    settings.contrast =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::CONTRAST);
-    settings.Hue = m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::HUE);
-    settings.Saturation =
+    settings.hue = m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::HUE);
+    settings.saturation =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::SATURATION);
-    settings.Sharpness =
+    settings.sharpness =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::SHARPNESS);
-    settings.Gain = m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::GAIN);
-    settings.Exposure =
+    settings.gain = m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::GAIN);
+    settings.exposure =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::EXPOSURE);
-    settings.Whitebalance = m_Camera.getCameraSettings(
+    settings.whitebalance = m_Camera.getCameraSettings(
         sl::VIDEO_SETTINGS::WHITEBALANCE_TEMPERATURE);
-    settings.AutoExposure =
+    settings.auto_exposure =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::AEC_AGC);
-    settings.AutoWhitebalance =
+    settings.auto_whitebalance =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO);
-    settings.EnableLED =
+    settings.enable_led =
         m_Camera.getCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS);
 
     return settings;
@@ -185,34 +190,34 @@ std::optional<SensorData> RecordManager::RequestSensorData()
         return {};
     }
 
-    sl::SensorsData nativeData;
-    m_Camera.getSensorsData(nativeData, sl::TIME_REFERENCE::CURRENT);
+    sl::SensorsData native_data;
+    m_Camera.getSensorsData(native_data, sl::TIME_REFERENCE::CURRENT);
 
-    auto& acceleration = nativeData.imu.linear_acceleration;
-    auto& angularVelocity = nativeData.imu.angular_velocity;
-    auto& temperatures = nativeData.temperature.temperature_map;
+    auto& acceleration = native_data.imu.linear_acceleration;
+    auto& angular_velocity = native_data.imu.angular_velocity;
+    auto& temperatures = native_data.temperature.temperature_map;
 
-    Pineapple::SensorData data;
-    data.Pressure = nativeData.barometer.pressure * 100.0f;
-    data.TemperatureLeft = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_LEFT];
-    data.TemperatureRight = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
-    data.Acceleration =
+    Pineapple::Zed::SensorData data;
+    data.pressure = native_data.barometer.pressure * 100.0f;
+    data.temperature_left = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_LEFT];
+    data.temperature_right = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
+    data.acceleration =
         Pine::Vec3(acceleration[0], acceleration[1], acceleration[2]);
-    data.AngularVelocity =
-        Pine::Vec3(angularVelocity[0], angularVelocity[1], angularVelocity[2]);
+    data.angular_velocity =
+        Pine::Vec3(angular_velocity[0], angular_velocity[1], angular_velocity[2]);
 
     return data;
 }
 
-std::optional<Pine::Image> RecordManager::RequestImage(
-    const uint32_t width, const uint32_t height, const View& view)
+std::optional<Image> RecordManager::RequestImage(
+    const uint32_t width, const uint32_t height, const View view)
 {
     if (!m_Camera.isOpened())
     {
         return {};
     }
 
-    const auto nativeView = [view]() {
+    const auto native_view = [view]() {
         switch (view)
         {
         case View::LEFT:
@@ -230,36 +235,16 @@ std::optional<Pine::Image> RecordManager::RequestImage(
         }
     }();
 
-    const auto imageFormat = [view]() {
-        switch (view)
-        {
-        case View::LEFT:
-            return Pine::ImageFormat::BGRA;
-        case View::RIGHT:
-            return Pine::ImageFormat::BGRA;
-        case View::LEFT_GRAY:
-            return Pine::ImageFormat::GRAY;
-        case View::RIGHT_GRAY:
-            return Pine::ImageFormat::GRAY;
-        case View::SIDE_BY_SIDE:
-            return Pine::ImageFormat::BGRA;
-        default:
-            return Pine::ImageFormat::BGRA;
-        }
-    }();
-
-    sl::Mat nativeImage;
-    m_Camera.retrieveImage(nativeImage,
-        nativeView,
+    sl::Mat native_image;
+    m_Camera.retrieveImage(native_image,
+        native_view,
         sl::MEM::CPU,
         sl::Resolution(width, height));
 
-    Pine::Image image(nativeImage.getPtr<uint8_t>(),
-        nativeImage.getWidth(),
-        nativeImage.getHeight(),
-        imageFormat);
+    Image image(native_image.getPtr<uint8_t>(), native_image.getWidth(),
+        native_image.getHeight(), view);
 
-    return image;
+    return std::move(image);
 }
 
 bool RecordManager::UpdateCameraSettings(const CameraSettings& settings)
@@ -270,66 +255,66 @@ bool RecordManager::UpdateCameraSettings(const CameraSettings& settings)
     }
 
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::BRIGHTNESS,
-        settings.Brightness);
+        settings.brightness);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::CONTRAST,
-        settings.Contrast);
+        settings.contrast);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::HUE,
-        settings.Hue);
+        settings.hue);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::SATURATION,
-        settings.Saturation);
+        settings.saturation);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::SHARPNESS,
-        settings.Sharpness);
+        settings.sharpness);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::GAMMA,
-        settings.Gamma);
+        settings.gamma);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::GAIN,
-        settings.Gain);
+        settings.gain);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::EXPOSURE,
-        settings.Exposure);
+        settings.exposure);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_TEMPERATURE,
-        settings.Whitebalance);
+        settings.whitebalance);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::AEC_AGC,
-        settings.AutoExposure);
+        settings.auto_exposure);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO,
-        settings.AutoWhitebalance);
+        settings.auto_whitebalance);
     m_Camera.setCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS,
-        settings.EnableLED);
+        settings.enable_led);
     return true;
 }
 
 void RecordManager::RecordWorker(const RecordJob job)
 {
-    auto [initParameters, recordingParameters, runtimeParameters] =
-        ToStereolabs(job.Parameters);
+    auto [init_parameters, recording_parameters, runtime_parameters] =
+        ToStereolabs(job.parameters);
 
-    const auto dateString = CurrentDateTime() + ".svo";
-    const auto filepath = job.OutputDirectory / dateString;
-    recordingParameters.video_filename = filepath.string().c_str();
+    const auto date_string = CurrentDateTime() + ".svo";
+    const auto filepath = job.output_directory / date_string;
+    recording_parameters.video_filename = filepath.string().c_str();
 
-    const auto openState = m_Camera.open(initParameters);
-    if (openState != sl::ERROR_CODE::SUCCESS)
+    const auto open_state = m_Camera.open(init_parameters);
+    if (open_state != sl::ERROR_CODE::SUCCESS)
     {
-        PINE_WARN("Error while opening ZED: {0}",
-            sl::toString(openState).get());
+        PINE_WARN("Error while opening Zed: {0}",
+            sl::toString(open_state).get());
         m_Busy = false;
         return;
     }
 
-    const auto enableState = m_Camera.enableRecording(recordingParameters);
-    if (enableState != sl::ERROR_CODE::SUCCESS)
+    const auto recording_state = m_Camera.enableRecording(recording_parameters);
+    if (recording_state != sl::ERROR_CODE::SUCCESS)
     {
-        PINE_WARN("Error while enabling ZED recording: {0}",
-            sl::toString(enableState).get());
+        PINE_WARN("Error while enabling Zed recording: {0}",
+            sl::toString(recording_state).get());
         m_Busy = false;
         return;
     }
 
     while (!m_Stop)
     {
-        const auto grabState = m_Camera.grab(runtimeParameters);
-        if (grabState != sl::ERROR_CODE::SUCCESS)
+        const auto grab_state = m_Camera.grab(runtime_parameters);
+        if (grab_state != sl::ERROR_CODE::SUCCESS)
         {
-            PINE_WARN("Error while grabbing ZED data: {0}",
-                sl::toString(grabState).get());
+            PINE_WARN("Error while grabbing Zed data: {0}",
+                sl::toString(grab_state).get());
         }
     }
 
@@ -337,4 +322,4 @@ void RecordManager::RecordWorker(const RecordJob job)
     m_Busy = false;
 }
 
-} // namespace Pineapple::ZED
+} // namespace Pineapple::Zed

@@ -2,9 +2,10 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraControls.hpp"
-#include "Pineapple/UserInterface.hpp"
+#include "Pineapple/UiHelpers.hpp"
 #include "Pineapple/Utils.hpp"
+#include "Pineapple/Zed/Types.hpp"
+#include "Pineapple/Zed/Protocol.hpp"
 
 namespace Pineapple
 {
@@ -33,9 +34,15 @@ private:
 
     Pine::ClientState m_Client;
 
-    ZED::CameraParameters m_CameraParameters = {};
-    ZED::CameraSettings m_CameraSettings = {};
-    ZED::ImageConfiguration m_ImageConfig{};
+    Zed::ControlRequest m_ControlRequest = {};
+    Zed::SettingsRequest m_SettingsRequest = {};
+    Zed::StateRequest m_StateRequest = {};
+    Zed::SensorRequest m_SensorRequest = {};
+    Zed::ImageRequest m_ImageRequest = {};
+
+    Zed::CameraParameters m_CameraParameters = {};
+    Zed::CameraSettings m_CameraSettings = {};
+    Zed::ImageSpecification m_ImageSpecs{};
 
     bool m_ViewportFocused = false;
     bool m_ViewportHovered = false;

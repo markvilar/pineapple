@@ -1,4 +1,4 @@
-#include "Pineapple/RemoteControlLayer.hpp"
+#include "Pineapple/Zed/RemoteControlLayer.hpp"
 
 namespace Pineapple
 {
@@ -42,12 +42,12 @@ void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
     const auto specs = m_Framebuffer->GetSpecification();
     const auto viewport = m_PanelLayouts["Viewport"];
 
-    if (viewport.Size.x > 0.0f && viewport.Size.y > 0.0f
-        && (specs.Width != viewport.Size.x 
-        || specs.Height != viewport.Size.y))
+    if (viewport.size.x > 0.0f && viewport.size.y > 0.0f
+        && (specs.Width != viewport.size.x 
+        || specs.Height != viewport.size.y))
     {
-        m_Framebuffer->Resize(viewport.Size.x, viewport.Size.y);
-        m_CameraController.OnResize(viewport.Size.x, viewport.Size.y);
+        m_Framebuffer->Resize(viewport.size.x, viewport.size.y);
+        m_CameraController.OnResize(viewport.size.x, viewport.size.y);
     }
 
     if (m_ViewportFocused)
@@ -71,9 +71,9 @@ void RemoteControlLayer::OnImGuiRender()
     UpdatePanelLayouts();
 
     Pine::UI::AddMainMenuBar([]() {
-        static bool showImGuiDemoWindow = false;
-        static bool showImGuiMetrics = false;
-        static bool showImGuiStackTool = false;
+        static bool show_imgui_demo = false;
+        static bool show_imgui_metrics = false;
+        static bool show_imgui_stack = false;
 
         if (ImGui::BeginMenu("File"))
         {
@@ -92,23 +92,23 @@ void RemoteControlLayer::OnImGuiRender()
 
         if (ImGui::BeginMenu("ImGui"))
         {
-            ImGui::Checkbox("Show ImGui demo window", &showImGuiDemoWindow);
-            ImGui::Checkbox("Show ImGui metrics", &showImGuiMetrics);
-            ImGui::Checkbox("Show ImGui stack tool", &showImGuiStackTool);
+            ImGui::Checkbox("Show ImGui demo window", &show_imgui_demo);
+            ImGui::Checkbox("Show ImGui metrics", &show_imgui_metrics);
+            ImGui::Checkbox("Show ImGui stack tool", &show_imgui_stack);
             ImGui::EndMenu();
         }
 
-        if (showImGuiDemoWindow)
+        if (show_imgui_demo)
             ImGui::ShowDemoWindow();
-        if (showImGuiMetrics)
+        if (show_imgui_metrics)
             ImGui::ShowMetricsWindow();
-        if (showImGuiStackTool)
+        if (show_imgui_stack)
             ImGui::ShowStackToolWindow();
     });
 
     Pine::UI::AddViewport("Viewport",
-        m_PanelLayouts["Viewport"].Position,
-        m_PanelLayouts["Viewport"].Size,
+        m_PanelLayouts["Viewport"].position,
+        m_PanelLayouts["Viewport"].size,
         *m_Framebuffer.get(),
         [this]() {
             m_ViewportFocused = ImGui::IsWindowFocused();
@@ -118,8 +118,8 @@ void RemoteControlLayer::OnImGuiRender()
         });
 
     Pine::UI::AddWindow("Camera Controls",
-        m_PanelLayouts["LeftPanel"].Position,
-        m_PanelLayouts["LeftPanel"].Size,
+        m_PanelLayouts["LeftPanel"].position,
+        m_PanelLayouts["LeftPanel"].size,
         [this]() {
             
             static char address[256] = "";
@@ -159,19 +159,19 @@ void RemoteControlLayer::OnImGuiRender()
             ImGui::Separator();
             DrawCameraSettings(m_CameraSettings);
             ImGui::Separator();
-            DrawImageConfiguration(m_ImageConfig);
+            DrawImageSpecification(m_ImageSpecs);
         });
 
     Pine::UI::AddWindow("Sensor Data",
-        m_PanelLayouts["RightPanel"].Position,
-        m_PanelLayouts["RightPanel"].Size,
+        m_PanelLayouts["RightPanel"].position,
+        m_PanelLayouts["RightPanel"].size,
         []() {
             // TODO: Implement functionality.
         });
 
     Pine::UI::AddWindow("Console",
-        m_PanelLayouts["BottomPanel"].Position,
-        m_PanelLayouts["BottomPanel"].Size,
+        m_PanelLayouts["BottomPanel"].position,
+        m_PanelLayouts["BottomPanel"].size,
         []() {
             // TODO: Implement functionality.
         });
@@ -189,28 +189,28 @@ void RemoteControlLayer::OnMessage(const Pine::Message& message)
 
 void RemoteControlLayer::UpdatePanelLayouts()
 {
-    const auto& [windowWidth, windowHeight] =
+    const auto& [window_width, window_height] =
         Pine::Application::Get().GetWindow().GetSize();
 
-    static constexpr auto menuHeight = 20.0f;
+    static constexpr auto menu_height = 20.0f;
 
     const auto& mainMenuLayout = m_PanelLayouts["MainMenu"];
 
     m_PanelLayouts["LeftPanel"] = PanelLayout(
-        Pine::Vec2(0.0f * windowWidth, 0.0f * windowHeight + menuHeight),
-        Pine::Vec2(0.2f * windowWidth, 1.0f * windowHeight - menuHeight));
+        Pine::Vec2(0.0f * window_width, 0.0f * window_height + menu_height),
+        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
 
     m_PanelLayouts["Viewport"] = PanelLayout(
-        Pine::Vec2(0.2f * windowWidth, 0.0f * windowHeight + menuHeight),
-        Pine::Vec2(0.6f * windowWidth, 0.8f * windowHeight));
+        Pine::Vec2(0.2f * window_width, 0.0f * window_height + menu_height),
+        Pine::Vec2(0.6f * window_width, 0.8f * window_height));
 
     m_PanelLayouts["RightPanel"] = PanelLayout(
-        Pine::Vec2(0.8f * windowWidth, 0.0f * windowHeight + menuHeight),
-        Pine::Vec2(0.2f * windowWidth, 1.0f * windowHeight - menuHeight));
+        Pine::Vec2(0.8f * window_width, 0.0f * window_height + menu_height),
+        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
 
     m_PanelLayouts["BottomPanel"] = PanelLayout(
-        Pine::Vec2(0.2f * windowWidth, 0.8f * windowHeight + menuHeight),
-        Pine::Vec2(0.6f * windowWidth, 0.2f * windowHeight - menuHeight));
+        Pine::Vec2(0.2f * window_width, 0.8f * window_height + menu_height),
+        Pine::Vec2(0.6f * window_width, 0.2f * window_height - menu_height));
 }
 
 }; // namespace Pineapple

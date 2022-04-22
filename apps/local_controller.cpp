@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/LocalControlLayer.hpp"
+#include "Pineapple/Zed/LocalControlLayer.hpp"
 
 class LocalController : public Pine::Application
 {

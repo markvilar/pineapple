@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class Pineapple(ConanFile):
     """ """
@@ -37,7 +38,6 @@ class Pineapple(ConanFile):
     def requirements(self):
         """ Specifies the requirements of the package. """
         self.requires("pine/0.1.1")
-        self.requires("protobuf/3.17.1")
 
     def validate(self):
         """ Validates the project configuration. """
@@ -59,7 +59,7 @@ class Pineapple(ConanFile):
         cmake = CMake(self, generator="Ninja")
         cmake.definitions["ZED_LINK_SHARED"] = True
         cmake.definitions["PINEAPPLE_BUILD_EXAMPLES"] = True
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         return cmake
 
     def build(self):
