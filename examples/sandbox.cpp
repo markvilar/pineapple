@@ -73,21 +73,25 @@ void TestImageSerialization()
 
 void TestMessageSerialization()
 {
-    std::vector<std::uint8_t> buffer;
-    zpp::serializer::memory_output_archive output_archive(buffer);
+    std::vector<std::uint8_t> request_buffer;
+    zpp::serializer::memory_output_archive request_output_archive(request_buffer);
 
     PINE_INFO("\nTest message serialization:");
 
     Pineapple::HeadedMessage<Pineapple::Zed::MessageIdentifier, 
-        Pineapple::Zed::ControlRequest> message;
+        Pineapple::Zed::ControlRequest> control_request_message;
 
-    message.header = Pineapple::Zed::MessageIdentifier::ControlRequest;
-    message.body.action = Pineapple::Zed::CameraAction::START_RECORD;
+    control_request_message.header 
+        = Pineapple::Zed::MessageIdentifier::ControlRequest;
+    control_request_message.body.action 
+        = Pineapple::Zed::CameraAction::START_RECORD;
 
-    output_archive(message);
+    request_output_archive(control_request_message);
 
-    PINE_INFO("Serialized message: {0}, {1}", buffer.size(),
+    PINE_INFO("Serialized control request: {0}, {1}", buffer.size(),
         std::string(buffer.begin(), buffer.end()));
+
+    // TODO: Read identifier from buffer and try to deserialize.
 }
 
 int main(int argc, char** argv)
