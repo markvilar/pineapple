@@ -1,4 +1,4 @@
-#include "Pineapple/Zed/RemoteControlLayer.hpp"
+#include "pineapple/zed/remote_control_layer.hpp"
 
 namespace Pineapple
 {

@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/Zed/Types.hpp"
+#include "pineapple/zed/types.hpp"
 
 namespace Pineapple
 {

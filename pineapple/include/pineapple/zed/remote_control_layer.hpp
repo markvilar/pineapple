@@ -2,10 +2,10 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/UiHelpers.hpp"
-#include "Pineapple/Utils.hpp"
-#include "Pineapple/Zed/Types.hpp"
-#include "Pineapple/Zed/Protocol.hpp"
+#include "pineapple/ui_helpers.hpp"
+#include "pineapple/utils.hpp"
+#include "pineapple/zed/types.hpp"
+#include "pineapple/zed/protocol.hpp"
 
 namespace Pineapple
 {

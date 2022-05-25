@@ -1,11 +1,14 @@
 #pragma once
 
+#ifdef PINEAPPLE_ENABLE_ZED
+
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/UiHelpers.hpp"
-#include "Pineapple/Utils.hpp"
-#include "Pineapple/Zed/RecordManager.hpp"
-#include "Pineapple/Zed/Types.hpp"
+#include "pineapple/ui_helpers.hpp"
+#include "pineapple/utils.hpp"
+#include "pineapple/zed/types.hpp"
+
+#include "pineapple/zed/camera_manager.hpp"
 
 namespace Pineapple
 {
@@ -56,3 +59,6 @@ private:
 };
 
 } // namespace Pineapple
+
+#endif // PINEAPPLE_ENABLE_ZED
+

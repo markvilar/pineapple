@@ -21,9 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-#ifndef ZPP_SERIALIZER_H
-#define ZPP_SERIALIZER_H
+#pragma once
 
 #include <algorithm>
 #include <array>
@@ -3302,5 +3300,3 @@ constexpr id_type make_id(const char (&name)[size])
 
 } // namespace serializer
 } // namespace zpp
-
-#endif // ZPP_SERIALIZER_H

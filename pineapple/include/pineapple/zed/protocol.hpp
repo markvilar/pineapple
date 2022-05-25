@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 
-#include "Pineapple/Zed/Types.hpp"
+#include "pineapple/zed/types.hpp"
 
 namespace Pineapple::Zed 
 {
@@ -13,14 +13,19 @@ namespace Pineapple::Zed
 enum class MessageIdentifier : uint8_t
 {
     Unknown = 0,
+
     ControlRequest = 1,
     ControlResponse = 2,
+
     SettingsRequest = 3,
     SettingsResponse = 4,
+
     StateRequest = 5,
     StateResponse = 6,
+
     SensorRequest = 7,
     SensorResponse = 8,
+
     ImageRequest = 9,
     ImageResponse = 10
 };

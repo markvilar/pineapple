@@ -1,9 +1,9 @@
-#include "Pineapple/Zed/RecordManager.hpp"
+#include "pineapple/zed/camera_manager.hpp"
 
-#include <filesystem>
-#include <tuple>
+#include "pineapple/zed/protocol.hpp"
+#include "pineapple/utils.hpp"
 
-#include "Pineapple/Utils.hpp"
+#ifdef PINEAPPLE_ENABLE_ZED
 
 namespace Pineapple::Zed
 {
@@ -322,4 +322,48 @@ void RecordManager::RecordWorker(const RecordJob job)
     m_Busy = false;
 }
 
-} // namespace Pineapple::Zed
+CameraManager::CameraManager(const uint16_t port, 
+    const std::filesystem::path& outputDirectory)
+    : m_Server(port), m_RecordManager(outputDirectory)
+{
+}
+
+CameraManager::~CameraManager()
+{
+    PINE_INFO("Stopping server.");
+    StopServer(m_Server);
+}
+
+void CameraManager::Run()
+{
+    Pine::StartServer(m_Server, 
+        [this](const Pine::ConnectionState& connection) -> bool
+        {
+            PINE_INFO("Server got connection: {0}", 
+                connection.Socket.remote_endpoint());
+            return true;
+        });
+
+    while (m_Running)
+    {
+        OnUpdate();
+    }
+}
+
+void CameraManager::OnUpdate()
+{
+    Pine::UpdateServer(m_Server, 
+        [this](const Pine::Message& message) -> void
+        {
+            OnMessage(message);
+        });
+}
+
+void CameraManager::OnMessage(const Pine::Message& message)
+{
+    PINE_INFO("Got message: {0}", message.Header.Size);
+}
+
+}; // namespace Pineapple::Zed
+
+#endif // PINEAPPLE_ENABLE_ZED

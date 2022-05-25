@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/Zed/CameraNode.hpp"
+#include "pineapple/zed/camera_manager.hpp"
 
 int main(int argc, char** argv)
 {
@@ -11,6 +11,6 @@ int main(int argc, char** argv)
     const auto port = 6000;
     const std::filesystem::path directory = ".";
 
-    Pineapple::CameraNode node(port, directory);
-    node.Run();
+    Pineapple::Zed::CameraManager manager(port, directory);
+    manager.Run();
 }

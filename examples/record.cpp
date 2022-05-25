@@ -4,8 +4,8 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/Zed/Types.hpp"
-#include "Pineapple/Zed/RecordManager.hpp"
+#include "pineapple/zed/types.hpp"
+#include "pineapple/zed/camera_manager.hpp"
 
 sig_atomic_t stopFlag = 0;
 

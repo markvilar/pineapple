@@ -1,5 +1,8 @@
 #pragma once
 
+#ifdef PINEAPPLE_ENABLE_ZED
+
+#include <cstdint>
 #include <filesystem>
 #include <mutex>
 #include <optional>
@@ -14,7 +17,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/Zed/Types.hpp"
+#include "pineapple/zed/types.hpp"
 
 namespace Pineapple::Zed
 {
@@ -24,6 +27,10 @@ struct RecordJob
     std::filesystem::path output_directory = "";
     CameraParameters parameters = {};
 };
+
+// ----------------------------------------------------------------------------
+// RecordManager
+// ----------------------------------------------------------------------------
 
 class RecordManager
 {
@@ -65,4 +72,31 @@ private:
     std::atomic<bool> m_Busy = false;
 };
 
-} // namespace Pineapple::Zed
+// ----------------------------------------------------------------------------
+// CameraManager
+// ----------------------------------------------------------------------------
+
+class CameraManager
+{
+public:
+    CameraManager(const uint16_t port, 
+        const std::filesystem::path& outputDirectory = ".");
+    ~CameraManager();
+
+    void Run();
+
+private:
+    void OnUpdate();
+    void OnMessage(const Pine::Message& message);
+
+private:
+    bool m_Running = true;
+
+    Pine::ServerState m_Server;
+    
+    RecordManager m_RecordManager;
+};
+
+}; // namespace Pineapple::Zed
+
+#endif // PINEAPPLE_ENABLE_ZED

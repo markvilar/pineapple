@@ -1,79 +1,60 @@
 add_library(pineapple STATIC)
 add_library(pineapple::pineapple ALIAS pineapple)
 
-option(ZED_LINK_SHARED "Link with the ZED SDK shared executable" ON)
-
 find_package(pine REQUIRED)
-find_package(ZED 3 REQUIRED)
-find_package(CUDA REQUIRED)
 
-message(STATUS "Found ZED SDK ${ZED_VERSION} at ${ZED_DIR}. ZED CUDA version:
-	${ZED_CUDA_VERSION}")
-
-if(NOT ZED_LINK_SHARED AND MSVC)
-    message(FATAL_ERROR "ZED_LINK_SHARED OFF : ZED SDK static libraries not "
-        "available on Windows")
-endif()
-
-# ZED libraries - static or dynamic linking
-if(ZED_LINK_SHARED)
-    set(ZED_LIBS
-        ${ZED_LIBRARIES}
-        ${CUDA_CUDA_LIBRARY}
-        ${CUDA_CUDART_LIBRARY}
-        ${CUDA_NPP_LIBRARIES_ZED})
-else()
-    set(ZED_LIBS
-        ${ZED_STATIC_LIBRARIES}
-        ${CUDA_CUDA_LIBRARY}
-        ${CUDA_LIBRARY})
+if(PINEAPPLE_ENABLE_ZED)
+    include("${PROJECT_SOURCE_DIR}/cmake/zed.cmake")
 endif()
 
 target_sources(pineapple
     PUBLIC 
-        include/Pineapple/Zed/CameraNode.hpp
-        include/Pineapple/Zed/LocalControlLayer.hpp
-        include/Pineapple/Zed/Protocol.hpp
-        include/Pineapple/Zed/RecordManager.hpp
-        include/Pineapple/Zed/RemoteControlLayer.hpp
-        include/Pineapple/Zed/Types.hpp
-        include/Pineapple/Message.hpp
-        include/Pineapple/Serialization.hpp
-        include/Pineapple/UiHelpers.hpp
-        include/Pineapple/Utils.hpp
+        include/pineapple/zed/camera_manager.hpp
+        include/pineapple/zed/local_control_layer.hpp
+        include/pineapple/zed/protocol.hpp
+        include/pineapple/zed/remote_control_layer.hpp
+        include/pineapple/zed/types.hpp
+        include/pineapple/message.hpp
+        include/pineapple/serialization.hpp
+        include/pineapple/ui_helpers.hpp
+        include/pineapple/utils.hpp
     PRIVATE 
-        src/Zed/CameraNode.cpp
-        src/Zed/LocalControlLayer.cpp
-        src/Zed/RecordManager.cpp
-        src/Zed/RemoteControlLayer.cpp
-        src/UiHelpers.cpp
-        src/Utils.cpp)
+        src/zed/camera_manager.cpp
+        src/zed/local_control_layer.cpp
+        src/zed/remote_control_layer.cpp
+        src/ui_helpers.cpp
+        src/utils.cpp
+    )
 
 # Library include directory
 target_include_directories(pineapple
     PUBLIC 
         include
-        ${CUDA_INCLUDE_DIRS}
-        ${ZED_INCLUDE_DIRS}
+        $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:${CUDA_INCLUDE_DIRS}>
+        $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:${ZED_INCLUDE_DIRS}>
     PRIVATE 
-        src)
+        src
+    )
 
 # Library linking
 target_link_libraries(pineapple
     PUBLIC
         pine::pine
     PRIVATE 
-        ${ZED_LIBS})
+        $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:${ZED_LIBS}>
+    )
 
 if(MSVC)
-    target_compile_definitions(pineapple PUBLIC)
+    target_compile_definitions(pineapple 
+        PUBLIC
+            $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:PINEAPPLE_ENABLE_ZED>
+        )
 elseif(UNIX)
-    target_compile_definitions(pineapple PUBLIC)
+    target_compile_definitions(pineapple 
+        PUBLIC
+            $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:PINEAPPLE_ENABLE_ZED>
+        )
 endif()
-
-message(STATUS "Pineapple compiler")
-message(STATUS "${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "${CMAKE_CXX_COMPILER_VERSION}")
 
 target_compile_definitions(pineapple PUBLIC PRIVATE)
 target_compile_features(pineapple PUBLIC cxx_std_17)
@@ -82,4 +63,12 @@ target_compile_options(pineapple PUBLIC -std=c++17)
 set_target_properties(pineapple PROPERTIES 
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+
+# TODO: Problem that ZED_LIBS includes debug
+message(STATUS "--------------------------------------------------------------")
+message(STATUS "ZED include directories: ${ZED_INCLUDE_DIRS}")
+message(STATUS "Cuda include directories: ${CUDA_INCLUDE_DIRS}")
+message(STATUS "ZED libraries: ${ZED_LIBS}")
+message(STATUS "--------------------------------------------------------------")
