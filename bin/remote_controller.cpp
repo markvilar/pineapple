@@ -10,7 +10,7 @@ public:
     RemoteController(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
-        PushLayer(new Pineapple::RemoteControlLayer());
+        PushLayer(new pineapple::RemoteControlLayer());
     }
 
     ~RemoteController() {}

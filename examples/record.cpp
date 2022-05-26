@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 
     Pine::Log::Init();
 
-    Pineapple::Zed::RecordManager manager(".");
+    pineapple::zed::RecordManager manager(".");
 
     manager.StartRecord();
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
         auto settings_request = manager.RequestCameraSettings();
         auto sensor_request = manager.RequestSensorData();
         auto image_request =
-            manager.RequestImage(1280, 720, Pineapple::Zed::View::LEFT);
+            manager.RequestImage(1280, 720, pineapple::zed::View::LEFT);
 
         if (settings_request.has_value())
         {

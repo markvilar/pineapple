@@ -19,7 +19,7 @@
 
 #include "pineapple/zed/types.hpp"
 
-namespace Pineapple::Zed
+namespace pineapple::zed
 {
 
 struct RecordJob
@@ -97,6 +97,6 @@ private:
     RecordManager m_RecordManager;
 };
 
-}; // namespace Pineapple::Zed
+}; // namespace pineapple::zed
 
 #endif // PINEAPPLE_ENABLE_ZED

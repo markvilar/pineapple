@@ -7,7 +7,7 @@
 
 #include "pineapple/zed/types.hpp"
 
-namespace Pineapple::Zed 
+namespace pineapple::zed 
 {
 
 enum class MessageIdentifier : uint8_t
@@ -39,7 +39,7 @@ struct ControlRequest
     CameraAction action = CameraAction::UNKNOWN;
     CameraParameters parameters{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::ControlRequest;
     }
@@ -59,7 +59,7 @@ struct ControlResponse
 {
     CameraResponse response = CameraResponse::UNKNOWN;
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::ControlResponse;
     }
@@ -80,7 +80,7 @@ struct SettingsRequest
 {
     CameraSettings settings{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::SettingsRequest;
     }
@@ -100,7 +100,7 @@ struct SettingsResponse
 {
     CameraSettings settings{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::SettingsResponse;
     }
@@ -118,7 +118,7 @@ void serialize(Archive& archive, SettingsResponse& response)
 
 struct StateRequest
 {
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::StateRequest;
     }
@@ -138,7 +138,7 @@ struct StateResponse
     CameraState camera_state{};
     MemoryState memory_state{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::StateResponse;
     }
@@ -156,7 +156,7 @@ void serialize(Archive& archive, StateResponse& response)
 
 struct SensorRequest
 {
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::SensorRequest;
     }
@@ -175,7 +175,7 @@ struct SensorResponse
 {
     SensorData sensor_data{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::SensorResponse;
     }
@@ -195,7 +195,7 @@ struct ImageRequest
 {
     ImageSpecification image_specs{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::ImageRequest;
     }
@@ -215,7 +215,7 @@ struct ImageResponse
 {
     Image image{};
 
-    static constexpr MessageIdentifier GetStaticIdentifier()
+    static constexpr MessageIdentifier get_static_identifier()
     {
         return MessageIdentifier::ImageResponse;
     }
@@ -227,4 +227,4 @@ void serialize(Archive& archive, ImageResponse& response)
     archive(response.image);
 }
 
-} // namespace Pineapple::Zed
+} // namespace pineapple::zed

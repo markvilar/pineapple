@@ -7,7 +7,7 @@
 #include "pineapple/zed/types.hpp"
 #include "pineapple/zed/protocol.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 class RemoteControlLayer : public Pine::Layer
@@ -34,15 +34,15 @@ private:
 
     Pine::ClientState m_Client;
 
-    Zed::ControlRequest m_ControlRequest = {};
-    Zed::SettingsRequest m_SettingsRequest = {};
-    Zed::StateRequest m_StateRequest = {};
-    Zed::SensorRequest m_SensorRequest = {};
-    Zed::ImageRequest m_ImageRequest = {};
+    zed::ControlRequest m_ControlRequest = {};
+    zed::SettingsRequest m_SettingsRequest = {};
+    zed::StateRequest m_StateRequest = {};
+    zed::SensorRequest m_SensorRequest = {};
+    zed::ImageRequest m_ImageRequest = {};
 
-    Zed::CameraParameters m_CameraParameters = {};
-    Zed::CameraSettings m_CameraSettings = {};
-    Zed::ImageSpecification m_ImageSpecs{};
+    zed::CameraParameters m_CameraParameters = {};
+    zed::CameraSettings m_CameraSettings = {};
+    zed::ImageSpecification m_ImageSpecs{};
 
     bool m_ViewportFocused = false;
     bool m_ViewportHovered = false;
@@ -50,4 +50,4 @@ private:
     std::unordered_map<std::string, PanelLayout> m_PanelLayouts{};
 };
 
-} // namespace Pineapple
+} // namespace pineapple

@@ -9,11 +9,11 @@
 
 #include "pineapple/zed/types.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 std::string CurrentDateTime();
 
-Pine::Image ConvertImage(const Zed::Image& image);
+Pine::Image ConvertImage(const zed::Image& image);
 
-}; // namespace Pineapple
+}; // namespace pineapple

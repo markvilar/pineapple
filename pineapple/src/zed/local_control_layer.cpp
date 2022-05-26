@@ -2,7 +2,7 @@
 
 #ifdef PINEAPPLE_ENABLE_ZED
 
-namespace Pineapple
+namespace pineapple
 {
 
 LocalControlLayer::LocalControlLayer()
@@ -317,6 +317,6 @@ void LocalControlLayer::UpdatePanelLayouts()
         Pine::Vec2(0.6f * window_width, 0.2f * window_height - menu_height));
 }
 
-}; // namespace Pineapple
+}; // namespace pineapple
 
 #endif // PINEAPPLE_ENABLE_ZED

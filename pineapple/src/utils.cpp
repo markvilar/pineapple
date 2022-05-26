@@ -1,6 +1,6 @@
 #include "pineapple/utils.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 std::string CurrentDateTime()
@@ -14,22 +14,22 @@ std::string CurrentDateTime()
     return buf;
 }
 
-Pine::Image ConvertImage(const Zed::Image& image)
+Pine::Image ConvertImage(const zed::Image& image)
 {
     const auto& view = image.specification.view;
     const auto image_format = [view]()
     {
         switch (view)
         {
-        case Zed::View::LEFT:
+        case zed::View::LEFT:
             return Pine::ImageFormat::BGRA;
-        case Zed::View::RIGHT:
+        case zed::View::RIGHT:
             return Pine::ImageFormat::BGRA;
-        case Zed::View::LEFT_GRAY:
+        case zed::View::LEFT_GRAY:
             return Pine::ImageFormat::GRAY;
-        case Zed::View::RIGHT_GRAY:
+        case zed::View::RIGHT_GRAY:
             return Pine::ImageFormat::GRAY;
-        case Zed::View::SIDE_BY_SIDE:
+        case zed::View::SIDE_BY_SIDE:
             return Pine::ImageFormat::BGRA;
         default:
             return Pine::ImageFormat::UNKNOWN;
@@ -39,4 +39,4 @@ Pine::Image ConvertImage(const Zed::Image& image)
         image.specification.height, image_format);
 }
 
-} // namespace Pineapple
+} // namespace pineapple

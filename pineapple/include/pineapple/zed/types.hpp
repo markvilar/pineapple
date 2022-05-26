@@ -4,7 +4,7 @@
 
 #include <Pine/Pine.hpp>
 
-namespace Pineapple::Zed
+namespace pineapple::zed
 {
 
 enum class CameraAction : uint8_t
@@ -206,4 +206,4 @@ void serialize(Archive& archive, MemoryState& state)
     archive(state.total_space, state.free_space, state.available_space);
 }
 
-}; // namespace Pineapple::Zed
+}; // namespace pineapple::zed

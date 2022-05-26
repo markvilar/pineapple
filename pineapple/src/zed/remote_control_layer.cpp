@@ -1,6 +1,6 @@
 #include "pineapple/zed/remote_control_layer.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 RemoteControlLayer::RemoteControlLayer()
@@ -213,4 +213,4 @@ void RemoteControlLayer::UpdatePanelLayouts()
         Pine::Vec2(0.6f * window_width, 0.2f * window_height - menu_height));
 }
 
-}; // namespace Pineapple
+}; // namespace pineapple

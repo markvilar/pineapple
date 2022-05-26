@@ -1,27 +1,27 @@
 #include "pineapple/ui_helpers.hpp"
 
-namespace Pineapple 
+namespace pineapple 
 {
 
-void DrawCameraParameters(Zed::CameraParameters& parameters)
+void DrawCameraParameters(zed::CameraParameters& parameters)
 {
-    static const std::array<std::pair<std::string, Zed::Resolution>, 4>
+    static const std::array<std::pair<std::string, zed::Resolution>, 4>
         resolution_options = 
         {{
-            {"HD2K", Zed::Resolution::HD2K},
-            {"HD1080", Zed::Resolution::HD1080},
-            {"HD720", Zed::Resolution::HD720},
-            {"VGA", Zed::Resolution::VGA}
+            {"HD2K", zed::Resolution::HD2K},
+            {"HD1080", zed::Resolution::HD1080},
+            {"HD720", zed::Resolution::HD720},
+            {"VGA", zed::Resolution::VGA}
         }};
 
-    static const std::array<std::pair<std::string, Zed::Compression>, 5>
+    static const std::array<std::pair<std::string, zed::Compression>, 5>
         compression_options = 
         {{
-            {"Lossless", Zed::Compression::LOSSLESS},
-            {"H264", Zed::Compression::H264},
-            {"H265", Zed::Compression::H265},
-            {"H264, lossless", Zed::Compression::H264_LOSSLESS},
-            {"H265, lossless", Zed::Compression::H265_LOSSLESS}
+            {"Lossless", zed::Compression::LOSSLESS},
+            {"H264", zed::Compression::H264},
+            {"H265", zed::Compression::H265},
+            {"H264, lossless", zed::Compression::H264_LOSSLESS},
+            {"H265, lossless", zed::Compression::H265_LOSSLESS}
         }};
 
     Pine::UI::AddCombo("Resolution",
@@ -49,7 +49,7 @@ void DrawCameraParameters(Zed::CameraParameters& parameters)
     ImGui::Checkbox("Enable depth", &parameters.enable_depth);
 }
 
-void DrawCameraSettings(Zed::CameraSettings& settings)
+void DrawCameraSettings(zed::CameraSettings& settings)
 {
     Pine::UI::SliderScalar("Brightness",
         &settings.brightness,
@@ -88,16 +88,16 @@ void DrawCameraSettings(Zed::CameraSettings& settings)
     ImGui::Checkbox("Enable LED", &settings.enable_led);
 }
 
-void DrawImageSpecification(Zed::ImageSpecification& specifications)
+void DrawImageSpecification(zed::ImageSpecification& specifications)
 {
-    static const std::array<std::pair<std::string, Zed::View>, 5> 
+    static const std::array<std::pair<std::string, zed::View>, 5> 
         view_options = 
         {{
-            {"Left", Zed::View::LEFT},
-            {"Right", Zed::View::RIGHT},
-            {"Left, gray", Zed::View::LEFT_GRAY},
-            {"Right, gray", Zed::View::RIGHT_GRAY},
-            {"Side by side", Zed::View::SIDE_BY_SIDE}
+            {"Left", zed::View::LEFT},
+            {"Right", zed::View::RIGHT},
+            {"Left, gray", zed::View::LEFT_GRAY},
+            {"Right, gray", zed::View::RIGHT_GRAY},
+            {"Side by side", zed::View::SIDE_BY_SIDE}
         }};
 
     ImGui::InputScalar("Image width", ImGuiDataType_U32, 
@@ -107,4 +107,4 @@ void DrawImageSpecification(Zed::ImageSpecification& specifications)
     Pine::UI::AddCombo("View", &specifications.view, view_options);
 }
     
-}; // namespace Pineapple
+}; // namespace pineapple

@@ -4,7 +4,7 @@
 
 #include "pineapple/zed/types.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 struct PanelLayout
@@ -61,8 +61,8 @@ private:
     size_t m_offset{0};
 };
 
-void DrawCameraParameters(Zed::CameraParameters& parameters);
-void DrawCameraSettings(Zed::CameraSettings& settings);
-void DrawImageSpecification(Zed::ImageSpecification& specifications);
+void DrawCameraParameters(zed::CameraParameters& parameters);
+void DrawCameraSettings(zed::CameraSettings& settings);
+void DrawImageSpecification(zed::ImageSpecification& specifications);
 
-}; // namespace Pineapple
+}; // namespace pineapple

@@ -11,45 +11,22 @@
 #include "pineapple/message.hpp"
 #include "pineapple/serialization.hpp"
 
-void TestControlSerialization()
+void test_image_serialization()
 {
     std::vector<std::uint8_t> buffer;
     zpp::serializer::memory_output_archive output_archive(buffer);
     zpp::serializer::memory_input_archive input_archive(buffer);
 
-    PINE_INFO("\nTest control serialization:");
-
-    // Serialization
-    Pineapple::Zed::ControlRequest request;
-    request.action = Pineapple::Zed::CameraAction::START_RECORD;
-    request.parameters.resolution = Pineapple::Zed::Resolution::HD1080;
-    PINE_INFO("Original: {0}, {1}", request.action, 
-        request.parameters.resolution);
-    output_archive(request);
-
-    // Deserialization
-    Pineapple::Zed::ControlRequest new_request;
-    input_archive(new_request);
-    PINE_INFO("New: {0}, {1}\n", new_request.action, 
-        new_request.parameters.resolution);
-}
-
-void TestImageSerialization()
-{
-    std::vector<std::uint8_t> buffer;
-    zpp::serializer::memory_output_archive output_archive(buffer);
-    zpp::serializer::memory_input_archive input_archive(buffer);
-
-    PINE_INFO("Test image serialization:");
+    PINE_INFO("---------- Test image serialization ----------");
 
     // Serialization
     const auto width = 32;
     const auto height = 32;
     const auto channels = 4;
-    Pineapple::Zed::Image output_image;
+    pineapple::zed::Image output_image;
     output_image.specification.width = width;
     output_image.specification.height = height;
-    output_image.specification.view = Pineapple::Zed::View::LEFT;
+    output_image.specification.view = pineapple::zed::View::LEFT;
     output_image.buffer = [width, height, channels](){
         std::vector<uint8_t> v(width*height*channels, 0);
         return v;
@@ -62,7 +39,7 @@ void TestImageSerialization()
     output_archive(output_image);
 
     // Deserialization
-    Pineapple::Zed::Image input_image;
+    pineapple::zed::Image input_image;
     input_archive(input_image);
     PINE_INFO("Input image: {0}, {1}, {2}, {3}\n", 
         input_image.specification.width, 
@@ -71,77 +48,74 @@ void TestImageSerialization()
         input_image.buffer.size());
 }
 
-void TestMessageSerialization()
+void test_message_serialization()
 {
     std::vector<std::uint8_t> request_buffer;
     zpp::serializer::memory_output_archive 
         request_output_archive(request_buffer);
 
-    PINE_INFO("Test message serialization:");
+    PINE_INFO("---------- Test message serialization ----------");
 
-    Pineapple::Message<Pineapple::Zed::MessageIdentifier, 
-        Pineapple::Zed::ControlRequest> control_request_message;
-
+    pineapple::Message<pineapple::zed::MessageIdentifier, 
+        pineapple::zed::ControlRequest> control_request_message;
     control_request_message.header 
-        = Pineapple::Zed::MessageIdentifier::ControlRequest;
+        = pineapple::zed::MessageIdentifier::ControlRequest;
     control_request_message.body.action 
-        = Pineapple::Zed::CameraAction::START_RECORD;
+        = pineapple::zed::CameraAction::START_RECORD;
 
     request_output_archive(control_request_message);
 
-    PINE_INFO("Serialized control request: {0}, {1}", request_buffer.size(),
-        std::string(request_buffer.begin(), request_buffer.end()));
+    PINE_INFO("Serialized control request: {0}", request_buffer.size());
 
-    // TODO: Read identifier from buffer and try to deserialize.
-    Pineapple::Zed::MessageIdentifier identifier;
+    pineapple::zed::MessageIdentifier identifier;
     zpp::serializer::memory_input_archive input_archive(request_buffer);
     input_archive(identifier);
     PINE_INFO("Deserialized identifier: {0}", identifier);
 
-    if (identifier == Pineapple::Zed::MessageIdentifier::Unknown)
+    if (identifier == pineapple::zed::MessageIdentifier::Unknown)
     {
         PINE_INFO("Got unknown message.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::ControlRequest)
+    else if (identifier == pineapple::zed::MessageIdentifier::ControlRequest)
     {
         PINE_INFO("Got control request.");
-        Pineapple::Zed::ControlRequest request;
+        pineapple::zed::ControlRequest request;
         input_archive(request);
         PINE_INFO("Control request: {0}", request.action);
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::ControlResponse)
+    else if (identifier == pineapple::zed::MessageIdentifier::ControlResponse)
     {
         PINE_INFO("Got control response.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::SettingsRequest)
+    else if (identifier == pineapple::zed::MessageIdentifier::SettingsRequest)
     {
         PINE_INFO("Got settings request.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::SettingsResponse)
+    else if (identifier == pineapple::zed::MessageIdentifier::SettingsResponse)
     {
         PINE_INFO("Got settings response.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::StateRequest)
+    else if (identifier == pineapple::zed::MessageIdentifier::StateRequest)
     {
         PINE_INFO("Got state request.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::StateResponse)
+    else if (identifier == pineapple::zed::MessageIdentifier::StateResponse)
     {
         PINE_INFO("Got state response.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::SensorRequest)
+    else if (identifier == pineapple::zed::MessageIdentifier::SensorRequest)
     {
         PINE_INFO("Got sensor request.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::SensorResponse)
+    else if (identifier == pineapple::zed::MessageIdentifier::SensorResponse)
     {
         PINE_INFO("Got sensor response.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::ImageRequest)
+    else if (identifier == pineapple::zed::MessageIdentifier::ImageRequest)
     {
         PINE_INFO("Got image request.");
     }
-    else if (identifier == Pineapple::Zed::MessageIdentifier::ImageResponse)
+    else if (identifier == pineapple::zed::MessageIdentifier::ImageResponse)
     {
         PINE_INFO("Got image response.");
     }
@@ -151,12 +125,36 @@ void TestMessageSerialization()
     }
 }
 
+void test_memory_archive()
+{
+    using ControlRequestMessage 
+        = pineapple::Message<pineapple::zed::MessageIdentifier, 
+            pineapple::zed::ControlRequest>;
+
+    PINE_INFO("---------- Test memory archive----------");
+
+    pineapple::MemoryArchive archive;
+
+    ControlRequestMessage message;
+    message.header = pineapple::zed::MessageIdentifier::ControlRequest;
+    message.body.action = pineapple::zed::CameraAction::STOP_RECORD;
+    archive.serialize(message);
+
+    ControlRequestMessage reply;
+    archive.deserialize(reply);
+
+    PINE_INFO("Message: {0}, {1}", message.header, message.body.action);
+    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.body.action);
+}
+
 int main(int argc, char** argv)
 {
     Pine::Log::Init();
 
-    TestControlSerialization();
-    TestImageSerialization();
-    TestMessageSerialization();
+    test_image_serialization();
+    test_message_serialization();
+
+    test_memory_archive();
+
     return 0;
 }

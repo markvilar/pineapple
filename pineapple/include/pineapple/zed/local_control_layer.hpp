@@ -10,7 +10,7 @@
 
 #include "pineapple/zed/camera_manager.hpp"
 
-namespace Pineapple
+namespace pineapple
 {
 
 class LocalControlLayer : public Pine::Layer
@@ -35,10 +35,10 @@ private:
     std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
     std::shared_ptr<Pine::Texture2D> m_ImageTexture;
 
-    Zed::RecordManager m_RecordManager{};
-    Zed::CameraParameters m_CameraParameters{};
-    Zed::CameraSettings m_CameraSettings{};
-    Zed::ImageSpecification m_ImageSpecs{};
+    zed::RecordManager m_RecordManager{};
+    zed::CameraParameters m_CameraParameters{};
+    zed::CameraSettings m_CameraSettings{};
+    zed::ImageSpecification m_ImageSpecs{};
 
     StaticSeries<float, 400> m_Pressure;
     StaticSeries<float, 400> m_TemperatureLeft;
@@ -58,7 +58,6 @@ private:
     std::unordered_map<const char*, PanelLayout> m_PanelLayouts{};
 };
 
-} // namespace Pineapple
+} // namespace pineapple
 
 #endif // PINEAPPLE_ENABLE_ZED
-

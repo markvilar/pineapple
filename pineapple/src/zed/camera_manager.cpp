@@ -5,7 +5,7 @@
 
 #ifdef PINEAPPLE_ENABLE_ZED
 
-namespace Pineapple::Zed
+namespace pineapple::zed
 {
 
 std::tuple<sl::InitParameters, sl::RecordingParameters, sl::RuntimeParameters>
@@ -197,7 +197,7 @@ std::optional<SensorData> RecordManager::RequestSensorData()
     auto& angular_velocity = native_data.imu.angular_velocity;
     auto& temperatures = native_data.temperature.temperature_map;
 
-    Pineapple::Zed::SensorData data;
+    pineapple::zed::SensorData data;
     data.pressure = native_data.barometer.pressure * 100.0f;
     data.temperature_left = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_LEFT];
     data.temperature_right = temperatures[sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
@@ -364,6 +364,6 @@ void CameraManager::OnMessage(const Pine::Message& message)
     PINE_INFO("Got message: {0}", message.Header.Size);
 }
 
-}; // namespace Pineapple::Zed
+}; // namespace pineapple::zed
 
 #endif // PINEAPPLE_ENABLE_ZED

@@ -10,7 +10,7 @@ public:
     LocalController(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
-        PushLayer(new Pineapple::LocalControlLayer());
+        PushLayer(new pineapple::LocalControlLayer());
     }
 
     ~LocalController() {}
