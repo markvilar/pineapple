@@ -131,17 +131,45 @@ void test_memory_archive()
         = pineapple::Message<pineapple::zed::MessageIdentifier, 
             pineapple::zed::ControlRequest>;
 
-    PINE_INFO("---------- Test memory archive----------");
+    PINE_INFO("---------- Test memory archive ----------");
 
-    pineapple::MemoryArchive archive;
+    pineapple::MemoryOutputArchive output_archive;
 
     ControlRequestMessage message;
     message.header = pineapple::zed::MessageIdentifier::ControlRequest;
     message.body.action = pineapple::zed::CameraAction::STOP_RECORD;
-    archive.serialize(message);
+    output_archive.serialize(message);
 
     ControlRequestMessage reply;
-    archive.deserialize(reply);
+    pineapple::MemoryInputArchive input_archive(output_archive.get_buffer());
+    input_archive.deserialize(reply);
+
+    PINE_INFO("Message: {0}, {1}", message.header, message.body.action);
+    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.body.action);
+}
+
+void test_memory_view_archive()
+{
+    PINE_INFO("---------- Test memory view archive ----------");
+
+    using ControlRequestMessage 
+        = pineapple::Message<pineapple::zed::MessageIdentifier, 
+            pineapple::zed::ControlRequest>;
+
+    std::vector<uint8_t> buffer(100);
+
+    pineapple::MemoryViewOutputArchive output_archive(buffer.data(),
+        buffer.size());
+    
+    ControlRequestMessage message;
+    message.header = pineapple::zed::MessageIdentifier::ControlRequest;
+    message.body.action = pineapple::zed::CameraAction::START_RECORD;
+    output_archive.serialize(message);
+
+    ControlRequestMessage reply;
+    pineapple::MemoryViewInputArchive input_archive(buffer.data(), 
+        buffer.size());
+    input_archive.deserialize(reply);
 
     PINE_INFO("Message: {0}, {1}", message.header, message.body.action);
     PINE_INFO("Reply:   {0}, {1}", reply.header, reply.body.action);
@@ -155,6 +183,7 @@ int main(int argc, char** argv)
     test_message_serialization();
 
     test_memory_archive();
+    test_memory_view_archive();
 
     return 0;
 }
