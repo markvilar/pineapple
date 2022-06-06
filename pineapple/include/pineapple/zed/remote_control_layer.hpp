@@ -2,10 +2,12 @@
 
 #include <Pine/Pine.hpp>
 
+#include "pineapple/serialization.hpp"
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
-#include "pineapple/zed/types.hpp"
+
 #include "pineapple/zed/protocol.hpp"
+#include "pineapple/zed/types.hpp"
 
 namespace pineapple
 {
@@ -23,31 +25,34 @@ public:
     virtual void OnEvent(Pine::Event& e) override;
 
 private:
-    void OnMessage(const Pine::Message& message);
     void UpdatePanelLayouts();
+
 private:
-    Pine::Renderer2D::RendererData m_RendererData{};
-    Pine::OrthographicCameraController m_CameraController;
+    // Rendering entities
+    Pine::Renderer2D::RendererData m_renderer_data{};
+    Pine::OrthographicCameraController m_camera_controller;
+    std::shared_ptr<Pine::Framebuffer> m_framebuffer;
+    std::shared_ptr<Pine::Texture2D> m_image_texture;
 
-    std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
-    std::shared_ptr<Pine::Texture2D> m_ImageTexture;
+    // Networking entities
+    Pine::ClientState m_client;
 
-    Pine::ClientState m_Client;
+    // ZED services
+    zed::ControlService::Request m_control_request{};
+    zed::ImageService::Request m_image_request{};
+    zed::MemoryService::Request m_memory_request{};
+    zed::SensorService::Request m_sensor_request{};
+    zed::SettingsService::Request m_settings_request{};
 
-    zed::ControlRequest m_ControlRequest = {};
-    zed::SettingsRequest m_SettingsRequest = {};
-    zed::StateRequest m_StateRequest = {};
-    zed::SensorRequest m_SensorRequest = {};
-    zed::ImageRequest m_ImageRequest = {};
+    // ZED types
+    zed::CameraParameters m_camera_parameters = {};
+    zed::CameraSettings m_camera_settings = {};
+    zed::ImageSpecification m_image_specs{};
 
-    zed::CameraParameters m_CameraParameters = {};
-    zed::CameraSettings m_CameraSettings = {};
-    zed::ImageSpecification m_ImageSpecs{};
+    bool m_viewport_focused = false;
+    bool m_viewport_hovered = false;
 
-    bool m_ViewportFocused = false;
-    bool m_ViewportHovered = false;
-
-    std::unordered_map<std::string, PanelLayout> m_PanelLayouts{};
+    std::unordered_map<std::string, PanelLayout> m_panel_layouts{};
 };
 
 } // namespace pineapple

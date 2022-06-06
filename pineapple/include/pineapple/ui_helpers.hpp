@@ -36,33 +36,21 @@ public:
         m_offset = (m_offset + 1) % N;
     }
 
-    T* data()
-    {
-        return m_buffer.data();
-    }
+    T* data() { return m_buffer.data(); }
 
-    T* data() const
-    {
-        return m_buffer.data();
-    }
+    T* data() const { return m_buffer.data(); }
 
-    size_t size() const
-    {
-        return m_buffer.size();
-    }
+    size_t size() const { return m_buffer.size(); }
 
-    size_t offset() const
-    {
-        return m_offset;
-    }
+    size_t offset() const { return m_offset; }
 
 private:
     std::array<T, N> m_buffer;
     size_t m_offset{0};
 };
 
-void DrawCameraParameters(zed::CameraParameters& parameters);
-void DrawCameraSettings(zed::CameraSettings& settings);
-void DrawImageSpecification(zed::ImageSpecification& specifications);
+void draw_camera_parameters(zed::CameraParameters& parameters);
+void draw_camera_settings(zed::CameraSettings& settings);
+void draw_image_specification(zed::ImageSpecification& specifications);
 
 }; // namespace pineapple

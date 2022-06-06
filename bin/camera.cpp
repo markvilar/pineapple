@@ -12,5 +12,5 @@ int main(int argc, char** argv)
     const std::filesystem::path directory = ".";
 
     pineapple::zed::CameraManager manager(port, directory);
-    manager.Run();
+    manager.run();
 }

@@ -3,18 +3,17 @@
 namespace pineapple
 {
 
-std::string CurrentDateTime()
+std::string current_date_time()
 {
-    time_t now = time(0);
-    struct tm tstruct;
-    char buf[80];
-    tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-
-    return buf;
+    const auto now = time(0);
+    struct tm time_struct;
+    std::array<char, 80> buffer;
+    time_struct = *localtime(&now);
+    strftime(buffer.data(), buffer.size(), "%Y-%m-%d.%X", &time_struct);
+    return std::string(buffer.data(), buffer.size());
 }
 
-Pine::Image ConvertImage(const zed::Image& image)
+Pine::Image convert_image(const zed::Image& image)
 {
     const auto& view = image.specification.view;
     const auto image_format = [view]()
@@ -35,8 +34,10 @@ Pine::Image ConvertImage(const zed::Image& image)
             return Pine::ImageFormat::UNKNOWN;
         }
     }();
-    return Pine::Image(image.buffer.data(), image.specification.width,
-        image.specification.height, image_format);
+    return Pine::Image(image.buffer.data(),
+        image.specification.width,
+        image.specification.height,
+        image_format);
 }
 
 } // namespace pineapple

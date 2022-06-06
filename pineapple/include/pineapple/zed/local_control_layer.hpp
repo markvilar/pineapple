@@ -29,33 +29,33 @@ private:
     void UpdatePanelLayouts();
 
 private:
-    Pine::Renderer2D::RendererData m_RendererData2D{};
-    Pine::OrthographicCameraController m_CameraController;
+    Pine::Renderer2D::RendererData m_renderer_data{};
+    Pine::OrthographicCameraController m_camera_controller;
 
-    std::shared_ptr<Pine::Framebuffer> m_Framebuffer;
-    std::shared_ptr<Pine::Texture2D> m_ImageTexture;
+    std::shared_ptr<Pine::Framebuffer> m_framebuffer;
+    std::shared_ptr<Pine::Texture2D> m_image_texture;
 
-    zed::RecordManager m_RecordManager{};
-    zed::CameraParameters m_CameraParameters{};
-    zed::CameraSettings m_CameraSettings{};
-    zed::ImageSpecification m_ImageSpecs{};
+    zed::RecordManager m_record_manager{};
+    zed::CameraParameters m_camera_parameters{};
+    zed::CameraSettings m_camera_settings{};
+    zed::ImageSpecification m_image_specs{};
 
-    StaticSeries<float, 400> m_Pressure;
-    StaticSeries<float, 400> m_TemperatureLeft;
-    StaticSeries<float, 400> m_TemperatureRight;
+    StaticSeries<float, 400> m_pressure;
+    StaticSeries<float, 400> m_temperature_left;
+    StaticSeries<float, 400> m_temperature_right;
 
-    StaticSeries<float, 400> m_AccX;
-    StaticSeries<float, 400> m_AccY;
-    StaticSeries<float, 400> m_AccZ;
+    StaticSeries<float, 400> m_acc_x;
+    StaticSeries<float, 400> m_acc_y;
+    StaticSeries<float, 400> m_acc_z;
 
-    StaticSeries<float, 400> m_AngX;
-    StaticSeries<float, 400> m_AngY;
-    StaticSeries<float, 400> m_AngZ;
+    StaticSeries<float, 400> m_ang_x;
+    StaticSeries<float, 400> m_ang_y;
+    StaticSeries<float, 400> m_ang_z;
 
-    bool m_ViewportFocused = false;
-    bool m_ViewportHovered = false;
+    bool m_viewport_focused = false;
+    bool m_viewport_hovered = false;
 
-    std::unordered_map<const char*, PanelLayout> m_PanelLayouts{};
+    std::unordered_map<const char*, PanelLayout> m_panel_layouts{};
 };
 
 } // namespace pineapple

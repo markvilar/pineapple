@@ -37,7 +37,7 @@ class Pineapple(ConanFile):
 
     def requirements(self):
         """ Specifies the requirements of the package. """
-        self.requires("pine/0.1.1")
+        self.requires("pine/0.1.2")
 
     def validate(self):
         """ Validates the project configuration. """

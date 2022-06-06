@@ -11,7 +11,7 @@ enum class CameraAction : uint8_t
 {
     UNKNOWN = 0,
     START_RECORD = 1,
-    STOP_RECORD = 2 
+    STOP_RECORD = 2
 };
 
 enum class CameraResponse : uint8_t
@@ -105,7 +105,7 @@ public:
     {
         const auto channels = [view]()
         {
-            switch(view)
+            switch (view)
             {
             case View::LEFT:
                 return 4;
@@ -121,7 +121,7 @@ public:
                 return 0;
             }
         }();
-        buffer = std::vector<uint8_t>(data, data + width*height*channels);
+        buffer = std::vector<uint8_t>(data, data + width * height * channels);
     }
 };
 
@@ -155,9 +155,9 @@ struct SensorData
 template <typename Archive>
 void serialize(Archive& archive, CameraParameters& parameters)
 {
-    archive(parameters.resolution, 
-        parameters.fps, 
-        parameters.timeout, 
+    archive(parameters.resolution,
+        parameters.fps,
+        parameters.timeout,
         parameters.enable_image_enhancement,
         parameters.disable_self_calibration,
         parameters.require_sensors,

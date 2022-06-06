@@ -65,10 +65,3 @@ set_target_properties(pineapple PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
-
-# TODO: Problem that ZED_LIBS includes debug
-message(STATUS "--------------------------------------------------------------")
-message(STATUS "ZED include directories: ${ZED_INCLUDE_DIRS}")
-message(STATUS "Cuda include directories: ${CUDA_INCLUDE_DIRS}")
-message(STATUS "ZED libraries: ${ZED_LIBS}")
-message(STATUS "--------------------------------------------------------------")

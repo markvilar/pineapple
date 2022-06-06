@@ -12,8 +12,8 @@
 namespace pineapple
 {
 
-std::string CurrentDateTime();
+std::string current_date_time();
 
-Pine::Image ConvertImage(const zed::Image& image);
+Pine::Image convert_image(const zed::Image& image);
 
 }; // namespace pineapple

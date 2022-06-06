@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 project(pineapple VERSION 0.1.1 LANGUAGES CXX)
 
 option(PINEAPPLE_BUILD_EXAMPLES "Build the Pineapple examples." ON)
-option(PINEAPPLE_SERIALIZATION_PROTO "Serialization with protocol buffers." OFF)
 option(PINEAPPLE_USE_CONAN "Use Conan for package management." ON)
 
 option(PINEAPPLE_ENABLE_ZED "Enable usage of the ZED SDK." ON)

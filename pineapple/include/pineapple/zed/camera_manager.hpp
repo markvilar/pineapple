@@ -29,7 +29,7 @@ struct RecordJob
 };
 
 // ----------------------------------------------------------------------------
-// RecordManager
+// Record manager
 // ----------------------------------------------------------------------------
 
 class RecordManager
@@ -38,63 +38,65 @@ public:
     RecordManager(const std::filesystem::path& output_directory = ".");
     ~RecordManager();
 
-    void StartRecord(const CameraParameters& parameters = {});
-    void StartRecord(const CameraParameters& parameters,
+    void start_record(const CameraParameters& parameters = {});
+    void start_record(const CameraParameters& parameters,
         const std::filesystem::path& output_directory);
 
-    void StopRecord();
+    void stop_record();
 
-    bool IsOpened();
-    bool IsRecording();
-    bool IsStopped();
+    bool is_opened();
+    bool is_recording();
+    bool is_stopped();
 
-    uint64_t GetTotalSpace();
-    uint64_t GetFreeSpace();
-    uint64_t GetAvailableSpace();
+    uint64_t get_total_space();
+    uint64_t get_free_space();
+    uint64_t get_available_space();
 
-    std::optional<CameraSettings> RequestCameraSettings();
-    std::optional<SensorData> RequestSensorData();
-    std::optional<Image> RequestImage(const uint32_t width, 
+    std::optional<CameraSettings> request_camera_settings();
+    std::optional<SensorData> request_sensor_data();
+    std::optional<Image> request_image(const uint32_t width,
         const uint32_t height, const View view = View::LEFT);
 
-    bool UpdateCameraSettings(const CameraSettings& settings);
+    bool update_camera_settings(const CameraSettings& settings);
 
 private:
-    void RecordWorker(const RecordJob job);
+    void record_worker(const RecordJob job);
 
 private:
-    std::filesystem::path m_OutputDirectory = ".";
+    std::filesystem::path m_output_directory = ".";
 
-    sl::Camera m_Camera = {};
+    sl::Camera m_camera = {};
 
-    std::unique_ptr<std::thread> m_WorkerThread = {};
-    std::atomic<bool> m_Stop = false;
-    std::atomic<bool> m_Busy = false;
+    std::unique_ptr<std::thread> m_worker_thread = {};
+    std::atomic<bool> m_stop_flag = false;
+    std::atomic<bool> m_busy_flag = false;
 };
 
 // ----------------------------------------------------------------------------
-// CameraManager
+// Camera manager
 // ----------------------------------------------------------------------------
 
 class CameraManager
 {
 public:
-    CameraManager(const uint16_t port, 
+    CameraManager(const uint16_t port,
         const std::filesystem::path& outputDirectory = ".");
     ~CameraManager();
 
-    void Run();
+    void run();
 
 private:
-    void OnUpdate();
-    void OnMessage(const Pine::Message& message);
+    void on_update();
+    void on_message(const std::vector<uint8_t>& message);
 
 private:
-    bool m_Running = true;
+    bool m_running = true;
 
-    Pine::ServerState m_Server;
-    
-    RecordManager m_RecordManager;
+    Pine::ServerState m_server;
+
+    RecordManager m_record_manager;
+    // TODO: Add video stream manager
+    // TODO: Add depth manager
 };
 
 }; // namespace pineapple::zed

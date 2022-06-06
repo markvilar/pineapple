@@ -2,6 +2,6 @@
 
 export CC=/usr/bin/gcc-11
 export CXX=/usr/bin/g++-11
-export CMAKE_CXX_STANDARD=20
+export CMAKE_CXX_STANDARD=17
 
 conan build "${PWD}" --build-folder "${PWD}/build"

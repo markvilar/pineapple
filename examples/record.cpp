@@ -4,8 +4,8 @@
 
 #include <Pine/Pine.hpp>
 
-#include "pineapple/zed/types.hpp"
 #include "pineapple/zed/camera_manager.hpp"
+#include "pineapple/zed/types.hpp"
 
 sig_atomic_t stopFlag = 0;
 
@@ -19,14 +19,14 @@ int main(int argc, char** argv)
 
     pineapple::zed::RecordManager manager(".");
 
-    manager.StartRecord();
+    manager.start_record();
 
     while (!stopFlag)
     {
-        auto settings_request = manager.RequestCameraSettings();
-        auto sensor_request = manager.RequestSensorData();
+        auto settings_request = manager.request_camera_settings();
+        auto sensor_request = manager.request_sensor_data();
         auto image_request =
-            manager.RequestImage(1280, 720, pineapple::zed::View::LEFT);
+            manager.request_image(1280, 720, pineapple::zed::View::LEFT);
 
         if (settings_request.has_value())
         {
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    manager.StopRecord();
+    manager.stop_record();
 
     return 0;
 }

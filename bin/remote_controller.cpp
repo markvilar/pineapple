@@ -16,7 +16,8 @@ public:
     ~RemoteController() {}
 };
 
-std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc, char** argv)
+std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc,
+    char** argv)
 {
     Pine::Application::Specification specs;
     specs.WorkingDirectory = ".";

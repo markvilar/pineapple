@@ -20,10 +20,7 @@ public:
         m_output_archive(t);
     }
 
-    auto& get_buffer()
-    {
-        return m_buffer;
-    }
+    auto& get_buffer() { return m_buffer; }
 
 private:
     std::vector<uint8_t> m_buffer{};
@@ -35,8 +32,7 @@ class MemoryInputArchive
     using InputArchive = zpp::serializer::memory_input_archive;
 
 public:
-    MemoryInputArchive(std::vector<uint8_t>& buffer)
-        : m_input_archive(buffer)
+    MemoryInputArchive(std::vector<uint8_t>& buffer) : m_input_archive(buffer)
     {
     }
 
@@ -66,7 +62,7 @@ public:
     {
         m_output_archive(t);
     }
-    
+
 private:
     OutputArchive m_output_archive;
     uint8_t* m_data{};
