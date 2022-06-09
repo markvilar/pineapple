@@ -1,6 +1,7 @@
 #include "pineapple/zed/camera_manager.hpp"
 
 #include "pineapple/utils.hpp"
+#include "pineapple/serialization.hpp"
 #include "pineapple/zed/protocol.hpp"
 
 #ifdef PINEAPPLE_ENABLE_ZED
@@ -188,7 +189,7 @@ std::optional<SensorData> RecordManager::request_sensor_data()
     m_camera.getSensorsData(native_data, sl::TIME_REFERENCE::CURRENT);
 
     auto& acceleration = native_data.imu.linear_acceleration;
-    auto& angular_velocity = native_data.imu.angular_velocity;
+    auto& turnrate = native_data.imu.angular_velocity;
     auto& temperatures = native_data.temperature.temperature_map;
 
     pineapple::zed::SensorData data;
@@ -199,9 +200,7 @@ std::optional<SensorData> RecordManager::request_sensor_data()
         [sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
     data.acceleration =
         Pine::Vec3(acceleration[0], acceleration[1], acceleration[2]);
-    data.angular_velocity = Pine::Vec3(angular_velocity[0],
-        angular_velocity[1],
-        angular_velocity[2]);
+    data.turnrate = Pine::Vec3(turnrate[0], turnrate[1], turnrate[2]);
 
     return data;
 }
@@ -352,9 +351,106 @@ void CameraManager::on_update()
         { on_message(message); });
 }
 
-void CameraManager::on_message(const std::vector<uint8_t>& message)
+void CameraManager::on_message(const std::vector<uint8_t>& buffer)
 {
-    PINE_INFO("Camera manager: Got message: Size = {0}", message.size());
+    PINE_INFO("Camera manager: Got message: Size = {0}", buffer.size());
+    pineapple::MemoryViewInputArchive input_archive(buffer.data(), 
+        buffer.size());
+
+    ServiceIdentifier identifier;
+    input_archive.deserialize(identifier);
+
+    if (identifier == ServiceIdentifier::UNKNOWN)
+    {
+        PINE_INFO("Camera manager: Unknown message.");
+    }
+    else if(identifier == ServiceIdentifier::CONTROL_REQUEST)
+    {
+        zed::ControlService::Request::DataType request;
+        input_archive.deserialize(request); // TODO: Catch error
+        on_request(request);
+    }
+    else if (identifier == ServiceIdentifier::IMAGE_REQUEST)
+    {
+        zed::ImageService::Request::DataType request;
+        input_archive.deserialize(request); // TODO: Catch error
+        on_request(request);
+    }
+    else if (identifier == ServiceIdentifier::MEMORY_REQUEST)
+    {
+        zed::MemoryService::Request::DataType request;
+        input_archive.deserialize(request); // TODO: Catch error
+        on_request(request);
+    }
+    else if (identifier == ServiceIdentifier::SENSOR_REQUEST)
+    {
+        zed::SensorService::Request::DataType request;
+        input_archive.deserialize(request); // TODO: Catch error
+        on_request(request);
+    }
+    else if (identifier == ServiceIdentifier::SETTINGS_REQUEST)
+    {
+        zed::SettingsService::Request::DataType request;
+        input_archive.deserialize(request); // TODO: Catch error
+        on_request(request);
+    }
+    else
+    {
+        PINE_INFO("Camera manager: Not handling message.");
+    }
+}
+
+void CameraManager::on_request(
+    const zed::ControlService::Request::DataType& request)
+{
+    PINE_INFO("Camera manager: Got control request.");
+    PINE_INFO(" - Action:          {0}", request.action);
+    PINE_INFO(" - Compression:     {0}", request.compression);
+    PINE_INFO(" - FPS:             {0}", request.fps);
+    PINE_INFO(" - Timeout:         {0}", request.timeout);
+    PINE_INFO(" - Image enhance.:  {0}", request.enable_image_enhancement);
+    PINE_INFO(" - Self calib.:     {0}", request.disable_self_calibration);
+    PINE_INFO(" - Req. sensors:    {0}", request.require_sensors);
+    PINE_INFO(" - Enable depth:    {0}", request.enable_depth);
+}
+
+void CameraManager::on_request(
+    const zed::ImageService::Request::DataType& request)
+{
+    PINE_INFO("Camera manager: Got image request.");
+    PINE_INFO(" - Width:  {0}", request.width);
+    PINE_INFO(" - Height: {0}", request.height);
+    PINE_INFO(" - View:   {0}", request.view);
+}
+
+void CameraManager::on_request(
+    const zed::MemoryService::Request::DataType& request)
+{
+    PINE_INFO("Camera manager: Got memory request.");
+}
+
+void CameraManager::on_request(
+    const zed::SensorService::Request::DataType& request)
+{
+    PINE_INFO("Camera manager: Got sensor request.");
+}
+
+void CameraManager::on_request(
+    const zed::SettingsService::Request::DataType& request)
+{
+    PINE_INFO("Camera manager: Got settings request.");
+    PINE_INFO(" - Brightness:   {0}", request.brightness);
+    PINE_INFO(" - Contrast:     {0}", request.contrast);
+    PINE_INFO(" - Hue:          {0}", request.hue);
+    PINE_INFO(" - Saturation:   {0}", request.saturation);
+    PINE_INFO(" - Sharpness:    {0}", request.sharpness);
+    PINE_INFO(" - Gamma:        {0}", request.gamma);
+    PINE_INFO(" - Gain:         {0}", request.gain);
+    PINE_INFO(" - Exposure:     {0}", request.exposure);
+    PINE_INFO(" - Whitebalance: {0}", request.whitebalance);
+    PINE_INFO(" - Auto expo.:   {0}", request.auto_exposure);
+    PINE_INFO(" - Auto white.:  {0}", request.auto_whitebalance);
+    PINE_INFO(" - Enable LED:   {0}", request.enable_led);
 }
 
 }; // namespace pineapple::zed

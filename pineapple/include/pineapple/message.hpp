@@ -1,30 +1,32 @@
 #pragma once
 
+#include <typeinfo>
+#include <typeindex>
 #include <type_traits>
 
 namespace pineapple
 {
 
-template <typename Header, typename Body>
+template <typename Header, typename Data>
 struct Message
 {
     using HeaderType = Header;
-    using BodyType = Body;
+    using DataType = Data;
 
     Header header{};
-    Body body{};
+    Data data{};
 };
 
-template <typename Archive, typename Header, typename Body>
-auto serialize(Archive& archive, Message<Header, Body>& message)
+template <typename Archive, typename Header, typename Data>
+auto serialize(Archive& archive, Message<Header, Data>& message)
 {
-    archive(message.header, message.body);
+    archive(message.header, message.data);
 }
 
-template <typename Archive, typename Header, typename Body>
-auto serialize(Archive& archive, const Message<Header, Body>& message)
+template <typename Archive, typename Header, typename Data>
+auto serialize(Archive& archive, const Message<Header, Data>& message)
 {
-    archive(message.header, message.body);
+    archive(message.header, message.data);
 }
 
 }; // namespace pineapple

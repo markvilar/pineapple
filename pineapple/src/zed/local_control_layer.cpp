@@ -60,9 +60,9 @@ void LocalControlLayer::OnUpdate(Pine::Timestep ts)
         m_acc_y.push_back(data.acceleration.y);
         m_acc_z.push_back(data.acceleration.z);
 
-        m_ang_x.push_back(data.angular_velocity.x);
-        m_ang_y.push_back(data.angular_velocity.y);
-        m_ang_z.push_back(data.angular_velocity.z);
+        m_ang_x.push_back(data.turnrate.x);
+        m_ang_y.push_back(data.turnrate.y);
+        m_ang_z.push_back(data.turnrate.z);
     }
 
     const auto specs = m_framebuffer->GetSpecification();

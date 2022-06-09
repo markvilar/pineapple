@@ -74,7 +74,7 @@ class MemoryViewInputArchive
     using InputArchive = zpp::serializer::memory_view_input_archive;
 
 public:
-    MemoryViewInputArchive(uint8_t* data, const std::size_t size)
+    MemoryViewInputArchive(const uint8_t* data, const std::size_t size)
         : m_data(data), m_size(size), m_input_archive(data, size)
     {
     }
@@ -87,7 +87,7 @@ public:
 
 private:
     InputArchive m_input_archive;
-    uint8_t* m_data{};
+    const uint8_t* m_data{};
     std::size_t m_size{};
 };
 

@@ -23,8 +23,8 @@ enum class ServiceIdentifier : uint8_t
     SETTINGS_REQUEST = 3,
     SETTINGS_RESPONSE = 4,
 
-    STATE_REQUEST = 5,
-    STATE_RESPONSE = 6,
+    MEMORY_REQUEST = 5,
+    MEMORY_RESPONSE = 6,
 
     SENSOR_REQUEST = 7,
     SENSOR_RESPONSE = 8,
@@ -104,9 +104,6 @@ struct MemoryService
 {
     struct RequestData
     {
-        bool request_total_space{false};
-        bool request_free_space{false};
-        bool request_available_space{false};
     };
 
     struct ResponseData
@@ -136,7 +133,7 @@ struct SensorService
         float temperature_left;
         float temperature_right;
         Pine::Vec3 acceleration{0.0f};
-        Pine::Vec3 angular_velocity{0.0f};
+        Pine::Vec3 turnrate{0.0f};
     };
 
     using Request = Message<ServiceIdentifier, RequestData>;
@@ -232,9 +229,6 @@ void serialize(Archive& archive, ImageService::ResponseData& response)
 template <typename Archive>
 void serialize(Archive& archive, MemoryService::RequestData& request)
 {
-    archive(request.request_total_space,
-        request.request_free_space,
-        request.request_available_space);
 }
 
 template <typename Archive>
@@ -257,7 +251,7 @@ void serialize(Archive& archive, SensorService::ResponseData& response)
         response.temperature_left,
         response.temperature_right,
         response.acceleration,
-        response.angular_velocity);
+        response.turnrate);
 }
 
 template <typename Archive>

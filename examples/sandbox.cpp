@@ -57,15 +57,15 @@ void test_memory_archive()
 
     pineapple::zed::ControlService::Request message;
     message.header = pineapple::zed::ServiceIdentifier::CONTROL_REQUEST;
-    message.body.action = pineapple::zed::CameraAction::STOP_RECORD;
+    message.data.action = pineapple::zed::CameraAction::STOP_RECORD;
     output_archive.serialize(message);
 
     pineapple::zed::ControlService::Request reply;
     pineapple::MemoryInputArchive input_archive(output_archive.get_buffer());
     input_archive.deserialize(reply);
 
-    PINE_INFO("Message: {0}, {1}", message.header, message.body.action);
-    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.body.action);
+    PINE_INFO("Message: {0}, {1}", message.header, message.data.action);
+    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.data.action);
 
     /*
     if (identifier == pineapple::zed::ServiceIdentifier::UNKNOWN)
@@ -130,7 +130,7 @@ void test_memory_view_archive()
 
     pineapple::zed::ControlService::Request message;
     message.header = pineapple::zed::ServiceIdentifier::CONTROL_REQUEST;
-    message.body.action = pineapple::zed::CameraAction::STOP_RECORD;
+    message.data.action = pineapple::zed::CameraAction::STOP_RECORD;
     output_archive.serialize(message);
 
     pineapple::zed::ControlService::Request reply;
@@ -138,8 +138,8 @@ void test_memory_view_archive()
         buffer.size());
     input_archive.deserialize(reply);
 
-    PINE_INFO("Message: {0}, {1}", message.header, message.body.action);
-    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.body.action);
+    PINE_INFO("Message: {0}, {1}", message.header, message.data.action);
+    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.data.action);
 }
 
 int main(int argc, char** argv)

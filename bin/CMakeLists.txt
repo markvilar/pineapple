@@ -1,17 +1,17 @@
 find_package(pine REQUIRED)
 
 # -----------------------------------------------------------------------------
-# Camera node
+# Camera server
 # -----------------------------------------------------------------------------
 
 if(PINEAPPLE_ENABLE_ZED)
-    add_executable(camera camera.cpp)
-    target_compile_definitions(camera PRIVATE)
-    target_compile_features(camera PRIVATE cxx_std_17)
-    target_compile_options(camera PUBLIC -std=c++17)
-    target_link_libraries(camera PRIVATE pineapple::pineapple)
+    add_executable(camera_server camera_server.cpp)
+    target_compile_definitions(camera_server PRIVATE)
+    target_compile_features(camera_server PRIVATE cxx_std_17)
+    target_compile_options(camera_server PUBLIC -std=c++17)
+    target_link_libraries(camera_server PRIVATE pineapple::pineapple)
 
-    set_target_properties(camera PROPERTIES 
+    set_target_properties(camera_server PROPERTIES 
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

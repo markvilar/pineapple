@@ -145,7 +145,7 @@ struct SensorData
     float temperature_left;
     float temperature_right;
     Pine::Vec3 acceleration{0.0f};
-    Pine::Vec3 angular_velocity{0.0f};
+    Pine::Vec3 turnrate{0.0f};
 };
 
 // ----------------------------------------------------------------------------

@@ -54,9 +54,9 @@ int main(int argc, char** argv)
                 sensor.acceleration.y,
                 sensor.acceleration.z);
             PINE_INFO("IMU ang. velocity: {0}, {1}, {2}",
-                sensor.angular_velocity.x,
-                sensor.angular_velocity.y,
-                sensor.angular_velocity.z);
+                sensor.turnrate.x,
+                sensor.turnrate.y,
+                sensor.turnrate.z);
         }
 
         if (image_request.has_value())

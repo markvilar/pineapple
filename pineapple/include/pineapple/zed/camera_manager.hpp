@@ -17,6 +17,7 @@
 
 #include <Pine/Pine.hpp>
 
+#include "pineapple/zed/protocol.hpp"
 #include "pineapple/zed/types.hpp"
 
 namespace pineapple::zed
@@ -87,7 +88,13 @@ public:
 
 private:
     void on_update();
-    void on_message(const std::vector<uint8_t>& message);
+    void on_message(const std::vector<uint8_t>& buffer);
+
+    void on_request(const zed::ControlService::Request::DataType& request);
+    void on_request(const zed::ImageService::Request::DataType& request);
+    void on_request(const zed::MemoryService::Request::DataType& request);
+    void on_request(const zed::SensorService::Request::DataType& request);
+    void on_request(const zed::SettingsService::Request::DataType& request);
 
 private:
     bool m_running = true;
