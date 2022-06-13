@@ -1,19 +1,14 @@
-# Sennet ZED module
+# Pineapple
 
-Module/extension to Sennet with functionality for Stereolabs ZED stereo cameras.
-The module includes:
+Application built upon pine with various functionality for Stereolabs ZED 
+stereo cameras. The following functionality is implemented:
 - Wrappers for Stereolabs data structures.
 - ZED network messages.
-- Intermediate level sensor controller.
-- Sensor-, network and control layers for nodes and applications.
-- A ZED remote control application as well as a ZED node.
+- Intermediate level sensor control which preserves the SDK functionality, while
+  allowing concurrency.
+- Sensor-, network and control layers.
+- A remote control application as well as a node controlling the camera.
 
-## CMake configuration and building
-To build the Sennet ZED module, first configure CMake by setting the source and build directory: 
-``` 
-cmake -S . -B build 
-```
-Then, build the extension by issuing following command:
-```
-cmake --build build
-```
+## Developer workflow
+
+TODO: Set up a decent developer flow.

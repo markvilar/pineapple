@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+
+SOURCE_DIR="${PWD}"
+BUILD_DIR="${SOURCE_DIR}/build/"
+
+GENERATOR="Ninja"
+BUILD_TYPE="Release"
+CXX_COMPILER="clang-12"
+
+export CMAKE_GENERATOR="${GENERATOR}"
+export CMAKE_BUILD_TYPE="${BUILD_TYPE}"
+export CMAKE_CXX_COMPILER="${CXX_COMPILER}"
+
+cmake -S "${SOURCE_DIR}" -B "${BUILD_DIR}"
+cmake --build ${BUILD_DIR}

@@ -1,3 +1,3 @@
-[submodule "extern/Sennet"]
-	path = extern/Sennet
-	url = https://github.com/markvilar/Sennet.git
+[submodule "extern/pine"]
+	path = extern/pine
+	url = https://github.com/markvilar/pine.git

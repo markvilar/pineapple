@@ -1,6 +1,7 @@
 # Directories
 data/*/
-/build*
+build/
+packages/
 
 # Files
 data/*
