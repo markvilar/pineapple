@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/RemoteControlLayer.hpp"
+#include "pineapple/zed/remote_control_layer.hpp"
 
 class RemoteController : public Pine::Application
 {
@@ -10,13 +10,14 @@ public:
     RemoteController(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
-        PushLayer(new Pineapple::RemoteControlLayer());
+        PushLayer(new pineapple::RemoteControlLayer());
     }
 
     ~RemoteController() {}
 };
 
-std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc, char** argv)
+std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc,
+    char** argv)
 {
     Pine::Application::Specification specs;
     specs.WorkingDirectory = ".";

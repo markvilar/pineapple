@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-find ./apps -iname *.hpp -o -iname *.cpp \
+find ./bin -iname *.hpp -o -iname *.cpp \
     | xargs clang-format -style=file -i -fallback-style=none
 
 find ./examples -iname *.hpp -o -iname *.cpp \

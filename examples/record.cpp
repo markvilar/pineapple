@@ -4,76 +4,75 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/CameraControls.hpp"
-#include "Pineapple/Messages.hpp"
-#include "Pineapple/RecordManager.hpp"
+#include "pineapple/zed/camera_manager.hpp"
+#include "pineapple/zed/types.hpp"
 
 sig_atomic_t stopFlag = 0;
 
-void interrupt_handler(int) { stopFlag = 1; }
+void InterruptHandler(int) { stopFlag = 1; }
 
 int main(int argc, char** argv)
 {
-    signal(SIGINT, &interrupt_handler);
+    signal(SIGINT, &InterruptHandler);
 
     Pine::Log::Init();
 
-    Pineapple::ZED::RecordManager manager(".");
+    pineapple::zed::RecordManager manager(".");
 
-    manager.StartRecord();
+    manager.start_record();
 
     while (!stopFlag)
     {
-        auto settingsRequest = manager.RequestCameraSettings();
-        auto imuRequest = manager.RequestSensorData();
-        auto imageRequest =
-            manager.RequestImage(1280, 720, Pineapple::ZED::View::LEFT);
+        auto settings_request = manager.request_camera_settings();
+        auto sensor_request = manager.request_sensor_data();
+        auto image_request =
+            manager.request_image(1280, 720, pineapple::zed::View::LEFT);
 
-        if (settingsRequest.has_value())
+        if (settings_request.has_value())
         {
-            const auto settings = settingsRequest.value();
+            const auto settings = settings_request.value();
             PINE_INFO("");
-            PINE_INFO("Brightness:        {0}", settings.Brightness);
-            PINE_INFO("Contrast:          {0}", settings.Contrast);
-            PINE_INFO("Hue:               {0}", settings.Hue);
-            PINE_INFO("Saturation:        {0}", settings.Saturation);
-            PINE_INFO("Sharpness:         {0}", settings.Sharpness);
-            PINE_INFO("Gain:              {0}", settings.Gain);
-            PINE_INFO("Exposure:          {0}", settings.Exposure);
-            PINE_INFO("Whitebalance:      {0}", settings.Whitebalance);
-            PINE_INFO("Auto exposure:     {0}", settings.AutoExposure);
-            PINE_INFO("Auto whitebalance: {0}", settings.AutoWhitebalance);
-            PINE_INFO("LED status:        {0}", settings.EnableLED);
+            PINE_INFO("Brightness:        {0}", settings.brightness);
+            PINE_INFO("Contrast:          {0}", settings.contrast);
+            PINE_INFO("Hue:               {0}", settings.hue);
+            PINE_INFO("Saturation:        {0}", settings.saturation);
+            PINE_INFO("Sharpness:         {0}", settings.sharpness);
+            PINE_INFO("Gain:              {0}", settings.gain);
+            PINE_INFO("Exposure:          {0}", settings.exposure);
+            PINE_INFO("Whitebalance:      {0}", settings.whitebalance);
+            PINE_INFO("Auto exposure:     {0}", settings.auto_exposure);
+            PINE_INFO("Auto whitebalance: {0}", settings.auto_whitebalance);
+            PINE_INFO("LED status:        {0}", settings.enable_led);
         }
 
-        if (imuRequest.has_value())
+        if (sensor_request.has_value())
         {
-            const auto imu = imuRequest.value();
+            const auto sensor = sensor_request.value();
             PINE_INFO("");
             PINE_INFO("IMU acceleration:  {0}, {1}, {2}",
-                imu.Acceleration.x,
-                imu.Acceleration.y,
-                imu.Acceleration.z);
+                sensor.acceleration.x,
+                sensor.acceleration.y,
+                sensor.acceleration.z);
             PINE_INFO("IMU ang. velocity: {0}, {1}, {2}",
-                imu.AngularVelocity.x,
-                imu.AngularVelocity.y,
-                imu.AngularVelocity.z);
+                sensor.turnrate.x,
+                sensor.turnrate.y,
+                sensor.turnrate.z);
         }
 
-        if (imageRequest.has_value())
+        if (image_request.has_value())
         {
-            const auto image = imageRequest.value();
+            const auto image = image_request.value();
             PINE_INFO("");
             PINE_INFO("Image: {0}, {1}, {2}",
-                image.Width,
-                image.Height,
-                image.Format);
+                image.specification.width,
+                image.specification.height,
+                image.specification.view);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    manager.StopRecord();
+    manager.stop_record();
 
     return 0;
 }

@@ -2,7 +2,7 @@
 
 #include <Pine/Pine.hpp>
 
-#include "Pineapple/LocalControlLayer.hpp"
+#include "pineapple/zed/local_control_layer.hpp"
 
 class LocalController : public Pine::Application
 {
@@ -10,13 +10,14 @@ public:
     LocalController(const Pine::Application::Specification& specs)
         : Pine::Application(specs)
     {
-        PushLayer(new Pineapple::LocalControlLayer());
+        PushLayer(new pineapple::LocalControlLayer());
     }
 
     ~LocalController() {}
 };
 
-std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc, char** argv)
+std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc,
+    char** argv)
 {
     Pine::Application::Specification specs;
     specs.WorkingDirectory = ".";
