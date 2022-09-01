@@ -1,30 +1,11 @@
 #pragma once
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/types.hpp"
 
 namespace pineapple
 {
-
-struct PanelLayout
-{
-    Pine::Vec2 position{};
-    Pine::Vec2 size{};
-
-public:
-    PanelLayout() = default;
-    PanelLayout(const PanelLayout&) = default;
-    PanelLayout(PanelLayout&&) = default;
-
-    PanelLayout(const Pine::Vec2& position, const Pine::Vec2& size)
-        : position(position), size(size)
-    {
-    }
-
-    PanelLayout& operator=(const PanelLayout&) = default;
-    PanelLayout& operator=(PanelLayout&&) = default;
-};
 
 template <typename T, size_t N>
 class StaticSeries

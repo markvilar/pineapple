@@ -15,7 +15,7 @@
 #pragma GCC diagnostic ignored "-Wcpp"
 #include <sl/Camera.hpp>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/protocol.hpp"
 #include "pineapple/zed/types.hpp"
@@ -99,7 +99,7 @@ private:
 private:
     bool m_running = true;
 
-    Pine::ServerState m_server;
+    pine::ServerState m_server;
 
     RecordManager m_record_manager;
     // TODO: Add video stream manager

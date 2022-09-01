@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/protocol.hpp"
 #include "pineapple/zed/types.hpp"
@@ -144,7 +144,7 @@ void test_memory_view_archive()
 
 int main(int argc, char** argv)
 {
-    Pine::Log::Init();
+    pine::Log::init();
 
     test_image_serialization();
     test_memory_archive();

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 namespace pineapple::zed
 {
@@ -144,8 +144,8 @@ struct SensorData
     float pressure;
     float temperature_left;
     float temperature_right;
-    Pine::Vec3 acceleration{0.0f};
-    Pine::Vec3 turnrate{0.0f};
+    pine::Vec3 acceleration{0.0f};
+    pine::Vec3 turnrate{0.0f};
 };
 
 // ----------------------------------------------------------------------------
