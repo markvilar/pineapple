@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/serialization.hpp"
 #include "pineapple/ui_helpers.hpp"
@@ -12,21 +12,19 @@
 namespace pineapple
 {
 
-class RemoteControlLayer : public Pine::Layer
+class RemoteControlLayer : public pine::Layer
 {
 public:
     RemoteControlLayer();
     ~RemoteControlLayer();
 
-    virtual void OnAttach() override;
-    virtual void OnDetach() override;
-    virtual void OnUpdate(Pine::Timestep ts) override;
-    virtual void OnImGuiRender() override;
-    virtual void OnEvent(Pine::Event& e) override;
+    virtual void on_attach() override;
+    virtual void on_detach() override;
+    virtual void on_update(pine::Timestep ts) override;
+    virtual void on_gui_render() override;
+    virtual void on_event(pine::Event& e) override;
 
 private:
-    void update_panel_layouts();
-
     void on_response(const zed::ControlService::Response::DataType& response);
     void on_response(const zed::ImageService::Response::DataType& response);
     void on_response(const zed::MemoryService::Response::DataType& response);
@@ -35,14 +33,14 @@ private:
 
 private:
     // Rendering entities
-    Pine::Renderer2D::RendererData m_renderer_data{};
-    Pine::OrthographicCameraController m_camera_controller;
-    std::shared_ptr<Pine::Framebuffer> m_framebuffer;
-    std::shared_ptr<Pine::Texture2D> m_image_texture;
-    Pine::Image m_image{};
+    pine::QuadRenderData m_renderer_data{};
+    pine::OrthographicCameraController m_camera_controller;
+    std::shared_ptr<pine::Framebuffer> m_framebuffer;
+    std::shared_ptr<pine::Texture2D> m_image_texture;
+    pine::Image m_image{};
 
     // Networking entities
-    Pine::ClientState m_client;
+    pine::ClientState m_client;
 
     // ZED services
     zed::ControlService::Request m_control_request{};
@@ -69,8 +67,6 @@ private:
 
     bool m_viewport_focused = false;
     bool m_viewport_hovered = false;
-
-    std::unordered_map<std::string, PanelLayout> m_panel_layouts{};
 };
 
 } // namespace pineapple

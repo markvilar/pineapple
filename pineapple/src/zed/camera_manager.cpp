@@ -199,8 +199,8 @@ std::optional<SensorData> RecordManager::request_sensor_data()
     data.temperature_right = temperatures
         [sl::SensorsData::TemperatureData::SENSOR_LOCATION::ONBOARD_RIGHT];
     data.acceleration =
-        Pine::Vec3(acceleration[0], acceleration[1], acceleration[2]);
-    data.turnrate = Pine::Vec3(turnrate[0], turnrate[1], turnrate[2]);
+        pine::Vec3(acceleration[0], acceleration[1], acceleration[2]);
+    data.turnrate = pine::Vec3(turnrate[0], turnrate[1], turnrate[2]);
 
     return data;
 }
@@ -325,13 +325,13 @@ CameraManager::CameraManager(const uint16_t port,
 CameraManager::~CameraManager()
 {
     PINE_INFO("Stopping server.");
-    StopServer(m_server);
+    stop_server(m_server);
 }
 
 void CameraManager::run()
 {
-    Pine::StartServer(m_server,
-        [this](const Pine::ConnectionState& connection) -> bool
+    pine::start_server(m_server,
+        [this](const pine::ConnectionState& connection) -> bool
         {
             PINE_INFO("Server got connection: {0}",
                 connection.socket.remote_endpoint());
@@ -346,7 +346,7 @@ void CameraManager::run()
 
 void CameraManager::on_update()
 {
-    Pine::UpdateServer(m_server,
+    pine::update_server(m_server,
         [this](const std::vector<uint8_t>& message) -> void
         { on_message(message); });
 }

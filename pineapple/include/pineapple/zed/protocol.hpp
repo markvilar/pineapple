@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/message.hpp"
 #include "pineapple/zed/types.hpp"
@@ -132,8 +132,8 @@ struct SensorService
         float pressure;
         float temperature_left;
         float temperature_right;
-        Pine::Vec3 acceleration{0.0f};
-        Pine::Vec3 turnrate{0.0f};
+        pine::Vec3 acceleration{0.0f};
+        pine::Vec3 turnrate{0.0f};
     };
 
     using Request = Message<ServiceIdentifier, RequestData>;

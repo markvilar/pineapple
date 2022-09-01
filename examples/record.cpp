@@ -2,26 +2,26 @@
 #include <iostream>
 #include <signal.h>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/camera_manager.hpp"
 #include "pineapple/zed/types.hpp"
 
-sig_atomic_t stopFlag = 0;
+sig_atomic_t stop_flag = 0;
 
-void InterruptHandler(int) { stopFlag = 1; }
+void InterruptHandler(int) { stop_flag = 1; }
 
 int main(int argc, char** argv)
 {
     signal(SIGINT, &InterruptHandler);
 
-    Pine::Log::Init();
+    pine::Log::init();
 
     pineapple::zed::RecordManager manager(".");
 
     manager.start_record();
 
-    while (!stopFlag)
+    while (!stop_flag)
     {
         auto settings_request = manager.request_camera_settings();
         auto sensor_request = manager.request_sensor_data();

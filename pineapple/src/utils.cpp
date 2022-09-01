@@ -13,7 +13,7 @@ std::string current_date_time()
     return std::string(buffer.data(), buffer.size());
 }
 
-Pine::Image convert_image(const zed::Image& image)
+pine::Image convert_image(const zed::Image& image)
 {
     const auto& view = image.specification.view;
     const auto image_format = [view]()
@@ -21,20 +21,20 @@ Pine::Image convert_image(const zed::Image& image)
         switch (view)
         {
         case zed::View::LEFT:
-            return Pine::ImageFormat::BGRA;
+            return pine::ImageFormat::BGRA;
         case zed::View::RIGHT:
-            return Pine::ImageFormat::BGRA;
+            return pine::ImageFormat::BGRA;
         case zed::View::LEFT_GRAY:
-            return Pine::ImageFormat::GRAY;
+            return pine::ImageFormat::GRAY;
         case zed::View::RIGHT_GRAY:
-            return Pine::ImageFormat::GRAY;
+            return pine::ImageFormat::GRAY;
         case zed::View::SIDE_BY_SIDE:
-            return Pine::ImageFormat::BGRA;
+            return pine::ImageFormat::BGRA;
         default:
-            return Pine::ImageFormat::UNKNOWN;
+            return pine::ImageFormat::UNKNOWN;
         }
     }();
-    return Pine::Image(image.buffer.data(),
+    return pine::Image(image.buffer.data(),
         image.specification.width,
         image.specification.height,
         image_format);

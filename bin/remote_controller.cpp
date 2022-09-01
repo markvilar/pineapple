@@ -1,42 +1,54 @@
 #include <memory>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/remote_control_layer.hpp"
 
-class RemoteController : public Pine::Application
+class RemoteController : public pine::Application
 {
 public:
-    RemoteController(const Pine::Application::Specification& specs)
-        : Pine::Application(specs)
+    RemoteController(const pine::ApplicationSpecs& specs)
+        : pine::Application(specs)
     {
-        PushLayer(new pineapple::RemoteControlLayer());
+        push_layer(new pineapple::RemoteControlLayer());
     }
 
     ~RemoteController() {}
 };
 
-std::unique_ptr<Pine::Application> Pine::CreateApplication(int argc,
-    char** argv)
+class RemoteControllerFactory : public pine::ApplicationFactory
 {
-    Pine::Application::Specification specs;
-    specs.WorkingDirectory = ".";
-    specs.Name = "Remote Controller";
-    specs.WindowWidth = 1600;
-    specs.WindowHeight = 800;
-    specs.StartMaximized = true;
-    specs.VSync = true;
-    specs.Resizable = true;
-    specs.EnableImGui = true;
-    specs.Fullscreen = true;
+public:
+    RemoteControllerFactory(int argc_, char** argv_) : argc(argc_), argv(argv_)
+    {
+    }
 
-    return std::make_unique<RemoteController>(specs);
-}
+    virtual std::unique_ptr<pine::Application> create_application() override
+    {
+        pine::ApplicationSpecs specs;
+        specs.working_directory = ".";
+        specs.name = "Remote Controller";
+        specs.window_width = 1600;
+        specs.window_height = 800;
+        specs.start_maximized = true;
+        specs.vsync = true;
+        specs.resizable = true;
+        specs.enable_gui = true;
+        specs.fullscreen = true;
+
+        return std::make_unique<RemoteController>(specs);
+    }
+
+private:
+    int argc;
+    char** argv;
+};
 
 int main(int argc, char** argv)
 {
-    Pine::Log::Init();
-    auto app = Pine::CreateApplication(argc, argv);
-    app->Run();
+    pine::Log::init();
+    auto factory = RemoteControllerFactory(argc, argv);
+    auto app = factory.create_application();
+    app->run();
     return 0;
 }

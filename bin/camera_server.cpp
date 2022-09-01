@@ -1,12 +1,12 @@
 #include <filesystem>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/camera_manager.hpp"
 
 int main(int argc, char** argv)
 {
-    Pine::Log::Init();
+    pine::Log::init();
 
     const auto port = 6000;
     const std::filesystem::path directory = ".";
