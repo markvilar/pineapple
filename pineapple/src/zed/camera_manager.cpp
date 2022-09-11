@@ -280,9 +280,13 @@ void RecordManager::record_worker(const RecordJob job)
     auto [init_parameters, recording_parameters, runtime_parameters] =
         to_stereolabs(job.parameters);
 
-    const auto date_string = pineapple::current_date_time() + ".svo";
+    const auto date_string = pineapple::current_date_time() 
+        + std::string(".svo");
     const auto filepath = job.output_directory / date_string;
     recording_parameters.video_filename = filepath.string().c_str();
+
+    PINE_INFO("Date string: {0}, {1}", date_string.size(), date_string);
+    PINE_INFO("File path:   {0}", filepath.string());
 
     const auto open_state = m_camera.open(init_parameters);
     if (open_state != sl::ERROR_CODE::SUCCESS)

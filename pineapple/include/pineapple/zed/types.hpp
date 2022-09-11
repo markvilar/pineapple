@@ -94,8 +94,29 @@ struct CameraSettings
     int whitebalance = 4000;
     bool auto_exposure = true;
     bool auto_whitebalance = true;
-    bool enable_led = true;
+    bool enable_led = false;
 };
+
+inline bool operator==(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return lhs.brightness == rhs.brightness 
+        && lhs.contrast == rhs.contrast
+        && lhs.hue == rhs.hue
+        && lhs.saturation == rhs.saturation
+        && lhs.sharpness == rhs.sharpness
+        && lhs.gamma == rhs.gamma
+        && lhs.gain == rhs.gain
+        && lhs.exposure == rhs.exposure
+        && lhs.whitebalance == rhs.whitebalance
+        && lhs.auto_exposure == rhs.auto_exposure
+        && lhs.auto_whitebalance == rhs.auto_whitebalance
+        && lhs.enable_led == rhs.enable_led;
+}
+
+inline bool operator!=(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return !(lhs == rhs);
+}
 
 struct ImageSpecification
 {

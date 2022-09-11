@@ -25,7 +25,7 @@ namespace zed
 
 struct RecordJob
 {
-    std::filesystem::path output_directory = "";
+    std::filesystem::path output_directory = ".";
     CameraParameters parameters = {};
 };
 
