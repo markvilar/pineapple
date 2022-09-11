@@ -2,6 +2,7 @@ add_library(pineapple STATIC)
 add_library(pineapple::pineapple ALIAS pineapple)
 
 find_package(pine REQUIRED)
+find_package(msgpack REQUIRED)
 
 if(PINEAPPLE_ENABLE_ZED)
     include("${PROJECT_SOURCE_DIR}/cmake/zed.cmake")
@@ -40,6 +41,7 @@ target_include_directories(pineapple
 target_link_libraries(pineapple
     PUBLIC
         pine::pine
+        msgpack::msgpack
     PRIVATE 
         $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:${ZED_LIBS}>
     )
