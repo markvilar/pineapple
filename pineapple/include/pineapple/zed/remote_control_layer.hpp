@@ -25,11 +25,12 @@ public:
     virtual void on_event(pine::Event& e) override;
 
 private:
-    void on_response(const zed::ControlService::Response::DataType& response);
-    void on_response(const zed::ImageService::Response::DataType& response);
-    void on_response(const zed::MemoryService::Response::DataType& response);
-    void on_response(const zed::SensorService::Response::DataType& response);
-    void on_response(const zed::SettingsService::Response::DataType& response);
+    void on_message(const std::vector<uint8_t>& buffer) {}
+
+    void send_request(const zed::ControlRequest& request);
+
+    // Debug
+    void on_server_message(const std::vector<uint8_t>& buffer);
 
 private:
     // Rendering entities
@@ -40,14 +41,7 @@ private:
     pine::Image m_image{};
 
     // Networking entities
-    pine::ClientState m_client;
-
-    // ZED services
-    zed::ControlService::Request m_control_request{};
-    zed::ImageService::Request m_image_request{};
-    zed::MemoryService::Request m_memory_request{};
-    zed::SensorService::Request m_sensor_request{};
-    zed::SettingsService::Request m_settings_request{};
+    pine::ClientState client;
 
     // ZED types, TODO: Replace with the above requests
     zed::CameraParameters m_camera_parameters = {};
@@ -67,6 +61,9 @@ private:
 
     bool m_viewport_focused = false;
     bool m_viewport_hovered = false;
+
+    // DEBUG
+    pine::ServerState server{6000};
 };
 
 } // namespace pineapple

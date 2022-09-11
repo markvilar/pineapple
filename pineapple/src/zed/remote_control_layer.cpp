@@ -26,15 +26,34 @@ void RemoteControlLayer::on_attach()
     m_renderer_data = pine::QuadRenderer::init();
 
     pine::gui::set_dark_theme(ImGui::GetStyle());
+
+    // TODO: Debug
+    server.set_connection_callback(
+        [](const pine::ConnectionState& connection) -> bool
+        {
+            PINE_INFO("New client: {0}", connection.socket.remote_endpoint());
+            return true;
+        });
+
+    server.set_message_callback(
+        [this](const std::vector<uint8_t>& buffer) -> void
+        {
+            on_server_message(buffer);
+        });
+
+    start_server(server);
 }
 
 void RemoteControlLayer::on_detach() {}
 
 void RemoteControlLayer::on_update(pine::Timestep ts)
 {
-    while (!m_client.message_queue.empty())
+    // TODO: Debug
+    update_server(server, 10);
+
+    while (!client.message_queue.empty())
     {
-        const auto& message = m_client.message_queue.pop_front();
+        const auto& message = client.message_queue.pop_front();
         // TODO: Handle message
     }
 
@@ -71,6 +90,7 @@ void RemoteControlLayer::on_update(pine::Timestep ts)
 
 void RemoteControlLayer::on_gui_render()
 {
+    pine::gui::render_dockspace("dockspace");
     pine::gui::main_menu_bar(
         []()
         {
@@ -133,17 +153,17 @@ void RemoteControlLayer::on_gui_render()
 
             ImGui::InputText("Server Address", address, IM_ARRAYSIZE(address));
             ImGui::InputInt("Server Port", (int*)&port, 0, 0);
-            ImGui::Text("Client connected: %d", is_connected(m_client));
+            ImGui::Text("Client connected: %d", is_connected(client));
 
             if (ImGui::Button("Connect", ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                pine::connect(m_client, std::string(address), port);
+                pine::connect(client, std::string(address), port);
             }
             ImGui::SameLine();
             if (ImGui::Button("Disconnect", 
                 ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                pine::disconnect(m_client);
+                pine::disconnect(client);
             }
 
             ImGui::Separator();
@@ -154,49 +174,13 @@ void RemoteControlLayer::on_gui_render()
 
             if (ImGui::Button("Record", ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                if (pine::is_connected(m_client))
-                {
-                    zed::ControlService::Request request;
-                    request.header = zed::ServiceIdentifier::CONTROL_REQUEST;
-                    request.data.action = zed::CameraAction::START_RECORD;
-                    request.data.resolution = m_camera_parameters.resolution;
-                    request.data.compression = m_camera_parameters.compression;
-                    request.data.fps = m_camera_parameters.fps;
-                    request.data.timeout = m_camera_parameters.timeout;
-                    request.data.enable_image_enhancement 
-                        = m_camera_parameters.enable_image_enhancement;
-                    request.data.disable_self_calibration 
-                        = m_camera_parameters.disable_self_calibration;
-                    request.data.require_sensors 
-                        = m_camera_parameters.require_sensors;
-                    request.data.enable_depth
-                        = m_camera_parameters.enable_depth;
-
-                    MemoryOutputArchive output_archive;
-                    output_archive.serialize(request);
-
-                    pine::send(m_client, output_archive.get_buffer().data(), 
-                        output_archive.get_buffer().size());
-                }
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button("Stop record",
-                    ImVec2(0.50f * content_size.x, 30.0f)))
+            if (ImGui::Button("Stop record", 
+                ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                if (pine::is_connected(m_client))
-                {
-                    zed::ControlService::Request request;
-                    request.header = zed::ServiceIdentifier::CONTROL_REQUEST;
-                    request.data.action = zed::CameraAction::STOP_RECORD;
-
-                    MemoryOutputArchive output_archive;
-                    output_archive.serialize(request);
-
-                    pine::send(m_client, output_archive.get_buffer().data(), 
-                        output_archive.get_buffer().size());
-                }
             }
 
             ImGui::Separator();
@@ -218,6 +202,11 @@ void RemoteControlLayer::on_gui_render()
         {
             // TODO: Implement functionality.
         });
+
+    pine::gui::render_window("Test message",
+        [this]()
+        {
+        });
 }
 
 void RemoteControlLayer::on_event(pine::Event& e)
@@ -225,94 +214,8 @@ void RemoteControlLayer::on_event(pine::Event& e)
     m_camera_controller.on_event(e);
 }
 
-void RemoteControlLayer::on_response(
-    const zed::ControlService::Response::DataType& response)
+void RemoteControlLayer::on_server_message(const std::vector<uint8_t>& buffer)
 {
-    // TODO: Implement.
-    PINE_INFO("Remote control: Got control response.");
-}
-
-void RemoteControlLayer::on_response(
-    const zed::ImageService::Response::DataType& response)
-{
-    PINE_INFO("Remote control: Got image response.");
-
-    // TODO: Perform sanity check
-
-    const auto format = [&response]()
-        {
-            switch (response.view)
-            {
-            case zed::View::LEFT:
-                return pine::ImageFormat::BGRA;
-            case zed::View::RIGHT:
-                return pine::ImageFormat::BGRA;
-            case zed::View::LEFT_GRAY:
-                return pine::ImageFormat::GRAY;
-            case zed::View::RIGHT_GRAY:
-                return pine::ImageFormat::GRAY;
-            case zed::View::SIDE_BY_SIDE:
-                return pine::ImageFormat::BGRA;
-            default:
-                return pine::ImageFormat::GRAY;
-            };
-        }();
-
-    m_image = pine::Image(response.buffer.data(), response.width, 
-        response.height, format);
-}
-
-void RemoteControlLayer::on_response(
-    const zed::MemoryService::Response::DataType& response)
-{
-    PINE_INFO("Remote control: Got memory response.");
-    m_server_memory.total_space = response.total_space;
-    m_server_memory.free_space = response.free_space;
-    m_server_memory.available_space = response.available_space;
-}
-
-void RemoteControlLayer::on_response(
-    const zed::SensorService::Response::DataType& response)
-{
-    PINE_INFO("Remote control: Got sensor response.");
-    PINE_INFO(" - Acceleration: {0}, {1}, {2}", response.acceleration.x,
-        response.acceleration.y, response.acceleration.z);
-    PINE_INFO(" - Turnrate:     {0}, {1}, {2}", response.turnrate.x,
-        response.turnrate.y, response.turnrate.z);
-
-    m_server_sensors.acceleration.x = response.acceleration.x;
-    m_server_sensors.acceleration.y = response.acceleration.y;
-    m_server_sensors.acceleration.z = response.acceleration.z;
-
-    m_server_sensors.turnrate.x = response.turnrate.x;
-    m_server_sensors.turnrate.y = response.turnrate.y;
-    m_server_sensors.turnrate.z = response.turnrate.z;
-
-    m_acceleration_x.push_back(response.acceleration.x);
-    m_acceleration_y.push_back(response.acceleration.y);
-    m_acceleration_z.push_back(response.acceleration.z);
-
-    m_turnrate_x.push_back(response.turnrate.x);
-    m_turnrate_y.push_back(response.turnrate.y);
-    m_turnrate_z.push_back(response.turnrate.z);
-}
-
-void RemoteControlLayer::on_response(
-    const zed::SettingsService::Response::DataType& response)
-{
-    PINE_INFO("Remote control: Got settings response.");
-    m_camera_settings.brightness = response.brightness;
-    m_camera_settings.contrast = response.contrast;
-    m_camera_settings.hue = response.hue;
-    m_camera_settings.saturation = response.saturation;
-    m_camera_settings.sharpness = response.sharpness;
-    m_camera_settings.gamma = response.gamma;
-    m_camera_settings.gain = response.gain;
-    m_camera_settings.exposure = response.exposure;
-    m_camera_settings.whitebalance = response.whitebalance;
-    m_camera_settings.auto_exposure = response.auto_exposure;
-    m_camera_settings.auto_whitebalance = response.auto_whitebalance;
-    m_camera_settings.enable_led = response.enable_led;
 }
 
 }; // namespace pineapple

@@ -17,16 +17,25 @@ int main(int argc, char** argv)
 
     pine::Log::init();
 
-    pineapple::zed::RecordManager manager(".");
+    zed::RecordManager manager();
 
-    manager.start_record();
+    zed::CameraParameters parameters;
+    parameters.resolution = zed::Resolution::HD2K;
+    parameters.compression = zed::Compression::H264;
+    parameters.fps = 0;
+    parameters.timeout = 5.0f;
+    parameters.enable_image_enhancement = true;
+    parameters.disable_self_calibration = false;
+    parameters.require_sensors = false;
+    parameters.enable_depth = false;
+
+    manager.start_record(parameters);
 
     while (!stop_flag)
     {
         auto settings_request = manager.request_camera_settings();
         auto sensor_request = manager.request_sensor_data();
-        auto image_request =
-            manager.request_image(1280, 720, pineapple::zed::View::LEFT);
+        auto image_request = manager.request_image(1280, 720, zed::View::LEFT);
 
         if (settings_request.has_value())
         {

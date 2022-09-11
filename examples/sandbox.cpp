@@ -5,150 +5,106 @@
 
 #include <pine/pine.hpp>
 
-#include "pineapple/zed/protocol.hpp"
-#include "pineapple/zed/types.hpp"
-
 #include "pineapple/message.hpp"
-#include "pineapple/serialization.hpp"
 
-void test_image_serialization()
+#include "pineapple/zed/protocol.hpp"
+
+void serialize_parameters()
 {
-    std::vector<std::uint8_t> buffer;
-    zpp::serializer::memory_output_archive output_archive(buffer);
-    zpp::serializer::memory_input_archive input_archive(buffer);
+    pineapple::Message message;
+    zed::CameraParameters parameters;
 
-    PINE_INFO("---------- Test image serialization ----------");
+    PINE_INFO("Resoltion:    {}", parameters.resolution);
+    PINE_INFO("Compression:  {}", parameters.compression);
+    PINE_INFO("FPS:          {}", parameters.fps);
+    PINE_INFO("Timeout:      {}", parameters.timeout);
+    PINE_INFO("Image enh.:   {}", parameters.enable_image_enhancement);
+    PINE_INFO("Self calib.:  {}", parameters.disable_self_calibration);
+    PINE_INFO("Req. sensors: {}", parameters.require_sensors);
+    PINE_INFO("Enable depth: {}", parameters.enable_depth);
+  
+    message.push(parameters.resolution);
+    message.push(parameters.compression);
+    message.push(parameters.fps);
+    message.push(parameters.timeout);
+    message.push(parameters.enable_image_enhancement);
+    message.push(parameters.disable_self_calibration);
+    message.push(parameters.require_sensors);
+    message.push(parameters.enable_depth);
 
-    // Serialization
-    const auto width = 32;
-    const auto height = 32;
-    const auto channels = 4;
-    pineapple::zed::Image output_image;
-    output_image.specification.width = width;
-    output_image.specification.height = height;
-    output_image.specification.view = pineapple::zed::View::LEFT;
-    output_image.buffer = [width, height, channels]()
-    {
-        std::vector<uint8_t> v(width * height * channels, 0);
-        return v;
-    }();
-    PINE_INFO("Output image: {0}, {1}, {2}, {3}",
-        output_image.specification.width,
-        output_image.specification.height,
-        output_image.specification.view,
-        output_image.buffer.size());
-    output_archive(output_image);
+    zed::CameraParameters remote;
+    remote.resolution = zed::Resolution::HD2K;
+    remote.compression = zed::Compression::H265;
+    remote.fps = 10;
+    remote.enable_depth = true;
 
-    // Deserialization
-    pineapple::zed::Image input_image;
-    input_archive(input_image);
-    PINE_INFO("Input image: {0}, {1}, {2}, {3}\n",
-        input_image.specification.width,
-        input_image.specification.height,
-        input_image.specification.view,
-        input_image.buffer.size());
+    PINE_INFO("------------------------------------");
+    PINE_INFO("Resoltion:    {}", remote.resolution);
+    PINE_INFO("Compression:  {}", remote.compression);
+    PINE_INFO("FPS:          {}", remote.fps);
+    PINE_INFO("Timeout:      {}", remote.timeout);
+    PINE_INFO("Image enh.:   {}", remote.enable_image_enhancement);
+    PINE_INFO("Self calib.:  {}", remote.disable_self_calibration);
+    PINE_INFO("Req. sensors: {}", remote.require_sensors);
+    PINE_INFO("Enable depth: {}", remote.enable_depth);
+
+    message.pop(remote.enable_depth);
+    message.pop(remote.require_sensors);
+    message.pop(remote.disable_self_calibration);
+    message.pop(remote.enable_image_enhancement);
+    message.pop(remote.timeout);
+    message.pop(remote.fps);
+    message.pop(remote.compression);
+    message.pop(remote.resolution);
+
+    PINE_INFO("------------------------------------");
+    PINE_INFO("Resoltion:    {}", remote.resolution);
+    PINE_INFO("Compression:  {}", remote.compression);
+    PINE_INFO("FPS:          {}", remote.fps);
+    PINE_INFO("Timeout:      {}", remote.timeout);
+    PINE_INFO("Image enh.:   {}", remote.enable_image_enhancement);
+    PINE_INFO("Self calib.:  {}", remote.disable_self_calibration);
+    PINE_INFO("Req. sensors: {}", remote.require_sensors);
+    PINE_INFO("Enable depth: {}", remote.enable_depth);
+
+    PINE_INFO("------------------------------------");
+    PINE_INFO("Final message size: {0}", message.size());
 }
 
-void test_memory_archive()
+void serialize_image()
 {
-    PINE_INFO("---------- Test memory archive ----------");
+    pineapple::Message message;
+    zed::Image image;
 
-    pineapple::MemoryOutputArchive output_archive;
+    PINE_INFO("Width:  {0}", image.specification.width);
+    PINE_INFO("Height: {0}", image.specification.height);
+    PINE_INFO("View:   {0}", image.specification.view);
 
-    pineapple::zed::ControlService::Request message;
-    message.header = pineapple::zed::ServiceIdentifier::CONTROL_REQUEST;
-    message.data.action = pineapple::zed::CameraAction::STOP_RECORD;
-    output_archive.serialize(message);
+    message.push(image.specification.width);
+    message.push(image.specification.height);
+    message.push(image.specification.view);
 
-    pineapple::zed::ControlService::Request reply;
-    pineapple::MemoryInputArchive input_archive(output_archive.get_buffer());
-    input_archive.deserialize(reply);
+    zed::Image remote;
+    message.pop(remote.specification.view);
+    message.pop(remote.specification.height);
+    message.pop(remote.specification.width);
 
-    PINE_INFO("Message: {0}, {1}", message.header, message.data.action);
-    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.data.action);
-
-    /*
-    if (identifier == pineapple::zed::ServiceIdentifier::UNKNOWN)
-    {
-        PINE_INFO("Got unknown message.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::CONTROL_REQUEST)
-    {
-        PINE_INFO("Got control request.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::CONTROL_RESPONSE)
-    {
-        PINE_INFO("Got control response.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::SETTINGS_REQUEST)
-    {
-        PINE_INFO("Got settings request.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::SETTINGS_RESPONSE)
-    {
-        PINE_INFO("Got settings response.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::STATE_REQUEST)
-    {
-        PINE_INFO("Got state request.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::STATE_RESPONSE)
-    {
-        PINE_INFO("Got state response.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::SENSOR_REQUEST)
-    {
-        PINE_INFO("Got sensor request.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::SENSOR_RESPONSE)
-    {
-        PINE_INFO("Got sensor response.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::IMAGE_REQUEST)
-    {
-        PINE_INFO("Got image request.");
-    }
-    else if (identifier == pineapple::zed::ServiceIdentifier::IMAGE_RESPONSE)
-    {
-        PINE_INFO("Got image response.");
-    }
-    else
-    {
-        PINE_INFO("Got invalid message.");
-    }
-    */
-}
-
-void test_memory_view_archive()
-{
-    PINE_INFO("---------- Test memory view archive ----------");
-
-    std::vector<uint8_t> buffer(100);
-
-    pineapple::MemoryViewOutputArchive output_archive(buffer.data(),
-        buffer.size());
-
-    pineapple::zed::ControlService::Request message;
-    message.header = pineapple::zed::ServiceIdentifier::CONTROL_REQUEST;
-    message.data.action = pineapple::zed::CameraAction::STOP_RECORD;
-    output_archive.serialize(message);
-
-    pineapple::zed::ControlService::Request reply;
-    pineapple::MemoryViewInputArchive input_archive(buffer.data(),
-        buffer.size());
-    input_archive.deserialize(reply);
-
-    PINE_INFO("Message: {0}, {1}", message.header, message.data.action);
-    PINE_INFO("Reply:   {0}, {1}", reply.header, reply.data.action);
+    PINE_INFO("Width:  {0}", remote.specification.width);
+    PINE_INFO("Height: {0}", remote.specification.height);
+    PINE_INFO("View:   {0}", remote.specification.view);
 }
 
 int main(int argc, char** argv)
 {
     pine::Log::init();
 
-    test_image_serialization();
-    test_memory_archive();
-    test_memory_view_archive();
+    bool test_parameters = false;
+    bool test_image = true;
+
+    if (test_parameters)
+        serialize_parameters();
+    if (test_image)
+        serialize_image();
 
     return 0;
 }
