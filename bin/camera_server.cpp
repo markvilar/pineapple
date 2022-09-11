@@ -11,6 +11,6 @@ int main(int argc, char** argv)
     const auto port = 6000;
     const std::filesystem::path directory = ".";
 
-    pineapple::zed::CameraManager manager(port, directory);
+    zed::CameraManager manager(port, directory);
     manager.run();
 }

@@ -4,7 +4,7 @@
 
 #include <pine/pine.hpp>
 
-namespace pineapple::zed
+namespace zed
 {
 
 enum class CameraAction : uint8_t
@@ -47,6 +47,28 @@ enum class View : uint8_t
     SIDE_BY_SIDE = 5,
 };
 
+inline uint8_t view_channels(const View view)
+{
+    return [view]()
+    {
+        switch (view)
+        {
+        case View::LEFT:
+            return 4;
+        case View::RIGHT:
+            return 4;
+        case View::LEFT_GRAY:
+            return 1;
+        case View::RIGHT_GRAY:
+            return 1;
+        case View::SIDE_BY_SIDE:
+            return 4;
+        default:
+            return 0;
+        }
+    }();
+}
+
 struct CameraParameters
 {
     Resolution resolution = Resolution::HD720;
@@ -72,8 +94,29 @@ struct CameraSettings
     int whitebalance = 4000;
     bool auto_exposure = true;
     bool auto_whitebalance = true;
-    bool enable_led = true;
+    bool enable_led = false;
 };
+
+inline bool operator==(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return lhs.brightness == rhs.brightness 
+        && lhs.contrast == rhs.contrast
+        && lhs.hue == rhs.hue
+        && lhs.saturation == rhs.saturation
+        && lhs.sharpness == rhs.sharpness
+        && lhs.gamma == rhs.gamma
+        && lhs.gain == rhs.gain
+        && lhs.exposure == rhs.exposure
+        && lhs.whitebalance == rhs.whitebalance
+        && lhs.auto_exposure == rhs.auto_exposure
+        && lhs.auto_whitebalance == rhs.auto_whitebalance
+        && lhs.enable_led == rhs.enable_led;
+}
+
+inline bool operator!=(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return !(lhs == rhs);
+}
 
 struct ImageSpecification
 {
@@ -148,62 +191,4 @@ struct SensorData
     pine::Vec3 turnrate{0.0f};
 };
 
-// ----------------------------------------------------------------------------
-// Serialization
-// ----------------------------------------------------------------------------
-
-template <typename Archive>
-void serialize(Archive& archive, CameraParameters& parameters)
-{
-    archive(parameters.resolution,
-        parameters.fps,
-        parameters.timeout,
-        parameters.enable_image_enhancement,
-        parameters.disable_self_calibration,
-        parameters.require_sensors,
-        parameters.compression,
-        parameters.enable_depth);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, CameraSettings& settings)
-{
-    archive(settings.brightness,
-        settings.contrast,
-        settings.hue,
-        settings.saturation,
-        settings.sharpness,
-        settings.gamma,
-        settings.gain,
-        settings.exposure,
-        settings.whitebalance,
-        settings.auto_exposure,
-        settings.auto_whitebalance,
-        settings.enable_led);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, ImageSpecification& specifications)
-{
-    archive(specifications.width, specifications.height, specifications.view);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, Image& image)
-{
-    archive(image.specification, image.buffer);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, CameraState& state)
-{
-    archive(state.opened, state.recording, state.stopped);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, MemoryState& state)
-{
-    archive(state.total_space, state.free_space, state.available_space);
-}
-
-}; // namespace pineapple::zed
+}; // namespace zed
