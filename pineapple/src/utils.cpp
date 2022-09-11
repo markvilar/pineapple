@@ -7,10 +7,10 @@ std::string current_date_time()
 {
     const auto now = time(0);
     struct tm time_struct;
-    std::array<char, 80> buffer;
+    char buffer[80];
     time_struct = *localtime(&now);
-    strftime(buffer.data(), buffer.size(), "%Y-%m-%d.%X", &time_struct);
-    return std::string(buffer.data(), buffer.size());
+    strftime(buffer, 80, "%Y%m%d_%H%M%S", &time_struct);
+    return std::string(buffer);
 }
 
 pine::Image convert_image(const zed::Image& image)
