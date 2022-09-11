@@ -3,6 +3,10 @@ add_library(pineapple::pineapple ALIAS pineapple)
 
 find_package(pine REQUIRED)
 
+#find_package(rclcpp REQUIRED)
+#find_package(rcl_interfaces REQUIRED)
+
+
 if(PINEAPPLE_ENABLE_ZED)
     include("${PROJECT_SOURCE_DIR}/cmake/zed.cmake")
 endif()
@@ -21,6 +25,7 @@ target_sources(pineapple
     PRIVATE 
         src/zed/camera_manager.cpp
         src/zed/local_control_layer.cpp
+        src/zed/protocol.cpp
         src/zed/remote_control_layer.cpp
         src/ui_helpers.cpp
         src/utils.cpp

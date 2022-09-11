@@ -14,17 +14,17 @@ class MemoryOutputArchive
     using OutputArchive = zpp::serializer::memory_output_archive;
 
 public:
-    template <typename T>
-    void serialize(T& t)
+    template <class... Args>
+    void serialize(Args... args)
     {
-        m_output_archive(t);
+        archive(args...);
     }
 
     auto& get_buffer() { return m_buffer; }
 
 private:
     std::vector<uint8_t> m_buffer{};
-    OutputArchive m_output_archive{m_buffer};
+    OutputArchive archive{m_buffer};
 };
 
 class MemoryInputArchive
@@ -32,19 +32,19 @@ class MemoryInputArchive
     using InputArchive = zpp::serializer::memory_input_archive;
 
 public:
-    MemoryInputArchive(std::vector<uint8_t>& buffer) : m_input_archive(buffer)
+    MemoryInputArchive(std::vector<uint8_t>& buffer) 
+        : archive(buffer)
     {
     }
 
-    template <typename T>
-    void deserialize(T& t)
+    template <class... Args>
+    void deserialize(Args... args)
     {
-        m_input_archive(t);
+        archive(args...);
     }
 
 private:
-    std::vector<uint8_t>* m_buffer{};
-    InputArchive m_input_archive;
+    InputArchive archive;
 };
 
 class MemoryViewOutputArchive
@@ -80,9 +80,17 @@ public:
     }
 
     template <typename T>
-    void deserialize(T& t)
+    bool deserialize(T& t)
     {
-        m_input_archive(t);
+        try
+        {
+            m_input_archive(t);
+        }
+        catch (const std::exception& e)
+        {
+            return false;
+        }
+        return true;
     }
 
 private:

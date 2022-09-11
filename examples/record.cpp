@@ -17,16 +17,26 @@ int main(int argc, char** argv)
 
     pine::Log::init();
 
-    pineapple::zed::RecordManager manager(".");
+    zed::RecordManager manager("/home/martin/data");
 
-    manager.start_record();
+    zed::CameraParameters parameters;
+    parameters.resolution = zed::Resolution::HD1080;
+    parameters.compression = zed::Compression::H264;
+    parameters.fps = 0;
+    parameters.timeout = 5.0f;
+    parameters.enable_image_enhancement = true;
+    parameters.disable_self_calibration = false;
+    parameters.require_sensors = false;
+    parameters.enable_depth = false;
+
+    manager.start_record(parameters);
 
     while (!stop_flag)
     {
         auto settings_request = manager.request_camera_settings();
-        auto sensor_request = manager.request_sensor_data();
-        auto image_request =
-            manager.request_image(1280, 720, pineapple::zed::View::LEFT);
+
+        PINE_INFO("Camera opened:    {0}", manager.is_opened());
+        PINE_INFO("Camera recording: {0}", manager.is_recording());
 
         if (settings_request.has_value())
         {
@@ -45,29 +55,6 @@ int main(int argc, char** argv)
             PINE_INFO("LED status:        {0}", settings.enable_led);
         }
 
-        if (sensor_request.has_value())
-        {
-            const auto sensor = sensor_request.value();
-            PINE_INFO("");
-            PINE_INFO("IMU acceleration:  {0}, {1}, {2}",
-                sensor.acceleration.x,
-                sensor.acceleration.y,
-                sensor.acceleration.z);
-            PINE_INFO("IMU ang. velocity: {0}, {1}, {2}",
-                sensor.turnrate.x,
-                sensor.turnrate.y,
-                sensor.turnrate.z);
-        }
-
-        if (image_request.has_value())
-        {
-            const auto image = image_request.value();
-            PINE_INFO("");
-            PINE_INFO("Image: {0}, {1}, {2}",
-                image.specification.width,
-                image.specification.height,
-                image.specification.view);
-        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }

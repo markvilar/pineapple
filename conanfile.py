@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 class Pineapple(ConanFile):
     """ """
     name = "pineapple"
-    version = "0.1.1"
+    version = "0.1"
     license = "Apache 2.0"
     author = "Martin Kvisvik Larsen"
     description = "Pineapple is a toolbox for remote control and real-time \
