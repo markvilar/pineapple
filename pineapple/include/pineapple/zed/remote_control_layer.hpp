@@ -1,8 +1,9 @@
 #pragma once
 
+#include <msgpack.hpp>
+
 #include <pine/pine.hpp>
 
-#include "pineapple/serialization.hpp"
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
 
@@ -44,10 +45,9 @@ private:
     pine::ClientState client;
 
     // ZED types, TODO: Replace with the above requests
-    zed::CameraParameters m_camera_parameters = {};
+    zed::CameraParameters camera_parameters = {};
     zed::CameraSettings m_camera_settings = {};
     zed::ImageSpecification m_image_specs{};
-
     zed::MemoryState m_server_memory{};
     zed::SensorData m_server_sensors{};
 

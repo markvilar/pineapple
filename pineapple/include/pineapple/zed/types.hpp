@@ -7,21 +7,7 @@
 namespace zed
 {
 
-enum class CameraAction : uint8_t
-{
-    UNKNOWN = 0,
-    START_RECORD = 1,
-    STOP_RECORD = 2
-};
-
-enum class CameraResponse : uint8_t
-{
-    UNKNOWN = 0,
-    CONTROL_SUCCESS = 1,
-    CONTROL_FAILURE = 2
-};
-
-enum class Resolution : uint8_t
+enum Resolution : uint8_t
 {
     HD2K = 1,
     HD1080 = 2,
@@ -29,7 +15,7 @@ enum class Resolution : uint8_t
     VGA = 4
 };
 
-enum class Compression : uint8_t
+enum Compression : uint8_t
 {
     LOSSLESS = 1,
     H264 = 2,
@@ -38,7 +24,7 @@ enum class Compression : uint8_t
     H265_LOSSLESS = 5
 };
 
-enum class View : uint8_t
+enum View : uint8_t
 {
     LEFT = 1,
     RIGHT = 2,
@@ -71,8 +57,8 @@ inline uint8_t view_channels(const View view)
 
 struct CameraParameters
 {
-    Resolution resolution = Resolution::HD720;
-    Compression compression = Compression::H264;
+    uint8_t resolution = Resolution::HD720;
+    uint8_t compression = Compression::H264;
     uint8_t fps = 0;
     float timeout = 5.0f;
     bool enable_image_enhancement = true;

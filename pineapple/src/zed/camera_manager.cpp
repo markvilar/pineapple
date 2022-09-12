@@ -1,7 +1,6 @@
 #include "pineapple/zed/camera_manager.hpp"
 
 #include "pineapple/utils.hpp"
-#include "pineapple/serialization.hpp"
 #include "pineapple/zed/protocol.hpp"
 
 #ifdef PINEAPPLE_ENABLE_ZED
@@ -364,8 +363,6 @@ void CameraManager::on_update()
 void CameraManager::on_message(const std::vector<uint8_t>& buffer)
 {
     PINE_INFO("Camera manager: Got message: Size = {0}", buffer.size());
-    pineapple::MemoryViewInputArchive input_archive(buffer.data(), 
-        buffer.size());
 }
 
 }; // namespace zed

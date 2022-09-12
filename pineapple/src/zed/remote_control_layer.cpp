@@ -174,6 +174,19 @@ void RemoteControlLayer::on_gui_render()
 
             if (ImGui::Button("Record", ImVec2(0.50f * content_size.x, 30.0f)))
             {
+                zed::ControlRequest request;
+                request.topic = "/desktop/control_request";
+                request.action = "start_record";
+                request.fps = camera_parameters.fps;
+                request.timeout = camera_parameters.timeout;
+                request.enable_image_enhancement 
+                    = camera_parameters.enable_image_enhancement;
+                request.disable_self_calibration 
+                    = camera_parameters.disable_self_calibration;
+                request.require_sensors = camera_parameters.require_sensors;
+                request.enable_depth = camera_parameters.enable_depth;
+
+                send_request(request);
             }
 
             ImGui::SameLine();
@@ -181,10 +194,23 @@ void RemoteControlLayer::on_gui_render()
             if (ImGui::Button("Stop record", 
                 ImVec2(0.50f * content_size.x, 30.0f)))
             {
+                zed::ControlRequest request;
+                request.topic = "/desktop/control_request";
+                request.action = "stop_record";
+                request.fps = camera_parameters.fps;
+                request.timeout = camera_parameters.timeout;
+                request.enable_image_enhancement 
+                    = camera_parameters.enable_image_enhancement;
+                request.disable_self_calibration 
+                    = camera_parameters.disable_self_calibration;
+                request.require_sensors = camera_parameters.require_sensors;
+                request.enable_depth = camera_parameters.enable_depth;
+
+                send_request(request);
             }
 
             ImGui::Separator();
-            draw_camera_parameters(m_camera_parameters);
+            draw_camera_parameters(camera_parameters);
             ImGui::Separator();
             draw_camera_settings(m_camera_settings);
             ImGui::Separator();
@@ -214,8 +240,26 @@ void RemoteControlLayer::on_event(pine::Event& e)
     m_camera_controller.on_event(e);
 }
 
+void RemoteControlLayer::send_request(const zed::ControlRequest& request)
+{
+    msgpack::sbuffer buffer;
+    msgpack::pack(buffer, request);
+
+    pine::send(client, (uint8_t*)buffer.data(), buffer.size());
+
+    PINE_INFO("Client sent {0} bytes", buffer.size());
+}
+
+// TODO: Remove, debug
 void RemoteControlLayer::on_server_message(const std::vector<uint8_t>& buffer)
 {
+    PINE_INFO("Server got {0} bytes", buffer.size());
+
+    msgpack::object_handle handle 
+        = msgpack::unpack((char*)buffer.data(), buffer.size());
+    msgpack::object object = handle.get();
+
+    PINE_INFO("Object: {0}", object);
 }
 
 }; // namespace pineapple

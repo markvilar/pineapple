@@ -5,6 +5,7 @@ namespace pineapple
 
 void draw_camera_parameters(zed::CameraParameters& parameters)
 {
+    /*
     static const std::array<std::pair<const char*, zed::Resolution>, 4>
         resolution_options = {{
             {"HD2K", zed::Resolution::HD2K},
@@ -35,6 +36,7 @@ void draw_camera_parameters(zed::CameraParameters& parameters)
         &parameters.disable_self_calibration);
     ImGui::Checkbox("Require sensors", &parameters.require_sensors);
     ImGui::Checkbox("Enable depth", &parameters.enable_depth);
+    */
 }
 
 void draw_camera_settings(zed::CameraSettings& settings)
@@ -59,6 +61,7 @@ void draw_camera_settings(zed::CameraSettings& settings)
 
 void draw_image_specification(zed::ImageSpecification& specifications)
 {
+    /*
     static const std::array<std::pair<const char*, zed::View>, 5> view_options =
         {{
             {"Left", zed::View::LEFT},
@@ -78,6 +81,7 @@ void draw_image_specification(zed::ImageSpecification& specifications)
         NULL,
         NULL);
     pine::gui::dropdown("View", &specifications.view, view_options);
+    */
 }
 
 }; // namespace pineapple
