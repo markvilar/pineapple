@@ -7,21 +7,7 @@
 namespace zed
 {
 
-enum class CameraAction : uint8_t
-{
-    UNKNOWN = 0,
-    START_RECORD = 1,
-    STOP_RECORD = 2
-};
-
-enum class CameraResponse : uint8_t
-{
-    UNKNOWN = 0,
-    CONTROL_SUCCESS = 1,
-    CONTROL_FAILURE = 2
-};
-
-enum class Resolution : uint8_t
+enum Resolution : uint8_t
 {
     HD2K = 1,
     HD1080 = 2,
@@ -29,7 +15,7 @@ enum class Resolution : uint8_t
     VGA = 4
 };
 
-enum class Compression : uint8_t
+enum Compression : uint8_t
 {
     LOSSLESS = 1,
     H264 = 2,
@@ -38,7 +24,7 @@ enum class Compression : uint8_t
     H265_LOSSLESS = 5
 };
 
-enum class View : uint8_t
+enum View : uint8_t
 {
     LEFT = 1,
     RIGHT = 2,
@@ -71,8 +57,8 @@ inline uint8_t view_channels(const View view)
 
 struct CameraParameters
 {
-    Resolution resolution = Resolution::HD720;
-    Compression compression = Compression::H264;
+    uint8_t resolution = Resolution::HD720;
+    uint8_t compression = Compression::H264;
     uint8_t fps = 0;
     float timeout = 5.0f;
     bool enable_image_enhancement = true;
@@ -94,23 +80,17 @@ struct CameraSettings
     int whitebalance = 4000;
     bool auto_exposure = true;
     bool auto_whitebalance = true;
-    bool enable_led = false;
 };
 
 inline bool operator==(const CameraSettings& lhs, const CameraSettings& rhs)
 {
-    return lhs.brightness == rhs.brightness 
-        && lhs.contrast == rhs.contrast
-        && lhs.hue == rhs.hue
-        && lhs.saturation == rhs.saturation
-        && lhs.sharpness == rhs.sharpness
-        && lhs.gamma == rhs.gamma
-        && lhs.gain == rhs.gain
-        && lhs.exposure == rhs.exposure
+    return lhs.brightness == rhs.brightness && lhs.contrast == rhs.contrast
+        && lhs.hue == rhs.hue && lhs.saturation == rhs.saturation
+        && lhs.sharpness == rhs.sharpness && lhs.gamma == rhs.gamma
+        && lhs.gain == rhs.gain && lhs.exposure == rhs.exposure
         && lhs.whitebalance == rhs.whitebalance
         && lhs.auto_exposure == rhs.auto_exposure
-        && lhs.auto_whitebalance == rhs.auto_whitebalance
-        && lhs.enable_led == rhs.enable_led;
+        && lhs.auto_whitebalance == rhs.auto_whitebalance;
 }
 
 inline bool operator!=(const CameraSettings& lhs, const CameraSettings& rhs)
@@ -120,16 +100,17 @@ inline bool operator!=(const CameraSettings& lhs, const CameraSettings& rhs)
 
 struct ImageSpecification
 {
-    uint32_t width = 1280;
-    uint32_t height = 720;
-    View view = View::LEFT;
+    uint16_t width = 1280;
+    uint16_t height = 720;
+    uint16_t channels = 4;
+    std::string format{"BGRA"};
 
 public:
     ImageSpecification() = default;
 
-    ImageSpecification(const uint32_t width, const uint32_t height,
-        const View view)
-        : width(width), height(height), view(view)
+    ImageSpecification(const uint16_t width_, const uint16_t height_,
+        const uint16_t channels_)
+        : width(width_), height(height_), channels(channels_)
     {
     }
 };
@@ -143,27 +124,9 @@ public:
     Image() = default;
 
     Image(const uint8_t* data, const uint32_t width, const uint32_t height,
-        const View view)
-        : specification(width, height, view)
+        uint16_t channels)
+        : specification(width, height, channels)
     {
-        const auto channels = [view]()
-        {
-            switch (view)
-            {
-            case View::LEFT:
-                return 4;
-            case View::RIGHT:
-                return 4;
-            case View::LEFT_GRAY:
-                return 1;
-            case View::RIGHT_GRAY:
-                return 1;
-            case View::SIDE_BY_SIDE:
-                return 4;
-            default:
-                return 0;
-            }
-        }();
         buffer = std::vector<uint8_t>(data, data + width * height * channels);
     }
 };

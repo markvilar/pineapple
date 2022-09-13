@@ -37,12 +37,12 @@ void LocalControlLayer::on_update(pine::Timestep ts)
 {
     const auto image_request =
         m_record_manager.request_image(m_image_specs.width,
-            m_image_specs.height,
-            m_image_specs.view);
+            m_image_specs.height);
     if (image_request.has_value())
     {
         const auto& image = image_request.value();
-        m_image_texture = pine::Texture2D::create(convert_image(image));
+        // FIXME: m_image_texture =
+        // pine::Texture2D::create(convert_image(image));
     }
 
     const auto sensor_data_request = m_record_manager.request_sensor_data();
@@ -62,7 +62,6 @@ void LocalControlLayer::on_update(pine::Timestep ts)
         m_ang_y.push_back(data.turnrate.y);
         m_ang_z.push_back(data.turnrate.z);
     }
-
 
     /*
     if (m_viewport_focused)
@@ -135,16 +134,16 @@ void LocalControlLayer::on_gui_render()
                 ImGui::ShowStackToolWindow();
         });
 
-    const auto viewport_panel = pine::gui::render_viewport("Viewport", 
-        *m_framebuffer.get());
+    const auto viewport_panel =
+        pine::gui::render_viewport("Viewport", *m_framebuffer.get());
     const auto& specs = m_framebuffer->get_specification();
 
     if (viewport_panel.size.x > 0.0f && viewport_panel.size.y > 0.0f
-        && (specs.width != viewport_panel.size.x 
-        || specs.height != viewport_panel.size.y))
+        && (specs.width != viewport_panel.size.x
+            || specs.height != viewport_panel.size.y))
     {
         m_framebuffer->resize(viewport_panel.size.x, viewport_panel.size.y);
-        m_camera_controller.on_resize(viewport_panel.size.x, 
+        m_camera_controller.on_resize(viewport_panel.size.x,
             viewport_panel.size.y);
     }
 
@@ -200,7 +199,6 @@ void LocalControlLayer::on_gui_render()
                     PINE_INFO(" - Auto expos.: {0}", settings.auto_exposure);
                     PINE_INFO(" - Auto w.b.:   {0}",
                         settings.auto_whitebalance);
-                    PINE_INFO(" - Enable LED:  {0}", settings.enable_led);
                 }
             }
 

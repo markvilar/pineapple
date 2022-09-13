@@ -52,9 +52,7 @@ int main(int argc, char** argv)
             PINE_INFO("Whitebalance:      {0}", settings.whitebalance);
             PINE_INFO("Auto exposure:     {0}", settings.auto_exposure);
             PINE_INFO("Auto whitebalance: {0}", settings.auto_whitebalance);
-            PINE_INFO("LED status:        {0}", settings.enable_led);
         }
-
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <msgpack.hpp>
+
 #include <pine/pine.hpp>
 
-#include "pineapple/serialization.hpp"
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
 
@@ -25,45 +26,45 @@ public:
     virtual void on_event(pine::Event& e) override;
 
 private:
-    void on_message(const std::vector<uint8_t>& buffer) {}
+    template <typename T>
+    void send_message(const T& message)
+    {
+        msgpack::sbuffer buffer;
+        msgpack::pack(buffer, message);
+        pine::send(client, (uint8_t*)buffer.data(), buffer.size());
+    }
 
-    void send_request(const zed::ControlRequest& request);
+    void on_message(const std::vector<uint8_t>& buffer);
 
-    // Debug
-    void on_server_message(const std::vector<uint8_t>& buffer);
+    void on_message(const zed::ControlMessage& message);
+    void on_message(const zed::SettingsMessage& message);
+    void on_message(const zed::SensorMessage& message);
+    void on_message(const zed::ImageMessage& message);
 
 private:
     // Rendering entities
-    pine::QuadRenderData m_renderer_data{};
-    pine::OrthographicCameraController m_camera_controller;
-    std::shared_ptr<pine::Framebuffer> m_framebuffer;
-    std::shared_ptr<pine::Texture2D> m_image_texture;
+    pine::QuadRenderData quad_renderer{};
+    pine::OrthographicCameraController camera_controller;
+    std::shared_ptr<pine::Framebuffer> framebuffer;
+    std::shared_ptr<pine::Texture2D> image_texture;
     pine::Image m_image{};
 
     // Networking entities
     pine::ClientState client;
 
-    // ZED types, TODO: Replace with the above requests
-    zed::CameraParameters m_camera_parameters = {};
-    zed::CameraSettings m_camera_settings = {};
-    zed::ImageSpecification m_image_specs{};
+    // Stream parameters
+    uint16_t image_width = 1280;
+    uint16_t image_height = 720;
+    float stream_period = 1.0f;
 
-    zed::MemoryState m_server_memory{};
-    zed::SensorData m_server_sensors{};
+    // ZED types
+    zed::CameraParameters camera_parameters = {};
+    zed::CameraSettings camera_settings = {};
 
-    // Data entities
-    StaticSeries<float, 400> m_acceleration_x{};
-    StaticSeries<float, 400> m_acceleration_y{};
-    StaticSeries<float, 400> m_acceleration_z{};
-    StaticSeries<float, 400> m_turnrate_x{};
-    StaticSeries<float, 400> m_turnrate_y{};
-    StaticSeries<float, 400> m_turnrate_z{};
-
+    // GUI
+    pine::gui::PanelState viewport_panel{};
     bool m_viewport_focused = false;
     bool m_viewport_hovered = false;
-
-    // DEBUG
-    pine::ServerState server{6000};
 };
 
 } // namespace pineapple

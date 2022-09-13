@@ -2,10 +2,7 @@ add_library(pineapple STATIC)
 add_library(pineapple::pineapple ALIAS pineapple)
 
 find_package(pine REQUIRED)
-
-#find_package(rclcpp REQUIRED)
-#find_package(rcl_interfaces REQUIRED)
-
+find_package(msgpack REQUIRED)
 
 if(PINEAPPLE_ENABLE_ZED)
     include("${PROJECT_SOURCE_DIR}/cmake/zed.cmake")
@@ -18,8 +15,6 @@ target_sources(pineapple
         include/pineapple/zed/protocol.hpp
         include/pineapple/zed/remote_control_layer.hpp
         include/pineapple/zed/types.hpp
-        include/pineapple/message.hpp
-        include/pineapple/serialization.hpp
         include/pineapple/ui_helpers.hpp
         include/pineapple/utils.hpp
     PRIVATE 
@@ -45,6 +40,7 @@ target_include_directories(pineapple
 target_link_libraries(pineapple
     PUBLIC
         pine::pine
+        msgpack::msgpack
     PRIVATE 
         $<$<BOOL:${PINEAPPLE_ENABLE_ZED}>:${ZED_LIBS}>
     )
