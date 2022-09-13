@@ -56,7 +56,7 @@ public:
     std::optional<CameraSettings> request_camera_settings();
     std::optional<SensorData> request_sensor_data();
     std::optional<Image> request_image(const uint32_t width,
-        const uint32_t height, const View view = View::LEFT);
+        const uint32_t height);
 
     bool update_camera_settings(const CameraSettings& settings);
 
@@ -88,16 +88,42 @@ public:
 
 private:
     void on_update();
+
+    template <typename T>
+    void send_message(const std::shared_ptr<pine::ConnectionState>& client,
+        const T& message)
+    {
+        msgpack::sbuffer buffer;
+        msgpack::pack(buffer, message);
+        pine::send_to_client(server,
+            client,
+            (uint8_t*)buffer.data(),
+            buffer.size());
+    }
+
     void on_message(const std::vector<uint8_t>& buffer);
 
+    void on_message(const zed::ControlMessage& message);
+    void on_message(const zed::SettingsMessage& message);
+    void on_message(const zed::SensorMessage& message);
+    void on_message(const zed::StreamMessage& message);
+
 private:
-    bool m_running = true;
+    bool running = true;
+    bool streaming = false;
 
-    pine::ServerState m_server;
+    // FIXME: timestamps
+    std::chrono::time_point<std::chrono::high_resolution_clock> last_frame =
+        std::chrono::high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> now =
+        std::chrono::high_resolution_clock::now();
 
-    RecordManager m_record_manager;
-    // TODO: Add video stream manager
-    // TODO: Add depth manager
+    uint16_t stream_width = 0;
+    uint16_t stream_height = 0;
+    float stream_period = 1.0f;
+
+    pine::ServerState server;
+    RecordManager record_manager;
 };
 
 }; // namespace zed

@@ -1,5 +1,7 @@
 #include "pineapple/zed/camera_manager.hpp"
 
+#include <chrono>
+
 #include "pineapple/utils.hpp"
 #include "pineapple/zed/protocol.hpp"
 
@@ -171,8 +173,6 @@ std::optional<CameraSettings> RecordManager::request_camera_settings()
         m_camera.getCameraSettings(sl::VIDEO_SETTINGS::AEC_AGC);
     settings.auto_whitebalance =
         m_camera.getCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO);
-    settings.enable_led =
-        m_camera.getCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS);
 
     return settings;
 }
@@ -205,42 +205,23 @@ std::optional<SensorData> RecordManager::request_sensor_data()
 }
 
 std::optional<Image> RecordManager::request_image(const uint32_t width,
-    const uint32_t height, const View view)
+    const uint32_t height)
 {
     if (!is_opened())
     {
         return {};
     }
 
-    const auto native_view = [view]()
-    {
-        switch (view)
-        {
-        case View::LEFT:
-            return sl::VIEW::LEFT;
-        case View::RIGHT:
-            return sl::VIEW::RIGHT;
-        case View::LEFT_GRAY:
-            return sl::VIEW::LEFT_GRAY;
-        case View::RIGHT_GRAY:
-            return sl::VIEW::RIGHT_GRAY;
-        case View::SIDE_BY_SIDE:
-            return sl::VIEW::SIDE_BY_SIDE;
-        default:
-            return sl::VIEW::LEFT;
-        }
-    }();
-
     sl::Mat native_image;
     m_camera.retrieveImage(native_image,
-        native_view,
+        sl::VIEW::LEFT,
         sl::MEM::CPU,
         sl::Resolution(width, height));
 
     Image image(native_image.getPtr<uint8_t>(),
         native_image.getWidth(),
         native_image.getHeight(),
-        view);
+        4);
 
     return std::move(image);
 }
@@ -269,8 +250,8 @@ bool RecordManager::update_camera_settings(const CameraSettings& settings)
         settings.auto_exposure);
     m_camera.setCameraSettings(sl::VIDEO_SETTINGS::WHITEBALANCE_AUTO,
         settings.auto_whitebalance);
-    m_camera.setCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS,
-        settings.enable_led);
+    m_camera.setCameraSettings(sl::VIDEO_SETTINGS::LED_STATUS, false);
+
     return true;
 }
 
@@ -279,8 +260,8 @@ void RecordManager::record_worker(const RecordJob job)
     auto [init_parameters, recording_parameters, runtime_parameters] =
         to_stereolabs(job.parameters);
 
-    const auto date_string = pineapple::current_date_time() 
-        + std::string(".svo");
+    const auto date_string =
+        pineapple::current_date_time() + std::string(".svo");
     const auto filepath = job.output_directory / date_string;
     recording_parameters.video_filename = filepath.string().c_str();
 
@@ -321,35 +302,33 @@ void RecordManager::record_worker(const RecordJob job)
 
 CameraManager::CameraManager(const uint16_t port,
     const std::filesystem::path& output_directory)
-    : m_server(port), m_record_manager(output_directory)
+    : server(port), record_manager(output_directory)
 {
 }
 
 CameraManager::~CameraManager()
 {
-    PINE_INFO("Stopping server.");
-    stop_server(m_server);
+    record_manager.stop_record();
+    stop_server(server);
 }
 
 void CameraManager::run()
 {
-    m_server.set_connection_callback(
+    server.set_connection_callback(
         [](const pine::ConnectionState& connection) -> bool
         {
-            PINE_INFO("Server got connection: {0}",
-                connection.socket.remote_endpoint());
+            PINE_INFO("New client: {0}", connection.socket.remote_endpoint());
             return true;
         });
 
-    m_server.set_message_callback(
+    server.set_message_callback(
         [this](const std::vector<uint8_t>& message) -> void
-        { 
-            on_message(message); 
-        });
+        { on_message(message); });
 
-    pine::start_server(m_server);
+    PINE_INFO("Server running on {0}", server.acceptor.local_endpoint());
+    pine::start_server(server);
 
-    while (m_running)
+    while (running)
     {
         on_update();
     }
@@ -357,12 +336,155 @@ void CameraManager::run()
 
 void CameraManager::on_update()
 {
-    pine::update_server(m_server);
+    pine::update_server(server, 10);
+
+    // Get current timestamp
+    now = std::chrono::high_resolution_clock::now();
+
+    double elapsed_time =
+        std::chrono::duration<double, std::milli>(now - last_frame).count()
+        / 1000.0f;
+
+    if (record_manager.is_opened() && streaming && elapsed_time > stream_period)
+    {
+
+        auto request =
+            record_manager.request_image(stream_width, stream_height);
+        if (request.has_value())
+        {
+            auto& image = request.value();
+
+            // format message
+            zed::ImageMessage message;
+            message.topic = "/camera/image";
+            message.width = image.specification.width;
+            message.height = image.specification.height;
+            message.channels = image.specification.channels;
+            message.format = image.specification.format;
+            message.data = image.buffer;
+
+            for (const auto& client : server.connections)
+            {
+                send_message(client, message);
+            }
+
+            last_frame = std::chrono::high_resolution_clock::now();
+        }
+    }
 }
 
 void CameraManager::on_message(const std::vector<uint8_t>& buffer)
 {
-    PINE_INFO("Camera manager: Got message: Size = {0}", buffer.size());
+    msgpack::object_handle handle =
+        msgpack::unpack((char*)buffer.data(), buffer.size());
+    msgpack::object object = handle.get();
+
+    try
+    {
+        auto message = object.as<zed::ControlMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::SettingsMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::SensorMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::StreamMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+}
+
+void CameraManager::on_message(const zed::ControlMessage& message)
+{
+    if (message.command == "stop_record")
+    {
+        record_manager.stop_record();
+    }
+    else if (message.command == "start_record")
+    {
+        CameraParameters parameters;
+        parameters.resolution = message.resolution;   // TODO: Validate
+        parameters.compression = message.compression; // TODO: Validate
+        parameters.fps = message.fps;
+        parameters.timeout = message.timeout;
+        parameters.enable_image_enhancement = message.enable_image_enhancement;
+        parameters.disable_self_calibration = message.disable_self_calibration;
+        parameters.require_sensors = message.require_sensors;
+        parameters.enable_depth = message.enable_depth;
+
+        record_manager.start_record(parameters);
+    }
+}
+
+void CameraManager::on_message(const zed::SettingsMessage& message)
+{
+    zed::CameraSettings settings;
+    settings.brightness = message.brightness;
+    settings.contrast = message.contrast;
+    settings.hue = message.hue;
+    settings.saturation = message.saturation;
+    settings.sharpness = message.sharpness;
+    settings.gamma = message.gamma;
+    settings.gain = message.gain;
+    settings.exposure = message.exposure;
+    settings.whitebalance = message.whitebalance;
+    settings.auto_exposure = message.auto_exposure;
+    settings.auto_whitebalance = message.auto_whitebalance;
+
+    const auto success = record_manager.update_camera_settings(settings);
+    if (success)
+    {
+        auto reply = message;
+        reply.topic = "/camera/settings_response";
+
+        for (const auto& client : server.connections)
+        {
+            send_message(client, reply);
+        }
+    }
+}
+
+void CameraManager::on_message(const zed::SensorMessage& message) {}
+
+void CameraManager::on_message(const zed::StreamMessage& message)
+{
+    if (message.topic == "/desktop/stream_request")
+    {
+        if (message.command == "stop_stream")
+            streaming = false;
+        else if (message.command == "start_stream")
+            streaming = true;
+
+        stream_width = message.width;
+        stream_height = message.height;
+        stream_period = message.period;
+    }
 }
 
 }; // namespace zed
