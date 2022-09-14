@@ -4,6 +4,7 @@
 
 #include <pine/pine.hpp>
 
+#include "pineapple/common.hpp"
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
 
@@ -26,8 +27,11 @@ public:
     virtual void on_event(pine::Event& e) override;
 
 private:
+    void send_settings(const zed::CameraSettings& settings) const;
+    //void send_stream_config();
+
     template <typename T>
-    void send_message(const T& message)
+    void send_message(const T& message) const
     {
         msgpack::sbuffer buffer;
         msgpack::pack(buffer, message);
@@ -43,7 +47,7 @@ private:
 
 private:
     // Rendering entities
-    pine::QuadRenderData quad_renderer{};
+    pine::QuadRenderData quad_data{};
     pine::OrthographicCameraController camera_controller;
     std::shared_ptr<pine::Framebuffer> framebuffer;
     std::shared_ptr<pine::Texture2D> image_texture;
@@ -53,18 +57,19 @@ private:
     pine::ClientState client;
 
     // Stream parameters
-    uint16_t image_width = 1280;
-    uint16_t image_height = 720;
-    float stream_period = 1.0f;
+    StreamConfig stream_config;
 
-    // ZED types
+    // Camera primitives - local and remote
     zed::CameraParameters camera_parameters = {};
+    zed::CameraParameters remote_parameters = {};
     zed::CameraSettings camera_settings = {};
+    zed::CameraSettings remote_settings = {};
+
+    // Reference primitives - for automated updates
+    zed::CameraSettings reference_settings = {};
 
     // GUI
     pine::gui::PanelState viewport_panel{};
-    bool m_viewport_focused = false;
-    bool m_viewport_hovered = false;
 };
 
 } // namespace pineapple

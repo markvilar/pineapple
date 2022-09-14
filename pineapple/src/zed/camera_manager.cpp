@@ -147,7 +147,7 @@ uint64_t RecordManager::get_available_space()
     return si.available;
 }
 
-std::optional<CameraSettings> RecordManager::request_camera_settings()
+std::optional<CameraSettings> RecordManager::get_settings()
 {
     if (!is_opened())
     {
@@ -177,7 +177,7 @@ std::optional<CameraSettings> RecordManager::request_camera_settings()
     return settings;
 }
 
-std::optional<SensorData> RecordManager::request_sensor_data()
+std::optional<SensorData> RecordManager::get_sensor_data()
 {
     if (!is_opened())
     {
@@ -204,7 +204,7 @@ std::optional<SensorData> RecordManager::request_sensor_data()
     return data;
 }
 
-std::optional<Image> RecordManager::request_image(const uint32_t width,
+std::optional<Image> RecordManager::get_image(const uint32_t width,
     const uint32_t height)
 {
     if (!is_opened())
@@ -226,7 +226,7 @@ std::optional<Image> RecordManager::request_image(const uint32_t width,
     return std::move(image);
 }
 
-bool RecordManager::update_camera_settings(const CameraSettings& settings)
+bool RecordManager::update_settings(const CameraSettings& settings)
 {
     if (!is_opened())
     {
@@ -348,8 +348,7 @@ void CameraManager::on_update()
     if (record_manager.is_opened() && streaming && elapsed_time > stream_period)
     {
 
-        auto request =
-            record_manager.request_image(stream_width, stream_height);
+        auto request = record_manager.get_image(stream_width, stream_height);
         if (request.has_value())
         {
             auto& image = request.value();
@@ -425,12 +424,20 @@ void CameraManager::on_message(const zed::ControlMessage& message)
     if (message.command == "stop_record")
     {
         record_manager.stop_record();
+        auto reply = message;
+        reply.topic = "/camera/control_response";
+        reply.command = "record_stopped";
+        for (const auto& client : server.connections)
+        {
+            send_message(client, reply);
+        }
+
     }
     else if (message.command == "start_record")
     {
         CameraParameters parameters;
-        parameters.resolution = message.resolution;   // TODO: Validate
-        parameters.compression = message.compression; // TODO: Validate
+        parameters.resolution = message.resolution;
+        parameters.compression = message.compression;
         parameters.fps = message.fps;
         parameters.timeout = message.timeout;
         parameters.enable_image_enhancement = message.enable_image_enhancement;
@@ -439,6 +446,14 @@ void CameraManager::on_message(const zed::ControlMessage& message)
         parameters.enable_depth = message.enable_depth;
 
         record_manager.start_record(parameters);
+
+        auto reply = message;
+        reply.topic = "/camera/control_response";
+        reply.command = "record_started";
+        for (const auto& client : server.connections)
+        {
+            send_message(client, reply);
+        }
     }
 }
 
@@ -457,7 +472,7 @@ void CameraManager::on_message(const zed::SettingsMessage& message)
     settings.auto_exposure = message.auto_exposure;
     settings.auto_whitebalance = message.auto_whitebalance;
 
-    const auto success = record_manager.update_camera_settings(settings);
+    const auto success = record_manager.update_settings(settings);
     if (success)
     {
         auto reply = message;

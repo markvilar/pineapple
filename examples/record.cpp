@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     while (!stop_flag)
     {
-        auto settings_request = manager.request_camera_settings();
+        auto settings_request = manager.get_settings();
 
         PINE_INFO("Camera opened:    {0}", manager.is_opened());
         PINE_INFO("Camera recording: {0}", manager.is_recording());

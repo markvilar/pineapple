@@ -15,6 +15,7 @@ target_sources(pineapple
         include/pineapple/zed/protocol.hpp
         include/pineapple/zed/remote_control_layer.hpp
         include/pineapple/zed/types.hpp
+        include/pineapple/common.hpp
         include/pineapple/ui_helpers.hpp
         include/pineapple/utils.hpp
     PRIVATE 
