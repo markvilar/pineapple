@@ -77,11 +77,12 @@ void RemoteControlLayer::on_update(pine::Timestep ts)
         send_settings(camera_settings);
     }
 
-    /* TODO: Automatically update stream configuration
-    if ()
+    // Automatically update stream configuration
+    if (stream_config != reference_stream_config)
     {
+        reference_stream_config = stream_config;
+        send_stream_update(stream_config);
     }
-    */
 }
 
 void RemoteControlLayer::on_gui_render()
@@ -140,15 +141,13 @@ void RemoteControlLayer::on_gui_render()
     pine::Application::get().get_graphical_interface().block_events(
         !viewport_panel.focused || !viewport_panel.hovered);
 
-    pine::gui::render_window("Camera Controls",
+    pine::gui::render_window("Network",
         [this]()
         {
-            static char address[256] = "";
-            static uint16_t port = 0;
-
-            static constexpr auto control_panel_height = 200;
             const auto content_size = ImGui::GetContentRegionAvail();
 
+            static char address[256] = "";
+            static uint16_t port = 0;
             ImGui::InputText("Server Address", address, IM_ARRAYSIZE(address));
             ImGui::InputInt("Server Port", (int*)&port, 0, 0);
             ImGui::Text("Client connected: %d", is_connected(client));
@@ -166,9 +165,13 @@ void RemoteControlLayer::on_gui_render()
 
             ImGui::Separator();
 
-            // ----------------------------------------------------------------
-            // Camera controls
-            // ----------------------------------------------------------------
+
+        });
+
+    pine::gui::render_window("Camera Controls",
+        [this]()
+        {
+            const auto content_size = ImGui::GetContentRegionAvail();
 
             if (ImGui::Button("Record", ImVec2(0.50f * content_size.x, 30.0f)))
             {
@@ -299,16 +302,23 @@ void RemoteControlLayer::send_settings(
     send_message(message);
 }
 
-/*
-void RemoteControlLayer::send_stream_config()
+void RemoteControlLayer::send_stream_update(const StreamConfig& config) const
 {
+    zed::StreamMessage message;
+    message.topic = "/desktop/stream_request";
+
+    message.command = "update_stream";
+    message.width = stream_config.width;
+    message.height = stream_config.height;
+    message.period = stream_config.period;
+
+    send_message(message);
 }
-*/
 
 void RemoteControlLayer::on_message(const std::vector<uint8_t>& buffer)
 {
     msgpack::object_handle handle =
-        msgpack::unpack((char*)buffer.data(), buffer.size());
+        msgpack::unpack((const char*)(buffer.data()), buffer.size());
     msgpack::object object = handle.get();
 
     try

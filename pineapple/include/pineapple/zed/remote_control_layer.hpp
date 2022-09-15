@@ -28,7 +28,7 @@ public:
 
 private:
     void send_settings(const zed::CameraSettings& settings) const;
-    //void send_stream_config();
+    void send_stream_update(const StreamConfig& config) const;
 
     template <typename T>
     void send_message(const T& message) const
@@ -48,25 +48,26 @@ private:
 private:
     // Rendering entities
     pine::QuadRenderData quad_data{};
-    pine::OrthographicCameraController camera_controller;
-    std::shared_ptr<pine::Framebuffer> framebuffer;
-    std::shared_ptr<pine::Texture2D> image_texture;
+    pine::OrthographicCameraController camera_controller{1.0f};
+    std::shared_ptr<pine::Framebuffer> framebuffer{};
+    std::shared_ptr<pine::Texture2D> image_texture{};
     pine::Image m_image{};
 
     // Networking entities
     pine::ClientState client;
 
     // Stream parameters
-    StreamConfig stream_config;
+    StreamConfig stream_config{};
+    StreamConfig reference_stream_config{};
 
     // Camera primitives - local and remote
-    zed::CameraParameters camera_parameters = {};
-    zed::CameraParameters remote_parameters = {};
-    zed::CameraSettings camera_settings = {};
-    zed::CameraSettings remote_settings = {};
+    zed::CameraParameters camera_parameters{};
+    zed::CameraParameters remote_parameters{};
+    zed::CameraSettings camera_settings{};
+    zed::CameraSettings remote_settings{};
 
     // Reference primitives - for automated updates
-    zed::CameraSettings reference_settings = {};
+    zed::CameraSettings reference_settings{};
 
     // GUI
     pine::gui::PanelState viewport_panel{};
