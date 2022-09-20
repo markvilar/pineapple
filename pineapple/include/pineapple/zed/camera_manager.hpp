@@ -63,13 +63,13 @@ private:
     void record_worker(const RecordJob job);
 
 private:
-    std::filesystem::path m_output_directory = ".";
+    std::filesystem::path output_directory = ".";
 
-    sl::Camera m_camera = {};
+    sl::Camera camera = {};
 
-    std::unique_ptr<std::thread> m_worker_thread = {};
-    std::atomic<bool> m_stop_flag = false;
-    std::atomic<bool> m_busy_flag = false;
+    std::unique_ptr<std::thread> worker_thread = {};
+    std::atomic<bool> stop_flag = false;
+    std::atomic<bool> busy_flag = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -84,6 +84,7 @@ public:
     ~CameraManager();
 
     void run();
+    void stop();
 
 private:
     void on_update();
@@ -108,10 +109,9 @@ private:
     void on_message(const zed::StreamMessage& message);
 
 private:
-    bool running = true;
+    std::atomic<bool> running = true;
     bool streaming = false;
 
-    // FIXME: timestamps
     std::chrono::time_point<std::chrono::high_resolution_clock> last_frame =
         std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> now =
