@@ -33,28 +33,6 @@ enum View : uint8_t
     SIDE_BY_SIDE = 5,
 };
 
-inline uint8_t view_channels(const View view)
-{
-    return [view]()
-    {
-        switch (view)
-        {
-        case View::LEFT:
-            return 4;
-        case View::RIGHT:
-            return 4;
-        case View::LEFT_GRAY:
-            return 1;
-        case View::RIGHT_GRAY:
-            return 1;
-        case View::SIDE_BY_SIDE:
-            return 4;
-        default:
-            return 0;
-        }
-    }();
-}
-
 struct CameraParameters
 {
     uint8_t resolution = Resolution::HD720;
@@ -129,20 +107,6 @@ public:
     {
         buffer = std::vector<uint8_t>(data, data + width * height * channels);
     }
-};
-
-struct CameraState
-{
-    bool opened;
-    bool recording;
-    bool stopped;
-};
-
-struct MemoryState
-{
-    uint64_t total_space;
-    uint64_t free_space;
-    uint64_t available_space;
 };
 
 struct SensorData

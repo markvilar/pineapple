@@ -36,8 +36,7 @@ void LocalControlLayer::on_detach() {}
 void LocalControlLayer::on_update(pine::Timestep ts)
 {
     const auto image_request =
-        m_record_manager.request_image(m_image_specs.width,
-            m_image_specs.height);
+        m_record_manager.get_image(m_image_specs.width, m_image_specs.height);
     if (image_request.has_value())
     {
         const auto& image = image_request.value();
@@ -45,7 +44,7 @@ void LocalControlLayer::on_update(pine::Timestep ts)
         // pine::Texture2D::create(convert_image(image));
     }
 
-    const auto sensor_data_request = m_record_manager.request_sensor_data();
+    const auto sensor_data_request = m_record_manager.get_sensor_data();
     if (sensor_data_request.has_value())
     {
         const auto& data = sensor_data_request.value();
@@ -182,8 +181,7 @@ void LocalControlLayer::on_gui_render()
 
             if (ImGui::Button("Request settings"))
             {
-                const auto settings_request =
-                    m_record_manager.request_camera_settings();
+                const auto settings_request = m_record_manager.get_settings();
                 if (settings_request.has_value())
                 {
                     const auto settings = settings_request.value();
@@ -206,7 +204,7 @@ void LocalControlLayer::on_gui_render()
 
             if (ImGui::Button("Update settings"))
             {
-                m_record_manager.update_camera_settings(m_camera_settings);
+                m_record_manager.update_settings(m_camera_settings);
             }
 
             ImGui::Separator();

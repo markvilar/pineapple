@@ -53,12 +53,11 @@ public:
     uint64_t get_free_space();
     uint64_t get_available_space();
 
-    std::optional<CameraSettings> request_camera_settings();
-    std::optional<SensorData> request_sensor_data();
-    std::optional<Image> request_image(const uint32_t width,
-        const uint32_t height);
+    std::optional<CameraSettings> get_settings();
+    std::optional<SensorData> get_sensor_data();
+    std::optional<Image> get_image(const uint32_t width, const uint32_t height);
 
-    bool update_camera_settings(const CameraSettings& settings);
+    bool update_settings(const CameraSettings& settings);
 
 private:
     void record_worker(const RecordJob job);
