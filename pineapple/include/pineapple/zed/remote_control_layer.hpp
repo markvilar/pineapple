@@ -1,8 +1,10 @@
 #pragma once
 
-#include <Pine/Pine.hpp>
+#include <msgpack.hpp>
 
-#include "pineapple/serialization.hpp"
+#include <pine/pine.hpp>
+
+#include "pineapple/common.hpp"
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
 
@@ -12,65 +14,63 @@
 namespace pineapple
 {
 
-class RemoteControlLayer : public Pine::Layer
+class RemoteControlLayer : public pine::Layer
 {
 public:
     RemoteControlLayer();
     ~RemoteControlLayer();
 
-    virtual void OnAttach() override;
-    virtual void OnDetach() override;
-    virtual void OnUpdate(Pine::Timestep ts) override;
-    virtual void OnImGuiRender() override;
-    virtual void OnEvent(Pine::Event& e) override;
+    virtual void on_attach() override;
+    virtual void on_detach() override;
+    virtual void on_update(pine::Timestep ts) override;
+    virtual void on_gui_render() override;
+    virtual void on_event(pine::Event& e) override;
 
 private:
-    void update_panel_layouts();
+    void send_settings(const zed::CameraSettings& settings) const;
+    void send_stream_update(const StreamConfig& config) const;
 
-    void on_response(const zed::ControlService::Response::DataType& response);
-    void on_response(const zed::ImageService::Response::DataType& response);
-    void on_response(const zed::MemoryService::Response::DataType& response);
-    void on_response(const zed::SensorService::Response::DataType& response);
-    void on_response(const zed::SettingsService::Response::DataType& response);
+    template <typename T>
+    void send_message(const T& message) const
+    {
+        msgpack::sbuffer buffer;
+        msgpack::pack(buffer, message);
+        pine::send(client, (uint8_t*)buffer.data(), buffer.size());
+    }
+
+    void on_message(const std::vector<uint8_t>& buffer);
+
+    void on_message(const zed::ControlMessage& message);
+    void on_message(const zed::SettingsMessage& message);
+    void on_message(const zed::SensorMessage& message);
+    void on_message(const zed::ImageMessage& message);
 
 private:
     // Rendering entities
-    Pine::Renderer2D::RendererData m_renderer_data{};
-    Pine::OrthographicCameraController m_camera_controller;
-    std::shared_ptr<Pine::Framebuffer> m_framebuffer;
-    std::shared_ptr<Pine::Texture2D> m_image_texture;
-    Pine::Image m_image{};
+    pine::QuadRenderData quad_data{};
+    pine::OrthographicCameraController camera_controller{1.0f};
+    std::shared_ptr<pine::Framebuffer> framebuffer{};
+    std::shared_ptr<pine::Texture2D> image_texture{};
+    pine::Image m_image{};
 
     // Networking entities
-    Pine::ClientState m_client;
+    pine::ClientState client;
 
-    // ZED services
-    zed::ControlService::Request m_control_request{};
-    zed::ImageService::Request m_image_request{};
-    zed::MemoryService::Request m_memory_request{};
-    zed::SensorService::Request m_sensor_request{};
-    zed::SettingsService::Request m_settings_request{};
+    // Stream parameters
+    StreamConfig stream_config{};
+    StreamConfig reference_stream_config{};
 
-    // ZED types, TODO: Replace with the above requests
-    zed::CameraParameters m_camera_parameters = {};
-    zed::CameraSettings m_camera_settings = {};
-    zed::ImageSpecification m_image_specs{};
+    // Camera primitives - local and remote
+    zed::CameraParameters camera_parameters{};
+    zed::CameraParameters remote_parameters{};
+    zed::CameraSettings camera_settings{};
+    zed::CameraSettings remote_settings{};
 
-    zed::MemoryState m_server_memory{};
-    zed::SensorData m_server_sensors{};
+    // Reference primitives - for automated updates
+    zed::CameraSettings reference_settings{};
 
-    // Data entities
-    StaticSeries<float, 400> m_acceleration_x{};
-    StaticSeries<float, 400> m_acceleration_y{};
-    StaticSeries<float, 400> m_acceleration_z{};
-    StaticSeries<float, 400> m_turnrate_x{};
-    StaticSeries<float, 400> m_turnrate_y{};
-    StaticSeries<float, 400> m_turnrate_z{};
-
-    bool m_viewport_focused = false;
-    bool m_viewport_hovered = false;
-
-    std::unordered_map<std::string, PanelLayout> m_panel_layouts{};
+    // GUI
+    pine::gui::PanelState viewport_panel{};
 };
 
 } // namespace pineapple

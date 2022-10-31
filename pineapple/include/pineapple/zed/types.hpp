@@ -2,26 +2,12 @@
 
 #include <cstdint>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
-namespace pineapple::zed
+namespace zed
 {
 
-enum class CameraAction : uint8_t
-{
-    UNKNOWN = 0,
-    START_RECORD = 1,
-    STOP_RECORD = 2
-};
-
-enum class CameraResponse : uint8_t
-{
-    UNKNOWN = 0,
-    CONTROL_SUCCESS = 1,
-    CONTROL_FAILURE = 2
-};
-
-enum class Resolution : uint8_t
+enum Resolution : uint8_t
 {
     HD2K = 1,
     HD1080 = 2,
@@ -29,7 +15,7 @@ enum class Resolution : uint8_t
     VGA = 4
 };
 
-enum class Compression : uint8_t
+enum Compression : uint8_t
 {
     LOSSLESS = 1,
     H264 = 2,
@@ -38,7 +24,7 @@ enum class Compression : uint8_t
     H265_LOSSLESS = 5
 };
 
-enum class View : uint8_t
+enum View : uint8_t
 {
     LEFT = 1,
     RIGHT = 2,
@@ -49,8 +35,8 @@ enum class View : uint8_t
 
 struct CameraParameters
 {
-    Resolution resolution = Resolution::HD720;
-    Compression compression = Compression::H264;
+    uint8_t resolution = Resolution::HD720;
+    uint8_t compression = Compression::H264;
     uint8_t fps = 0;
     float timeout = 5.0f;
     bool enable_image_enhancement = true;
@@ -72,21 +58,37 @@ struct CameraSettings
     int whitebalance = 4000;
     bool auto_exposure = true;
     bool auto_whitebalance = true;
-    bool enable_led = true;
 };
+
+inline bool operator==(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return lhs.brightness == rhs.brightness && lhs.contrast == rhs.contrast
+        && lhs.hue == rhs.hue && lhs.saturation == rhs.saturation
+        && lhs.sharpness == rhs.sharpness && lhs.gamma == rhs.gamma
+        && lhs.gain == rhs.gain && lhs.exposure == rhs.exposure
+        && lhs.whitebalance == rhs.whitebalance
+        && lhs.auto_exposure == rhs.auto_exposure
+        && lhs.auto_whitebalance == rhs.auto_whitebalance;
+}
+
+inline bool operator!=(const CameraSettings& lhs, const CameraSettings& rhs)
+{
+    return !(lhs == rhs);
+}
 
 struct ImageSpecification
 {
-    uint32_t width = 1280;
-    uint32_t height = 720;
-    View view = View::LEFT;
+    uint16_t width = 1280;
+    uint16_t height = 720;
+    uint16_t channels = 4;
+    std::string format{"BGRA"};
 
 public:
     ImageSpecification() = default;
 
-    ImageSpecification(const uint32_t width, const uint32_t height,
-        const View view)
-        : width(width), height(height), view(view)
+    ImageSpecification(const uint16_t width_, const uint16_t height_,
+        const uint16_t channels_)
+        : width(width_), height(height_), channels(channels_)
     {
     }
 };
@@ -100,43 +102,11 @@ public:
     Image() = default;
 
     Image(const uint8_t* data, const uint32_t width, const uint32_t height,
-        const View view)
-        : specification(width, height, view)
+        uint16_t channels)
+        : specification(width, height, channels)
     {
-        const auto channels = [view]()
-        {
-            switch (view)
-            {
-            case View::LEFT:
-                return 4;
-            case View::RIGHT:
-                return 4;
-            case View::LEFT_GRAY:
-                return 1;
-            case View::RIGHT_GRAY:
-                return 1;
-            case View::SIDE_BY_SIDE:
-                return 4;
-            default:
-                return 0;
-            }
-        }();
         buffer = std::vector<uint8_t>(data, data + width * height * channels);
     }
-};
-
-struct CameraState
-{
-    bool opened;
-    bool recording;
-    bool stopped;
-};
-
-struct MemoryState
-{
-    uint64_t total_space;
-    uint64_t free_space;
-    uint64_t available_space;
 };
 
 struct SensorData
@@ -144,66 +114,8 @@ struct SensorData
     float pressure;
     float temperature_left;
     float temperature_right;
-    Pine::Vec3 acceleration{0.0f};
-    Pine::Vec3 turnrate{0.0f};
+    pine::Vec3 acceleration{0.0f};
+    pine::Vec3 turnrate{0.0f};
 };
 
-// ----------------------------------------------------------------------------
-// Serialization
-// ----------------------------------------------------------------------------
-
-template <typename Archive>
-void serialize(Archive& archive, CameraParameters& parameters)
-{
-    archive(parameters.resolution,
-        parameters.fps,
-        parameters.timeout,
-        parameters.enable_image_enhancement,
-        parameters.disable_self_calibration,
-        parameters.require_sensors,
-        parameters.compression,
-        parameters.enable_depth);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, CameraSettings& settings)
-{
-    archive(settings.brightness,
-        settings.contrast,
-        settings.hue,
-        settings.saturation,
-        settings.sharpness,
-        settings.gamma,
-        settings.gain,
-        settings.exposure,
-        settings.whitebalance,
-        settings.auto_exposure,
-        settings.auto_whitebalance,
-        settings.enable_led);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, ImageSpecification& specifications)
-{
-    archive(specifications.width, specifications.height, specifications.view);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, Image& image)
-{
-    archive(image.specification, image.buffer);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, CameraState& state)
-{
-    archive(state.opened, state.recording, state.stopped);
-}
-
-template <typename Archive>
-void serialize(Archive& archive, MemoryState& state)
-{
-    archive(state.total_space, state.free_space, state.available_space);
-}
-
-}; // namespace pineapple::zed
+}; // namespace zed

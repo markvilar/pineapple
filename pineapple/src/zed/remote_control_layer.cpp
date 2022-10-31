@@ -4,86 +4,91 @@ namespace pineapple
 {
 
 RemoteControlLayer::RemoteControlLayer()
-    : Layer("RemoteControlLayer"), m_camera_controller(1.0f)
+    : Layer("RemoteControlLayer"), camera_controller(1.0f)
 {
 }
 
 RemoteControlLayer::~RemoteControlLayer() {}
 
-void RemoteControlLayer::OnAttach()
+void RemoteControlLayer::on_attach()
 {
-    update_panel_layouts();
-
     auto& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Regular.ttf",
         15.0f,
         nullptr,
         io.Fonts->GetGlyphRangesCyrillic());
 
-    Pine::Framebuffer::Specification framebufferSpecs;
-    framebufferSpecs.Width = 1280;
-    framebufferSpecs.Height = 720;
-    m_framebuffer = Pine::Framebuffer::Create(framebufferSpecs);
+    pine::FramebufferSpecs framebuffer_specs;
+    framebuffer_specs.width = 1280;
+    framebuffer_specs.height = 720;
+    framebuffer = pine::Framebuffer::create(framebuffer_specs);
 
-    m_renderer_data = Pine::Renderer2D::Init();
+    quad_data = pine::QuadRenderer::init();
 
-    Pine::UI::SetDarkTheme(ImGui::GetStyle());
+    image_texture = pine::Texture2D::create(m_image);
+
+    pine::gui::set_dark_theme(ImGui::GetStyle());
 }
 
-void RemoteControlLayer::OnDetach() {}
+void RemoteControlLayer::on_detach() {}
 
-void RemoteControlLayer::OnUpdate(Pine::Timestep ts)
+void RemoteControlLayer::on_update(pine::Timestep ts)
 {
-    while (!m_client.message_queue.empty())
+    while (!client.message_queue.empty())
     {
-        const auto& message = m_client.message_queue.pop_front();
-        // TODO: Handle message
+        const auto& message = client.message_queue.pop_front();
+        on_message(message);
     }
 
-    const auto specs = m_framebuffer->GetSpecification();
-    const auto viewport = m_panel_layouts["Viewport"];
+    /* FIXME: Update to pines new camera controller API
+    if (viewport_panel.focused)
+        camera_controller.OnUpdate(ts);
+    */
 
-    if (viewport.size.x > 0.0f && viewport.size.y > 0.0f
-        && (specs.Width != viewport.size.x || specs.Height != viewport.size.y))
+    pine::RenderCommand::set_clear_color({0.1f, 0.1f, 0.1f, 1.0f});
+    pine::RenderCommand::clear();
+
+    framebuffer->bind();
+    pine::RenderCommand::set_clear_color({0.1f, 0.1f, 0.1f, 1.0f});
+    pine::RenderCommand::clear();
+
+    pine::QuadRenderer::begin_scene(quad_data,
+        camera_controller.get_camera());
+
+    if (image_texture)
     {
-        m_framebuffer->Resize(viewport.size.x, viewport.size.y);
-        m_camera_controller.OnResize(viewport.size.x, viewport.size.y);
-    }
-
-    if (m_viewport_focused)
-        m_camera_controller.OnUpdate(ts);
-
-    m_image_texture = Pine::Texture2D::Create(m_image);
-
-    Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-    Pine::RenderCommand::Clear();
-
-    m_framebuffer->Bind();
-    Pine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-    Pine::RenderCommand::Clear();
-
-    Pine::Renderer2D::BeginScene(m_renderer_data,
-        m_camera_controller.GetCamera());
-
-    if (m_image_texture)
-    {
-        Pine::Renderer2D::DrawQuad(m_renderer_data,
-            {0.0f, 0.0f, 0.0f},
-            {(m_image.Width / 1000.0f), -(m_image.Height / 1000.0f)},
-            m_image_texture,
+        auto width = (m_image.get_width() / 1000.0f);
+        auto height = -(m_image.get_height() / 1000.0f);
+        pine::QuadRenderer::draw_quad(quad_data,
+            {0.0f, 0.0f, -0.05f},
+            {width, height},
+            image_texture,
             1.0f,
-            Pine::Vec4{1.0f, 1.0f, 1.0f, 1.0f});
+            pine::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
     }
 
-    Pine::Renderer2D::EndScene(m_renderer_data);
-    m_framebuffer->Unbind();
+    pine::QuadRenderer::end_scene(quad_data);
+    framebuffer->unbind();
+
+    // Automatically update settings
+    if (camera_settings != reference_settings)
+    {
+        reference_settings = camera_settings;
+        send_settings(camera_settings);
+    }
+
+    // Automatically update stream configuration
+    if (stream_config != reference_stream_config)
+    {
+        reference_stream_config = stream_config;
+        send_stream_update(stream_config);
+    }
 }
 
-void RemoteControlLayer::OnImGuiRender()
+void RemoteControlLayer::on_gui_render()
 {
-    update_panel_layouts();
-
-    Pine::UI::AddMainMenuBar(
+    pine::gui::render_dockspace("dockspace");
+    pine::gui::main_menu_bar(
         []()
         {
             static bool show_imgui_demo = false;
@@ -100,7 +105,7 @@ void RemoteControlLayer::OnImGuiRender()
                 }
                 if (ImGui::MenuItem("Exit", "Ctrl+W"))
                 {
-                    Pine::Application::Get().Close();
+                    pine::Application::get().close();
                 }
                 ImGui::EndMenu();
             }
@@ -121,76 +126,72 @@ void RemoteControlLayer::OnImGuiRender()
                 ImGui::ShowStackToolWindow();
         });
 
-    Pine::UI::AddViewport("Viewport",
-        m_panel_layouts["Viewport"].position,
-        m_panel_layouts["Viewport"].size,
-        *m_framebuffer.get(),
+    viewport_panel = pine::gui::render_viewport("Viewport", *framebuffer.get());
+    const auto specs = framebuffer->get_specification();
+
+    if (viewport_panel.size.x > 0.0f && viewport_panel.size.y > 0.0f
+        && (specs.width != viewport_panel.size.x
+            || specs.height != viewport_panel.size.y))
+    {
+        framebuffer->resize(viewport_panel.size.x, viewport_panel.size.y);
+        camera_controller.on_resize(viewport_panel.size.x,
+            viewport_panel.size.y);
+    }
+
+    pine::Application::get().get_graphical_interface().block_events(
+        !viewport_panel.focused || !viewport_panel.hovered);
+
+    pine::gui::render_window("Network",
         [this]()
         {
-            m_viewport_focused = ImGui::IsWindowFocused();
-            m_viewport_hovered = ImGui::IsWindowHovered();
-            Pine::Application::Get().GetImGuiLayer()->BlockEvents(
-                !m_viewport_focused || !m_viewport_hovered);
-        });
-
-    Pine::UI::AddWindow("Camera Controls",
-        m_panel_layouts["LeftPanel"].position,
-        m_panel_layouts["LeftPanel"].size,
-        [this]()
-        {
-            static char address[256] = "";
-            static uint16_t port = 0;
-
-            static constexpr auto control_panel_height = 200;
             const auto content_size = ImGui::GetContentRegionAvail();
 
+            static char address[256] = "";
+            static uint16_t port = 0;
             ImGui::InputText("Server Address", address, IM_ARRAYSIZE(address));
             ImGui::InputInt("Server Port", (int*)&port, 0, 0);
-            ImGui::Text("Client connected: %d", IsConnected(m_client));
+            ImGui::Text("Client connected: %d", is_connected(client));
 
             if (ImGui::Button("Connect", ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                Pine::Connect(m_client, std::string(address), port);
+                pine::connect(client, std::string(address), port);
             }
             ImGui::SameLine();
-            if (ImGui::Button("Disconnect", 
-                ImVec2(0.50f * content_size.x, 30.0f)))
+            if (ImGui::Button("Disconnect",
+                    ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                Pine::Disconnect(m_client);
+                pine::disconnect(client);
             }
 
             ImGui::Separator();
 
-            // ----------------------------------------------------------------
-            // Camera controls
-            // ----------------------------------------------------------------
+
+        });
+
+    pine::gui::render_window("Camera Controls",
+        [this]()
+        {
+            const auto content_size = ImGui::GetContentRegionAvail();
 
             if (ImGui::Button("Record", ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                if (Pine::IsConnected(m_client))
-                {
-                    zed::ControlService::Request request;
-                    request.header = zed::ServiceIdentifier::CONTROL_REQUEST;
-                    request.data.action = zed::CameraAction::START_RECORD;
-                    request.data.resolution = m_camera_parameters.resolution;
-                    request.data.compression = m_camera_parameters.compression;
-                    request.data.fps = m_camera_parameters.fps;
-                    request.data.timeout = m_camera_parameters.timeout;
-                    request.data.enable_image_enhancement 
-                        = m_camera_parameters.enable_image_enhancement;
-                    request.data.disable_self_calibration 
-                        = m_camera_parameters.disable_self_calibration;
-                    request.data.require_sensors 
-                        = m_camera_parameters.require_sensors;
-                    request.data.enable_depth
-                        = m_camera_parameters.enable_depth;
+                zed::ControlMessage message;
+                message.topic = "/desktop/control_request";
 
-                    MemoryOutputArchive output_archive;
-                    output_archive.serialize(request);
+                message.command = "start_record";
+                message.resolution = camera_parameters.resolution;
+                message.compression = camera_parameters.compression;
+                message.fps = camera_parameters.fps;
+                message.timeout = camera_parameters.timeout;
+                message.require_sensors = camera_parameters.require_sensors;
+                message.enable_depth = camera_parameters.enable_depth;
 
-                    Pine::Send(m_client, output_archive.get_buffer().data(), 
-                        output_archive.get_buffer().size());
-                }
+                message.enable_image_enhancement =
+                    camera_parameters.enable_image_enhancement;
+                message.disable_self_calibration =
+                    camera_parameters.disable_self_calibration;
+
+                send_message(message);
             }
 
             ImGui::SameLine();
@@ -198,168 +199,218 @@ void RemoteControlLayer::OnImGuiRender()
             if (ImGui::Button("Stop record",
                     ImVec2(0.50f * content_size.x, 30.0f)))
             {
-                if (Pine::IsConnected(m_client))
-                {
-                    zed::ControlService::Request request;
-                    request.header = zed::ServiceIdentifier::CONTROL_REQUEST;
-                    request.data.action = zed::CameraAction::STOP_RECORD;
+                zed::ControlMessage message;
+                message.topic = "/desktop/control_request";
 
-                    MemoryOutputArchive output_archive;
-                    output_archive.serialize(request);
+                message.command = "stop_record";
+                message.resolution = camera_parameters.resolution;
+                message.compression = camera_parameters.compression;
+                message.fps = camera_parameters.fps;
+                message.timeout = camera_parameters.timeout;
+                message.require_sensors = camera_parameters.require_sensors;
+                message.enable_depth = camera_parameters.enable_depth;
 
-                    Pine::Send(m_client, output_archive.get_buffer().data(), 
-                        output_archive.get_buffer().size());
-                }
+                message.enable_image_enhancement =
+                    camera_parameters.enable_image_enhancement;
+                message.disable_self_calibration =
+                    camera_parameters.disable_self_calibration;
+
+                send_message(message);
+            }
+
+            if (ImGui::Button("Start stream",
+                    ImVec2(0.50f * content_size.x, 30.0f)))
+            {
+                zed::StreamMessage message;
+                message.topic = "/desktop/stream_request";
+
+                message.command = "start_stream";
+                message.width = stream_config.width;
+                message.height = stream_config.height;
+                message.period = stream_config.period;
+
+                send_message(message);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Stop stream",
+                    ImVec2(0.50f * content_size.x, 30.0f)))
+            {
+                zed::StreamMessage message;
+                message.topic = "/desktop/stream_request";
+
+                message.command = "stop_stream";
+                message.width = stream_config.width;
+                message.height = stream_config.height;
+                message.period = stream_config.period;
+
+                send_message(message);
             }
 
             ImGui::Separator();
-            draw_camera_parameters(m_camera_parameters);
+
+            draw_camera_parameters(camera_parameters);
+
             ImGui::Separator();
-            draw_camera_settings(m_camera_settings);
+
+            draw_camera_settings(camera_settings);
+
             ImGui::Separator();
-            draw_image_specification(m_image_specs);
+
+            ImGui::InputScalar("Image width",
+                ImGuiDataType_U16,
+                &stream_config.width,
+                NULL,
+                NULL);
+            ImGui::InputScalar("Image height",
+                ImGuiDataType_U16,
+                &stream_config.height,
+                NULL,
+                NULL);
+
+            pine::gui::slider_scalar<float>("Stream period",
+                &stream_config.period,
+                0.05f,
+                5.00f);
         });
-
-    Pine::UI::AddWindow("Sensor Data",
-        m_panel_layouts["RightPanel"].position,
-        m_panel_layouts["RightPanel"].size,
-        []()
-        {
-            // TODO: Implement functionality.
-        });
-
-    Pine::UI::AddWindow("Console",
-        m_panel_layouts["BottomPanel"].position,
-        m_panel_layouts["BottomPanel"].size,
-        []()
-        {
-            // TODO: Implement functionality.
-        });
 }
 
-void RemoteControlLayer::OnEvent(Pine::Event& e)
+void RemoteControlLayer::on_event(pine::Event& e)
 {
-    m_camera_controller.OnEvent(e);
+    camera_controller.on_event(e);
 }
 
-void RemoteControlLayer::on_response(
-    const zed::ControlService::Response::DataType& response)
+void RemoteControlLayer::send_settings(
+    const zed::CameraSettings& settings) const
 {
-    // TODO: Implement.
-    PINE_INFO("Remote control: Got control response.");
+    zed::SettingsMessage message;
+    message.topic = "/desktop/settings_request";
+
+    message.brightness = settings.brightness;
+    message.contrast = settings.contrast;
+    message.hue = settings.hue;
+    message.saturation = settings.saturation;
+    message.sharpness = settings.sharpness;
+    message.gamma = settings.gamma;
+    message.gain = settings.gain;
+    message.exposure = settings.exposure;
+    message.whitebalance = settings.whitebalance;
+    message.auto_exposure = settings.auto_exposure;
+    message.auto_whitebalance = settings.auto_whitebalance;
+
+    send_message(message);
 }
 
-void RemoteControlLayer::on_response(
-    const zed::ImageService::Response::DataType& response)
+void RemoteControlLayer::send_stream_update(const StreamConfig& config) const
 {
-    PINE_INFO("Remote control: Got image response.");
+    zed::StreamMessage message;
+    message.topic = "/desktop/stream_request";
 
-    // TODO: Perform sanity check
+    message.command = "update_stream";
+    message.width = stream_config.width;
+    message.height = stream_config.height;
+    message.period = stream_config.period;
 
-    const auto format = [&response]()
-        {
-            switch (response.view)
-            {
-            case zed::View::LEFT:
-                return Pine::ImageFormat::BGRA;
-            case zed::View::RIGHT:
-                return Pine::ImageFormat::BGRA;
-            case zed::View::LEFT_GRAY:
-                return Pine::ImageFormat::GRAY;
-            case zed::View::RIGHT_GRAY:
-                return Pine::ImageFormat::GRAY;
-            case zed::View::SIDE_BY_SIDE:
-                return Pine::ImageFormat::BGRA;
-            default:
-                return Pine::ImageFormat::GRAY;
-            };
-        }();
-
-    m_image = Pine::Image(response.buffer.data(), response.width, 
-        response.height, format);
+    send_message(message);
 }
 
-void RemoteControlLayer::on_response(
-    const zed::MemoryService::Response::DataType& response)
+void RemoteControlLayer::on_message(const std::vector<uint8_t>& buffer)
 {
-    PINE_INFO("Remote control: Got memory response.");
-    m_server_memory.total_space = response.total_space;
-    m_server_memory.free_space = response.free_space;
-    m_server_memory.available_space = response.available_space;
+    msgpack::object_handle handle =
+        msgpack::unpack((const char*)(buffer.data()), buffer.size());
+    msgpack::object object = handle.get();
+
+    try
+    {
+        auto message = object.as<zed::ControlMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::SettingsMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::SensorMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
+
+    try
+    {
+        auto message = object.as<zed::ImageMessage>();
+        on_message(message);
+        return;
+    }
+    catch (const msgpack::v1::type_error& error)
+    {
+    };
 }
 
-void RemoteControlLayer::on_response(
-    const zed::SensorService::Response::DataType& response)
+void RemoteControlLayer::on_message(const zed::ControlMessage& message)
 {
-    PINE_INFO("Remote control: Got sensor response.");
-    PINE_INFO(" - Acceleration: {0}, {1}, {2}", response.acceleration.x,
-        response.acceleration.y, response.acceleration.z);
-    PINE_INFO(" - Turnrate:     {0}, {1}, {2}", response.turnrate.x,
-        response.turnrate.y, response.turnrate.z);
-
-    m_server_sensors.acceleration.x = response.acceleration.x;
-    m_server_sensors.acceleration.y = response.acceleration.y;
-    m_server_sensors.acceleration.z = response.acceleration.z;
-
-    m_server_sensors.turnrate.x = response.turnrate.x;
-    m_server_sensors.turnrate.y = response.turnrate.y;
-    m_server_sensors.turnrate.z = response.turnrate.z;
-
-    m_acceleration_x.push_back(response.acceleration.x);
-    m_acceleration_y.push_back(response.acceleration.y);
-    m_acceleration_z.push_back(response.acceleration.z);
-
-    m_turnrate_x.push_back(response.turnrate.x);
-    m_turnrate_y.push_back(response.turnrate.y);
-    m_turnrate_z.push_back(response.turnrate.z);
+    PINE_INFO("Got control message.");
+    if (message.topic == "/camera/control_reponse")
+    {
+        remote_parameters.resolution = message.resolution;
+        remote_parameters.compression = message.compression;
+        remote_parameters.fps = message.fps;
+        remote_parameters.timeout = message.timeout;
+        remote_parameters.enable_image_enhancement 
+            = message.enable_image_enhancement;
+        remote_parameters.disable_self_calibration 
+            = message.disable_self_calibration;
+        remote_parameters.require_sensors = message.require_sensors;
+        remote_parameters.enable_depth = message.enable_depth;
+    }
 }
 
-void RemoteControlLayer::on_response(
-    const zed::SettingsService::Response::DataType& response)
+void RemoteControlLayer::on_message(const zed::SettingsMessage& message)
 {
-    PINE_INFO("Remote control: Got settings response.");
-    m_camera_settings.brightness = response.brightness;
-    m_camera_settings.contrast = response.contrast;
-    m_camera_settings.hue = response.hue;
-    m_camera_settings.saturation = response.saturation;
-    m_camera_settings.sharpness = response.sharpness;
-    m_camera_settings.gamma = response.gamma;
-    m_camera_settings.gain = response.gain;
-    m_camera_settings.exposure = response.exposure;
-    m_camera_settings.whitebalance = response.whitebalance;
-    m_camera_settings.auto_exposure = response.auto_exposure;
-    m_camera_settings.auto_whitebalance = response.auto_whitebalance;
-    m_camera_settings.enable_led = response.enable_led;
+    PINE_INFO("Got settings message.");
+    if (message.topic == "/camera/settings_response")
+    {
+        remote_settings.brightness = message.brightness;
+        remote_settings.contrast = message.contrast;
+        remote_settings.hue = message.hue;
+        remote_settings.saturation = message.saturation;
+        remote_settings.sharpness = message.sharpness;
+        remote_settings.gamma = message.gamma;
+        remote_settings.gain = message.gain;
+        remote_settings.exposure = message.exposure;
+        remote_settings.whitebalance = message.whitebalance;
+        remote_settings.auto_exposure = message.auto_exposure;
+        remote_settings.auto_whitebalance = message.auto_whitebalance;
+    }
 }
 
-void RemoteControlLayer::update_panel_layouts()
+void RemoteControlLayer::on_message(const zed::SensorMessage& message) {}
+
+void RemoteControlLayer::on_message(const zed::ImageMessage& message)
 {
-    const auto& [window_width, window_height] =
-        Pine::Application::Get().GetWindow().GetSize();
-
-    static constexpr auto menu_height = 20.0f;
-
-    const auto& mainMenuLayout = m_panel_layouts["MainMenu"];
-
-    m_panel_layouts["LeftPanel"] = PanelLayout(Pine::Vec2(0.0f * window_width,
-                                                   0.0f * window_height
-                                                       + menu_height),
-        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
-
-    m_panel_layouts["Viewport"] =
-        PanelLayout(Pine::Vec2(0.2f * window_width,
-                        0.0f * window_height + menu_height),
-            Pine::Vec2(0.6f * window_width, 0.8f * window_height));
-
-    m_panel_layouts["RightPanel"] = PanelLayout(Pine::Vec2(0.8f * window_width,
-                                                    0.0f * window_height
-                                                        + menu_height),
-        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
-
-    m_panel_layouts["BottomPanel"] = PanelLayout(Pine::Vec2(0.2f * window_width,
-                                                     0.8f * window_height
-                                                         + menu_height),
-        Pine::Vec2(0.6f * window_width, 0.2f * window_height - menu_height));
+    if (message.topic == "/camera/image")
+    {
+        m_image = pine::Image(message.data.data(),
+            message.width,
+            message.height,
+            pine::ImageFormat::BGRA);
+        image_texture = pine::Texture2D::create(m_image);
+    }
 }
 
 }; // namespace pineapple

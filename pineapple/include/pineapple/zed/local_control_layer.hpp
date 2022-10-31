@@ -2,7 +2,7 @@
 
 #ifdef PINEAPPLE_ENABLE_ZED
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/ui_helpers.hpp"
 #include "pineapple/utils.hpp"
@@ -13,27 +13,24 @@
 namespace pineapple
 {
 
-class LocalControlLayer : public Pine::Layer
+class LocalControlLayer : public pine::Layer
 {
 public:
     LocalControlLayer();
     ~LocalControlLayer();
 
-    virtual void OnAttach() override;
-    virtual void OnDetach() override;
-    virtual void OnUpdate(Pine::Timestep ts) override;
-    virtual void OnImGuiRender() override;
-    virtual void OnEvent(Pine::Event& e) override;
+    virtual void on_attach() override;
+    virtual void on_detach() override;
+    virtual void on_update(pine::Timestep ts) override;
+    virtual void on_gui_render() override;
+    virtual void on_event(pine::Event& e) override;
 
 private:
-    void UpdatePanelLayouts();
+    pine::QuadRenderData m_renderer_data{};
+    pine::OrthographicCameraController m_camera_controller;
 
-private:
-    Pine::Renderer2D::RendererData m_renderer_data{};
-    Pine::OrthographicCameraController m_camera_controller;
-
-    std::shared_ptr<Pine::Framebuffer> m_framebuffer;
-    std::shared_ptr<Pine::Texture2D> m_image_texture;
+    std::shared_ptr<pine::Framebuffer> m_framebuffer;
+    std::shared_ptr<pine::Texture2D> m_image_texture;
 
     zed::RecordManager m_record_manager{};
     zed::CameraParameters m_camera_parameters{};
@@ -54,8 +51,6 @@ private:
 
     bool m_viewport_focused = false;
     bool m_viewport_hovered = false;
-
-    std::unordered_map<const char*, PanelLayout> m_panel_layouts{};
 };
 
 } // namespace pineapple

@@ -15,17 +15,17 @@
 #pragma GCC diagnostic ignored "-Wcpp"
 #include <sl/Camera.hpp>
 
-#include <Pine/Pine.hpp>
+#include <pine/pine.hpp>
 
 #include "pineapple/zed/protocol.hpp"
 #include "pineapple/zed/types.hpp"
 
-namespace pineapple::zed
+namespace zed
 {
 
 struct RecordJob
 {
-    std::filesystem::path output_directory = "";
+    std::filesystem::path output_directory = ".";
     CameraParameters parameters = {};
 };
 
@@ -53,24 +53,23 @@ public:
     uint64_t get_free_space();
     uint64_t get_available_space();
 
-    std::optional<CameraSettings> request_camera_settings();
-    std::optional<SensorData> request_sensor_data();
-    std::optional<Image> request_image(const uint32_t width,
-        const uint32_t height, const View view = View::LEFT);
+    std::optional<CameraSettings> get_settings();
+    std::optional<SensorData> get_sensor_data();
+    std::optional<Image> get_image(const uint32_t width, const uint32_t height);
 
-    bool update_camera_settings(const CameraSettings& settings);
+    bool update_settings(const CameraSettings& settings);
 
 private:
     void record_worker(const RecordJob job);
 
 private:
-    std::filesystem::path m_output_directory = ".";
+    std::filesystem::path output_directory = ".";
 
-    sl::Camera m_camera = {};
+    sl::Camera camera = {};
 
-    std::unique_ptr<std::thread> m_worker_thread = {};
-    std::atomic<bool> m_stop_flag = false;
-    std::atomic<bool> m_busy_flag = false;
+    std::unique_ptr<std::thread> worker_thread = {};
+    std::atomic<bool> stop_flag = false;
+    std::atomic<bool> busy_flag = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -85,27 +84,47 @@ public:
     ~CameraManager();
 
     void run();
+    void stop();
 
 private:
     void on_update();
+
+    template <typename T>
+    void send_message(const std::shared_ptr<pine::ConnectionState>& client,
+        const T& message)
+    {
+        msgpack::sbuffer buffer;
+        msgpack::pack(buffer, message);
+        pine::send_to_client(server,
+            client,
+            (uint8_t*)buffer.data(),
+            buffer.size());
+    }
+
     void on_message(const std::vector<uint8_t>& buffer);
 
-    void on_request(const zed::ControlService::Request::DataType& request);
-    void on_request(const zed::ImageService::Request::DataType& request);
-    void on_request(const zed::MemoryService::Request::DataType& request);
-    void on_request(const zed::SensorService::Request::DataType& request);
-    void on_request(const zed::SettingsService::Request::DataType& request);
+    void on_message(const zed::ControlMessage& message);
+    void on_message(const zed::SettingsMessage& message);
+    void on_message(const zed::SensorMessage& message);
+    void on_message(const zed::StreamMessage& message);
 
 private:
-    bool m_running = true;
+    std::atomic<bool> running = true;
+    bool streaming = false;
 
-    Pine::ServerState m_server;
+    std::chrono::time_point<std::chrono::high_resolution_clock> last_frame =
+        std::chrono::high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> now =
+        std::chrono::high_resolution_clock::now();
 
-    RecordManager m_record_manager;
-    // TODO: Add video stream manager
-    // TODO: Add depth manager
+    uint16_t stream_width = 0;
+    uint16_t stream_height = 0;
+    float stream_period = 1.0f;
+
+    pine::ServerState server;
+    RecordManager record_manager;
 };
 
-}; // namespace pineapple::zed
+}; // namespace zed
 
 #endif // PINEAPPLE_ENABLE_ZED

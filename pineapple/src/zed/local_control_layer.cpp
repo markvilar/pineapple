@@ -7,47 +7,44 @@ namespace pineapple
 
 LocalControlLayer::LocalControlLayer()
     : Layer("LocalControlLayer"), m_camera_controller(1.0f),
-      m_record_manager(Pine::FileSystem::GetWorkingDirectory())
+      m_record_manager(pine::filesystem::get_working_directory())
 {
 }
 
 LocalControlLayer::~LocalControlLayer() {}
 
-void LocalControlLayer::OnAttach()
+void LocalControlLayer::on_attach()
 {
-    UpdatePanelLayouts();
-
     auto& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans-Regular.ttf",
         15.0f,
         nullptr,
         io.Fonts->GetGlyphRangesCyrillic());
 
-    Pine::Framebuffer::Specification framebufferSpecs;
-    framebufferSpecs.Width = m_panel_layouts["Viewport"].size.x;
-    framebufferSpecs.Height = m_panel_layouts["Viewport"].size.y;
-    m_framebuffer = Pine::Framebuffer::Create(framebufferSpecs);
+    pine::FramebufferSpecs framebuffer_specs;
+    framebuffer_specs.width = 0;
+    framebuffer_specs.height = 0;
+    m_framebuffer = pine::Framebuffer::create(framebuffer_specs);
 
-    m_renderer_data = Pine::Renderer2D::Init();
+    m_renderer_data = pine::QuadRenderer::init();
 
-    Pine::UI::SetDarkTheme(ImGui::GetStyle());
+    pine::gui::set_dark_theme(ImGui::GetStyle());
 }
 
-void LocalControlLayer::OnDetach() {}
+void LocalControlLayer::on_detach() {}
 
-void LocalControlLayer::OnUpdate(Pine::Timestep ts)
+void LocalControlLayer::on_update(pine::Timestep ts)
 {
     const auto image_request =
-        m_record_manager.request_image(m_image_specs.width,
-            m_image_specs.height,
-            m_image_specs.view);
+        m_record_manager.get_image(m_image_specs.width, m_image_specs.height);
     if (image_request.has_value())
     {
         const auto& image = image_request.value();
-        m_image_texture = Pine::Texture2D::Create(convert_image(image));
+        // FIXME: m_image_texture =
+        // pine::Texture2D::create(convert_image(image));
     }
 
-    const auto sensor_data_request = m_record_manager.request_sensor_data();
+    const auto sensor_data_request = m_record_manager.get_sensor_data();
     if (sensor_data_request.has_value())
     {
         const auto& data = sensor_data_request.value();
@@ -65,50 +62,40 @@ void LocalControlLayer::OnUpdate(Pine::Timestep ts)
         m_ang_z.push_back(data.turnrate.z);
     }
 
-    const auto specs = m_framebuffer->GetSpecification();
-    const auto viewport = m_panel_layouts["Viewport"];
-
-    if (viewport.size.x > 0.0f && viewport.size.y > 0.0f
-        && (specs.Width != viewport.size.x || specs.Height != viewport.size.y))
-    {
-        m_framebuffer->Resize(viewport.size.x, viewport.size.y);
-        m_camera_controller.OnResize(viewport.size.x, viewport.size.y);
-    }
-
+    /*
     if (m_viewport_focused)
-        m_camera_controller.OnUpdate(ts);
+        m_camera_controller.on_update(ts);
+    */
 
-    Pine::RenderCommand::SetClearColor({0.10f, 0.10f, 0.10f, 1.00f});
-    Pine::RenderCommand::Clear();
+    pine::RenderCommand::set_clear_color({0.10f, 0.10f, 0.10f, 1.00f});
+    pine::RenderCommand::clear();
 
-    m_framebuffer->Bind();
-    Pine::RenderCommand::SetClearColor({0.15f, 0.15f, 0.15f, 1.00f});
-    Pine::RenderCommand::Clear();
+    m_framebuffer->bind();
+    pine::RenderCommand::set_clear_color({0.15f, 0.15f, 0.15f, 1.00f});
+    pine::RenderCommand::clear();
 
-    Pine::Renderer2D::BeginScene(m_renderer_data,
-        m_camera_controller.GetCamera());
+    pine::QuadRenderer::begin_scene(m_renderer_data,
+        m_camera_controller.get_camera());
 
     if (m_image_texture)
     {
-        Pine::Renderer2D::DrawQuad(m_renderer_data,
+        pine::QuadRenderer::draw_quad(m_renderer_data,
             {0.0f, 0.0f, 0.0f},
             {(m_image_specs.width / 1000.0f),
                 -(m_image_specs.height / 1000.0f)},
             m_image_texture,
             1.0f,
-            Pine::Vec4{1.0f, 1.0f, 1.0f, 1.0f});
+            pine::Vec4{1.0f, 1.0f, 1.0f, 1.0f});
     }
 
-    Pine::Renderer2D::EndScene(m_renderer_data);
+    pine::QuadRenderer::end_scene(m_renderer_data);
 
-    m_framebuffer->Unbind();
+    m_framebuffer->unbind();
 }
 
-void LocalControlLayer::OnImGuiRender()
+void LocalControlLayer::on_gui_render()
 {
-    UpdatePanelLayouts();
-
-    Pine::UI::AddMainMenuBar(
+    pine::gui::main_menu_bar(
         []()
         {
             static bool show_imgui_demo = false;
@@ -125,7 +112,7 @@ void LocalControlLayer::OnImGuiRender()
                 }
                 if (ImGui::MenuItem("Exit", "Ctrl+W"))
                 {
-                    Pine::Application::Get().Close();
+                    pine::Application::get().close();
                 }
                 ImGui::EndMenu();
             }
@@ -146,21 +133,20 @@ void LocalControlLayer::OnImGuiRender()
                 ImGui::ShowStackToolWindow();
         });
 
-    Pine::UI::AddViewport("Viewport",
-        m_panel_layouts["Viewport"].position,
-        m_panel_layouts["Viewport"].size,
-        *m_framebuffer.get(),
-        [this]()
-        {
-            m_viewport_focused = ImGui::IsWindowFocused();
-            m_viewport_hovered = ImGui::IsWindowHovered();
-            Pine::Application::Get().GetImGuiLayer()->BlockEvents(
-                !m_viewport_focused || !m_viewport_hovered);
-        });
+    const auto viewport_panel =
+        pine::gui::render_viewport("Viewport", *m_framebuffer.get());
+    const auto& specs = m_framebuffer->get_specification();
 
-    Pine::UI::AddWindow("Camera Controls",
-        m_panel_layouts["LeftPanel"].position,
-        m_panel_layouts["LeftPanel"].size,
+    if (viewport_panel.size.x > 0.0f && viewport_panel.size.y > 0.0f
+        && (specs.width != viewport_panel.size.x
+            || specs.height != viewport_panel.size.y))
+    {
+        m_framebuffer->resize(viewport_panel.size.x, viewport_panel.size.y);
+        m_camera_controller.on_resize(viewport_panel.size.x,
+            viewport_panel.size.y);
+    }
+
+    pine::gui::render_window("Camera Controls",
         [this]()
         {
             if (ImGui::Button("Start record"))
@@ -195,8 +181,7 @@ void LocalControlLayer::OnImGuiRender()
 
             if (ImGui::Button("Request settings"))
             {
-                const auto settings_request =
-                    m_record_manager.request_camera_settings();
+                const auto settings_request = m_record_manager.get_settings();
                 if (settings_request.has_value())
                 {
                     const auto settings = settings_request.value();
@@ -212,7 +197,6 @@ void LocalControlLayer::OnImGuiRender()
                     PINE_INFO(" - Auto expos.: {0}", settings.auto_exposure);
                     PINE_INFO(" - Auto w.b.:   {0}",
                         settings.auto_whitebalance);
-                    PINE_INFO(" - Enable LED:  {0}", settings.enable_led);
                 }
             }
 
@@ -220,7 +204,7 @@ void LocalControlLayer::OnImGuiRender()
 
             if (ImGui::Button("Update settings"))
             {
-                m_record_manager.update_camera_settings(m_camera_settings);
+                m_record_manager.update_settings(m_camera_settings);
             }
 
             ImGui::Separator();
@@ -228,13 +212,10 @@ void LocalControlLayer::OnImGuiRender()
             draw_image_specification(m_image_specs);
         });
 
-    Pine::UI::AddWindow("Sensor Data",
-        m_panel_layouts["RightPanel"].position,
-        m_panel_layouts["RightPanel"].size,
+    pine::gui::render_window("Sensor Data",
         [this]()
         {
-            const auto panel_width = m_panel_layouts["RightPanel"].size.x;
-            const auto panel_height = m_panel_layouts["RightPanel"].size.y;
+            const auto width = 160.0f;
 
             ImGui::PlotLines("Acc. X",
                 m_acc_x.data(),
@@ -243,7 +224,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Acceleration X",
                 -10.0f,
                 10.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
             ImGui::PlotLines("Acc. Y",
                 m_acc_y.data(),
                 m_acc_y.size(),
@@ -251,7 +232,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Acceleration Y",
                 -10.0f,
                 10.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
             ImGui::PlotLines("Acc. Z",
                 m_acc_z.data(),
                 m_acc_z.size(),
@@ -259,9 +240,9 @@ void LocalControlLayer::OnImGuiRender()
                 "Acceleration Z",
                 -10.0f,
                 10.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
 
-            Pine::UI::AddEmptySpace(0.0f, 10.0f);
+            pine::gui::empty_space(0.0f, 10.0f);
 
             ImGui::Separator();
 
@@ -272,7 +253,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Angular velocity X",
                 -30.0f,
                 30.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
             ImGui::PlotLines("Ang. vel. Y",
                 m_ang_y.data(),
                 m_ang_y.size(),
@@ -280,7 +261,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Angular velocity Y",
                 -30.0f,
                 30.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
             ImGui::PlotLines("Ang. vel. Z",
                 m_ang_z.data(),
                 m_ang_z.size(),
@@ -288,9 +269,9 @@ void LocalControlLayer::OnImGuiRender()
                 "Angular velocity Z",
                 -30.0f,
                 30.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
 
-            Pine::UI::AddEmptySpace(0.0f, 10.0f);
+            pine::gui::empty_space(0.0f, 10.0f);
 
             ImGui::Separator();
 
@@ -301,7 +282,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Pressure",
                 0.0f,
                 100000.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
 
             ImGui::PlotLines("Temp. left",
                 m_temperature_left.data(),
@@ -310,7 +291,7 @@ void LocalControlLayer::OnImGuiRender()
                 "Temp. left",
                 0.0f,
                 40.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
 
             ImGui::PlotLines("Temp. right",
                 m_temperature_right.data(),
@@ -319,51 +300,19 @@ void LocalControlLayer::OnImGuiRender()
                 "Temp. right",
                 0.0f,
                 40.0f,
-                ImVec2(panel_width, 80.0f));
+                ImVec2(width, 80.0f));
         });
 
-    Pine::UI::AddWindow("Console",
-        m_panel_layouts["BottomPanel"].position,
-        m_panel_layouts["BottomPanel"].size,
+    pine::gui::render_window("Console",
         []()
         {
             // TODO: Implement functionality.
         });
 }
 
-void LocalControlLayer::OnEvent(Pine::Event& e)
+void LocalControlLayer::on_event(pine::Event& e)
 {
-    m_camera_controller.OnEvent(e);
-}
-
-void LocalControlLayer::UpdatePanelLayouts()
-{
-    const auto& [window_width, window_height] =
-        Pine::Application::Get().GetWindow().GetSize();
-
-    static constexpr auto menu_height = 20.0f;
-
-    const auto& main_menu_layout = m_panel_layouts["MainMenu"];
-
-    m_panel_layouts["LeftPanel"] = PanelLayout(Pine::Vec2(0.0f * window_width,
-                                                   0.0f * window_height
-                                                       + menu_height),
-        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
-
-    m_panel_layouts["Viewport"] =
-        PanelLayout(Pine::Vec2(0.2f * window_width,
-                        0.0f * window_height + menu_height),
-            Pine::Vec2(0.6f * window_width, 0.8f * window_height));
-
-    m_panel_layouts["RightPanel"] = PanelLayout(Pine::Vec2(0.8f * window_width,
-                                                    0.0f * window_height
-                                                        + menu_height),
-        Pine::Vec2(0.2f * window_width, 1.0f * window_height - menu_height));
-
-    m_panel_layouts["BottomPanel"] = PanelLayout(Pine::Vec2(0.2f * window_width,
-                                                     0.8f * window_height
-                                                         + menu_height),
-        Pine::Vec2(0.6f * window_width, 0.2f * window_height - menu_height));
+    m_camera_controller.on_event(e);
 }
 
 }; // namespace pineapple
