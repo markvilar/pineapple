@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <iostream>
 #include <signal.h>
 
 #include <pine/pine.hpp>
@@ -9,11 +8,11 @@
 
 sig_atomic_t stop_flag = 0;
 
-void InterruptHandler(int) { stop_flag = 1; }
+void interrupt_handler(int) { stop_flag = 1; }
 
 int main(int argc, char** argv)
 {
-    signal(SIGINT, &InterruptHandler);
+    signal(SIGINT, &interrupt_handler);
 
     pine::Log::init();
 
