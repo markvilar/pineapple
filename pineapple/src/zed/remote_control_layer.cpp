@@ -32,7 +32,7 @@ void RemoteControlLayer::on_attach()
 
 void RemoteControlLayer::on_detach() {}
 
-void RemoteControlLayer::on_update(pine::Timestep ts)
+void RemoteControlLayer::on_update(const pine::Timestep& ts)
 {
     while (!client.message_queue.empty())
     {
