@@ -162,10 +162,6 @@ void RemoteControlLayer::on_gui_render()
             {
                 pine::disconnect(client);
             }
-
-            ImGui::Separator();
-
-
         });
 
     pine::gui::render_window("Camera Controls",

@@ -1,22 +1,30 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-class Pineapple(ConanFile):
+class PineappleConanFile(ConanFile):
     """ """
     name = "pineapple"
-    version = "0.1"
+    version = "0.1.1"
     license = "Apache 2.0"
     author = "Martin Kvisvik Larsen"
     description = "Pineapple is a toolbox for remote control and real-time \
-        visualization for sensors based on Pine."
+        visualization for sensors built upon Pine."
     url = "https://github.com/markvilar/pineapple.git"
     homepage = "https://github.com/markvilar/pineapple.git"
 
-    settings = "os", "compiler", "build_type", "arch"
-    options = { "shared" : [True, False], "fPIC" : [True, False] }
-    default_options = { "shared" : False, "fPIC" : True }
+    settings = ["os", "compiler", "build_type", "arch"]
+    
+    options = { 
+        "shared" : [True, False], 
+        "fPIC" : [True, False] 
+    }
+    
+    default_options = { 
+        "shared" : False, 
+        "fPIC" : True 
+    }
 
-    generators = "cmake", "cmake_find_package"
+    generators = ["cmake", "cmake_find_package", "cmake_find_package_multi"]
 
     @property
     def _source_subfolder(self):
@@ -57,7 +65,8 @@ class Pineapple(ConanFile):
 
     def _configure_cmake(self):
         """ Configure CMake. """
-        cmake = CMake(self, generator="Ninja")
+        cmake = CMake(self)
+        # TODO: Add dynamic definitions
         cmake.definitions["ZED_LINK_SHARED"] = True
         cmake.definitions["PINEAPPLE_BUILD_EXAMPLES"] = True
         cmake.configure()
