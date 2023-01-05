@@ -5,27 +5,35 @@ namespace pineapple
 
 void draw_camera_parameters(zed::CameraParameters& parameters)
 {
-    static const std::array<std::pair<const char*, uint8_t>, 4>
-        resolution_options = {{{"HD2K", zed::Resolution::HD2K},
+    static const std::array<std::pair<const char*, uint8_t>, 4> resolution_options = 
+        {{
+            {"HD2K", zed::Resolution::HD2K},
             {"HD1080", zed::Resolution::HD1080},
             {"HD720", zed::Resolution::HD720},
-            {"VGA", zed::Resolution::VGA}}};
+            {"VGA", zed::Resolution::VGA}
+        }};
 
-    static const std::array<std::pair<const char*, uint8_t>, 5>
-        compression_options = {{{"Lossless", zed::Compression::LOSSLESS},
+    static const std::array<std::pair<const char*, uint8_t>, 5> compression_options =
+        {{
+            {"Lossless", zed::Compression::LOSSLESS},
             {"H264", zed::Compression::H264},
             {"H265", zed::Compression::H265},
             {"H264, lossless", zed::Compression::H264_LOSSLESS},
-            {"H265, lossless", zed::Compression::H265_LOSSLESS}}};
+            {"H265, lossless", zed::Compression::H265_LOSSLESS}
+        }};
 
-    pine::gui::dropdown("Resolution",
-        &parameters.resolution,
-        resolution_options);
-    pine::gui::dropdown("Compression",
-        &parameters.compression,
-        compression_options);
+    static const std::array<std::pair<const char*, uint8_t>, 5> fps_options = {{ 
+            {"Auto", 0},
+            {"15", 15}, 
+            {"30", 30}, 
+            {"60", 60}, 
+            {"100", 100}
+        }};
 
-    pine::gui::slider_scalar<uint8_t>("Target FPS", &parameters.fps, 0, 100);
+    pine::gui::dropdown("Resolution", &parameters.resolution, resolution_options);
+    pine::gui::dropdown("Compression", &parameters.compression, compression_options);
+    pine::gui::dropdown("Target FPS", &parameters.fps, fps_options);
+
     pine::gui::slider_scalar<float>("Timeout",
         &parameters.timeout,
         -1.0f,
