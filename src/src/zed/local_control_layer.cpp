@@ -33,7 +33,7 @@ void LocalControlLayer::on_attach()
 
 void LocalControlLayer::on_detach() {}
 
-void LocalControlLayer::on_update(pine::Timestep ts)
+void LocalControlLayer::on_update(const pine::Timestep& ts)
 {
     const auto image_request =
         m_record_manager.get_image(m_image_specs.width, m_image_specs.height);
