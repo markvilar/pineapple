@@ -21,7 +21,7 @@ public:
 
     virtual void on_attach() override;
     virtual void on_detach() override;
-    virtual void on_update(pine::Timestep ts) override;
+    virtual void on_update(const pine::Timestep& ts) override;
     virtual void on_gui_render() override;
     virtual void on_event(pine::Event& e) override;
 
